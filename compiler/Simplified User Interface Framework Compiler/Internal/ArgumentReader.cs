@@ -11,6 +11,8 @@ namespace SimplifiedUserInterfaceFramework.Internal
 		static readonly string[] Arguments = Environment.GetCommandLineArgs().Skip(1).ToArray();
 		static readonly bool[] ParsedArguments = new bool[Arguments.Length];
 
+		public static Log Log { get; set; }
+
 		public static bool Exists(string key)
 		{
 			return RawExists($"--{key}");
@@ -58,9 +60,9 @@ namespace SimplifiedUserInterfaceFramework.Internal
 				}
 				else
 				{
-					Log.Error($"Expected a value after the input argument \"{Arguments[index]}\".");
+					Log?.Error($"Expected a value after the input argument \"{Arguments[index]}\".");
 					if (index == Arguments.Length - 1)
-						Log.Error(
+						Log?.Error(
 							$"Remember that the last value is always the input file.\n" +
 							$"Example solution:\n" +
 							$"  {Arguments[index]} some_value \"{Last()}\"");
@@ -72,16 +74,15 @@ namespace SimplifiedUserInterfaceFramework.Internal
 		}
 
 
-		public static T Enum<T>(string key, T defaultValue = default) where T : Enum => Enum(null, key, defaultValue);
+		public static T Enum<T>(string key, T defaultValue = default) where T : struct => Enum(null, key, defaultValue);
 
-		public static T Enum<T>(string shortKey, string longKey, T defaultValue = default) where T : Enum
+		public static T Enum<T>(string shortKey, string longKey, T defaultValue = default) where T : struct
 		{
 			var rawValue = String(shortKey, longKey);
-			if(System.Enum.TryParse(typeof(T), rawValue?.ToLower(), out var parsed))
+			if(System.Enum.TryParse<T>(rawValue, true, out var parsed))
 			{
-				var parsedAsType = (T)parsed;
-				if (System.Enum.IsDefined(typeof(T), parsedAsType))
-					return parsedAsType;
+				if (System.Enum.IsDefined(typeof(T), parsed))
+					return parsed;
 			}
 
 			return defaultValue;

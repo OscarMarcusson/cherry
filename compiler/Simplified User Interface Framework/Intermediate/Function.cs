@@ -4,13 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SimplifiedUserInterfaceFramework.Internal
+namespace SimplifiedUserInterfaceFramework.Intermediate
 {
-	internal enum LogLevel
+	class Function
 	{
-		trace = 0,
-		info  = 1,
-		warn  = 2,
-		error = 3
 	}
 }

@@ -7,4 +7,8 @@
     <AssemblyName>suifc</AssemblyName>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Simplified User Interface Framework\Simplified User Interface Framework.csproj" />
+  </ItemGroup>
+
 </Project>

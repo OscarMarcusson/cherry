@@ -27,10 +27,10 @@ namespace SimplifiedUserInterfaceFramework
 								"l", "log", "limit",
 								$"Sets the amount of information to write to the terminal. Defaults to Info (1), and will print anything equal to or higher than the limit set.\n" +
 								$"Choices (number OR name):\n" +
-								$"  {(int)LogLevel.trace}   {LogLevel.trace}\n" +
-								$"  {(int)LogLevel.info }   {LogLevel.info }\n" +
-								$"  {(int)LogLevel.warn }   {LogLevel.warn }\n" +
-								$"  {(int)LogLevel.error}   {LogLevel.error}\n");
+								$"  {(int)LogLevel.Trace}   {LogLevel.Trace}\n" +
+								$"  {(int)LogLevel.Info }   {LogLevel.Info }\n" +
+								$"  {(int)LogLevel.Warn }   {LogLevel.Warn }\n" +
+								$"  {(int)LogLevel.Error}   {LogLevel.Error}\n");
 
 				ArgumentPrinter.PrintArgumentDescription(
 								"o", "output", "path",
@@ -51,37 +51,58 @@ namespace SimplifiedUserInterfaceFramework
 			}
 			else
 			{
-				Log.LogLevel = ArgumentReader.Enum("l", "log", LogLevel.info);
-				Log.Trace($"Running compiler with log level {Log.LogLevel}");
+				var arguments = ReadArguments(out var log);
+				var compiler = new Compiler(arguments);
 
-				var output = ArgumentReader.String("o", "output");
-				if(!string.IsNullOrWhiteSpace(output))
-					Log.Trace($"Output set to {output}");
-				
-				var path = ArgumentReader.Last();
-				if(string.IsNullOrWhiteSpace(path))
-					Log.Fatal("No path set. The last argument should be a path to the file to compile.");
-
-				if(!File.Exists(path))
-					Log.Fatal("Invalid path. The last argument should be a path to the file to compile.");
-				
-				Log.Trace($"Path set to {path}");
-
-				var realtimeMode = ArgumentReader.Exists("r", "real-time");
-				if (realtimeMode)
-					Log.Trace("Real-time mode enabled");
-
-				var unknownArguments = ArgumentReader.GetUnhandledArguments();
-				if(unknownArguments.Length > 0)
+				if (arguments.RealTime)
 				{
-					Log.Error($"Unknown {(unknownArguments.Length == 1 ? "argument" : "arguments")}:");
-					foreach (var argument in unknownArguments)
-						Log.Error($"  {argument}");
-					Environment.Exit(1);
+					log.Fatal("Real-time compilation is not implemented yet...");
 				}
-
-				// TODO:: Implement compiler...
+				else
+				{
+					compiler.Compile();
+				}
 			}
+		}
+
+
+		private static CompilerArguments ReadArguments(out Log log)
+		{
+			var arguments = new CompilerArguments();
+			arguments.LogLevel = ArgumentReader.Enum("l", "log", LogLevel.Info);
+			log = new Log { LogLevel = arguments.LogLevel };
+			ArgumentReader.Log = log;
+
+			log.Trace($"Running compiler with log level {log.LogLevel}");
+
+			arguments.Output = ArgumentReader.String("o", "output");
+			if (!string.IsNullOrWhiteSpace(arguments.Output))
+				log.Trace($"Output set to {arguments.Output}");
+
+			arguments.Input = ArgumentReader.Last();
+			if (string.IsNullOrWhiteSpace(arguments.Input))
+				log.Fatal("No path set. The last argument should be a path to the file to compile.");
+
+			if (!File.Exists(arguments.Input))
+				log.Fatal("Invalid path. The last argument should be a path to the file to compile.");
+
+			log.Trace($"Path set to {arguments.Input}");
+
+			arguments.RealTime = ArgumentReader.Exists("r", "real-time");
+			if (arguments.RealTime)
+				log.Trace("Real-time mode enabled");
+
+			var unknownArguments = ArgumentReader.GetUnhandledArguments();
+			if (unknownArguments.Length > 0)
+			{
+				log.Error($"Unknown {(unknownArguments.Length == 1 ? "argument" : "arguments")}:");
+				foreach (var argument in unknownArguments)
+					log.Error($"  {argument}");
+				Environment.Exit(1);
+			}
+
+
+			return arguments;
 		}
 	}
 }
