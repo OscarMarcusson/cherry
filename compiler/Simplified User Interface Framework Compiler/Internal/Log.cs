@@ -28,14 +28,14 @@ namespace SimplifiedUserInterfaceFramework.Internal
 		}
 
 
-		public static void Trace   (object message) => Message(message, ConsoleColor.DarkGray, LogLevel.Trace);
-		public static void Info    (object message) => Message(message, ConsoleColor.Gray,     LogLevel.Info);
-		public static void Warning (object message) => Message(message, ConsoleColor.Yellow,   LogLevel.Warn);
-		public static void Error   (object message) => Message(message, ConsoleColor.Red,      LogLevel.Error);
+		public static void Trace   (object message) => Message(message, ConsoleColor.DarkGray, LogLevel.trace);
+		public static void Info    (object message) => Message(message, ConsoleColor.Gray,     LogLevel.info);
+		public static void Warning (object message) => Message(message, ConsoleColor.Yellow,   LogLevel.warn);
+		public static void Error   (object message) => Message(message, ConsoleColor.Red,      LogLevel.error);
 
 		public static void Fatal (object message)
 		{
-			Message(message, ConsoleColor.Red, LogLevel.Error);
+			Message(message, ConsoleColor.Red, LogLevel.error);
 			Environment.Exit(1);
 		}
 
@@ -46,7 +46,7 @@ namespace SimplifiedUserInterfaceFramework.Internal
 
 			lock (Locker)
 			{
-				if (isEmpty | logLevel < minimumNeededLogLevel)
+				if (isEmpty | logLevel > minimumNeededLogLevel)
 				{
 					Console.WriteLine();
 				}

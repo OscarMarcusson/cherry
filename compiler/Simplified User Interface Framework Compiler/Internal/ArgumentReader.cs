@@ -8,19 +8,37 @@ namespace SimplifiedUserInterfaceFramework.Internal
 {
 	internal static class ArgumentReader
 	{
-		static readonly string[] Arguments = Environment.GetCommandLineArgs();
+		static readonly string[] Arguments = Environment.GetCommandLineArgs().Skip(1).ToArray();
+		static readonly bool[] ParsedArguments = new bool[Arguments.Length];
 
+		public static bool Exists(string key)
+		{
+			return RawExists($"--{key}");
+		}
 
-		public static bool Exists(string key) => Exists(null, key);
 
 		public static bool Exists(string shortKey, string longKey)
 		{
-			if (shortKey != null && Arguments.Contains($"-{shortKey}"))
+			if (shortKey != null && RawExists($"-{shortKey}"))
 				return true;
 
-			if (longKey != null && Arguments.Contains($"--{longKey}"))
+			if (longKey != null && RawExists($"--{longKey}"))
 				return true;
 
+			return false;
+		}
+
+
+		static bool RawExists(string key)
+		{
+			for(int i = 0; i < Arguments.Length; i++)
+			{
+				if(Arguments[i].Equals(key, StringComparison.OrdinalIgnoreCase))
+				{
+					ParsedArguments[i] = true;
+					return true;
+				}
+			}
 			return false;
 		}
 
@@ -32,8 +50,22 @@ namespace SimplifiedUserInterfaceFramework.Internal
 		{
 			if (TryGetIndexOf(out var index, $"-{shortKey}", $"--{longKey}"))
 			{
-				if (index < Arguments.Length - 1)
+				ParsedArguments[index] = true;
+				if (index < Arguments.Length - 2)
+				{
+					ParsedArguments[index + 1] = true;
 					return Arguments[index + 1];
+				}
+				else
+				{
+					Log.Error($"Expected a value after the input argument \"{Arguments[index]}\".");
+					if (index == Arguments.Length - 1)
+						Log.Error(
+							$"Remember that the last value is always the input file.\n" +
+							$"Example solution:\n" +
+							$"  {Arguments[index]} some_value \"{Last()}\"");
+					Environment.Exit(1);
+				}
 			}
 
 			return null;
@@ -45,7 +77,7 @@ namespace SimplifiedUserInterfaceFramework.Internal
 		public static T Enum<T>(string shortKey, string longKey, T defaultValue = default) where T : Enum
 		{
 			var rawValue = String(shortKey, longKey);
-			if(System.Enum.TryParse(typeof(T), rawValue, out var parsed))
+			if(System.Enum.TryParse(typeof(T), rawValue?.ToLower(), out var parsed))
 			{
 				var parsedAsType = (T)parsed;
 				if (System.Enum.IsDefined(typeof(T), parsedAsType))
@@ -57,7 +89,23 @@ namespace SimplifiedUserInterfaceFramework.Internal
 
 
 
-		public static string Last() => Arguments.Last();
+		public static string Last()
+		{
+			ParsedArguments[ParsedArguments.Length - 1] = true;
+			return Arguments.Last();
+		}
+
+
+		public static string[] GetUnhandledArguments()
+		{
+			var output = new List<string>();
+			for(int i = 0; i < Arguments.Length; i++)
+			{
+				if (!ParsedArguments[i])
+					output.Add(Arguments[i]);
+			}
+			return output.ToArray();
+		}
 
 
 

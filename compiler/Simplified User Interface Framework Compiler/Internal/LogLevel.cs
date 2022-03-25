@@ -8,9 +8,9 @@ namespace SimplifiedUserInterfaceFramework.Internal
 {
 	internal enum LogLevel
 	{
-		Trace = 0,
-		Info  = 1,
-		Warn  = 2,
-		Error = 3
+		trace = 0,
+		info  = 1,
+		warn  = 2,
+		error = 3
 	}
 }
