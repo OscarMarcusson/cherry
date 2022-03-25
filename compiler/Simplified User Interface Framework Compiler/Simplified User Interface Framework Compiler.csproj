@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net5.0</TargetFramework>
+    <RootNamespace>SimplifiedUserInterfaceFramework</RootNamespace>
+    <AssemblyName>suifc</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Simplified User Interface Framework\Simplified User Interface Framework.csproj" />
+  </ItemGroup>
+
+</Project>
