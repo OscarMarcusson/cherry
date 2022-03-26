@@ -1,27 +1,10 @@
 # Simplified User Interface Framework
 This is a simple UI language based on HTML, but built with the intention of simplifying and reducing boilerplate syntax.
 
+## Content
+[Core Syntax](docs/CoreSyntax.md)
+[Styling](docs/Styles.md)
 
-<br>
-
-## Syntax
-The syntax is built to match HTML in terms of content, but with different syntax. 
-
-### Element declaration
-In its most simple way, you could view it as this:
-
-**Simplified**
-```ini
-div
-p = Hello World
-p = "String version of Hello World, if spaces should be included at the start or end like this  "
-```
-**HTML**
-```HTML
-<div></div>
-<p>Hello World</p>
-<p>String version of Hello World, if spaces should be included at the start or end like this&nbsp;&nbsp;</p>
-```
 <br>
 
 ### Scope
