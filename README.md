@@ -3,52 +3,56 @@ This is a simple UI language based on HTML, but built with the intention of simp
 
 #### Table of Contents
 * #### Syntax
-  * [Element Declaration](docs/Elements.md)
-  * [Scope](docs/Scope.md)
-  * [Styling](docs/Styles.md)
-  * [Comments](docs/Comments.md)
+  * [Element Declaration](docs/syntax/Elements.md)
+  * [Scope](docs/syntax/Scope.md)
+  * [Styling](docs/syntax/Styles.md)
+  * [Comments](docs/syntax/Comments.md)
 * #### Compiler
-  * [Installation / Setup](docs/CompilerSetup.md)
-  * [Arguments](docs/CompilerArguments.md)
+  * [Installation / Setup](docs/compiler/CompilerSetup.md)
+  * [Arguments](docs/compiler/CompilerArguments.md)
 
 <br>
 
-### Scope
-Scope is decided by newlines and tabs, similar to how you would do it in Python or other simplified scripting languages:
-
+## TL;DR
 **Simplified**
 ```ini
-center
-	div
-		p = "Some text"
+div.panel
+	h1 = "Hello World!"
+	p = "Lorem ipsum"
+  
+style
+	body
+		background-color = #141414
+	.panel
+		width = 500px
+		margin = auto
+		padding = 15px
+		background-color = #1c1c1c
+		color = #c7c7c7
+		border-radius = 8px
 ```
 **HTML**
 ```HTML
-<center>
-	<div>
-		<p>Some text</p>
+<!DOCTYPE html>
+<head>
+	<style>
+		body {
+			background-color: #141414;
+		}
+		.panel {
+			width: 500px;
+			margin: auto;
+			padding: 15px;
+			background-color: #1c1c1c;
+			color: #c7c7c7;
+			border-radius: 8px;
+		}
+	</style>
+</head>
+<body>
+	<div class="panel">
+		<h1>Hello World!</h1>
+		<p>Lorem ipsum</p>
 	</div>
-</center>
+</body>
 ```
-<br>
-
-### Comments
-Comments are written as with most languages, with the double slashes //.
-
-**Simplified**
-```ini
-// I am a comment!
-p = "Some text"
-```
-**HTML**
-```HTML
-<!-- I am a comment! -->
-<p>Some text</p>
-```
-
-
-<br>
-
-
-## Setup
-To run this project, install, compile with dotnet, and then run. Skip arguments or use "-h" or "--help" for more information.
