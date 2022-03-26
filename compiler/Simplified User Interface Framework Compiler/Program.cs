@@ -145,7 +145,7 @@ namespace SimplifiedUserInterfaceFramework
 			{
 				try
 				{
-					compiler.Compile();
+					Compile();
 
 					using (var watcher = new FileSystemWatcher(compiler.InputDirectory, compiler.InputFileName))
 					{
@@ -153,12 +153,7 @@ namespace SimplifiedUserInterfaceFramework
 						{
 							var result = watcher.WaitForChanged(WatcherChangeTypes.Created | WatcherChangeTypes.Changed, 1000);
 							if (!result.TimedOut)
-							{
-								Console.Clear();
-								compiler.Compile();
-								Console.WriteLine();
-								Console.WriteLine("Press ESC to exit live mode");
-							}
+								Compile();
 						}
 					}
 				}
@@ -168,6 +163,16 @@ namespace SimplifiedUserInterfaceFramework
 					Console.WriteLine(exc);
 					Thread.Sleep(10000);
 				}
+			}
+
+
+
+			void Compile()
+			{
+				Console.Clear();
+				compiler.Compile();
+				Console.WriteLine();
+				Console.WriteLine("Press ESC to exit live mode");
 			}
 		}
 	}
