@@ -1,9 +1,15 @@
 # Simplified User Interface Framework
 This is a simple UI language based on HTML, but built with the intention of simplifying and reducing boilerplate syntax.
 
-##### Table of Contents
-* [Syntax](docs/CoreSyntax.md)
+#### Table of Contents
+* #### Syntax
+  * [Element Declaration](docs/Elements.md)
+  * [Scope](docs/Scope.md)
   * [Styling](docs/Styles.md)
+  * [Comments](docs/Comments.md)
+* #### Compiler
+  * [Installation / Setup](docs/CompilerSetup.md)
+  * [Arguments](docs/CompilerArguments.md)
 
 <br>
 
