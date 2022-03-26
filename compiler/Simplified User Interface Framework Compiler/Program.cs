@@ -9,7 +9,9 @@ namespace SimplifiedUserInterfaceFramework
 	{
 		static void Main(string[] args)
 		{
-			if (args == null || args.Length == 0 || ArgumentReader.Exists("h", "help"))
+			var argumentReader = new ArgumentReader(args, exitOnFatal:true);
+
+			if (args == null || args.Length == 0 || argumentReader.Exists("h", "help"))
 			{
 				Console.WriteLine("Simplified User Interface Framework Compiler");
 				Console.WriteLine();
@@ -44,14 +46,14 @@ namespace SimplifiedUserInterfaceFramework
 								$"Enables realtime compilation. The compiler instance will start running in a loop, watching the target file. " +
 								$"Whenever a change is detected the file is recompiled automatically.\n");
 			}
-			else if (ArgumentReader.Exists("v", "version"))
+			else if (argumentReader.Exists("v", "version"))
 			{
 				var version = typeof(Program).Assembly.GetName().Version;
 				Console.WriteLine(version);
 			}
 			else
 			{
-				var arguments = ReadArguments(out var log);
+				var arguments = ReadArguments(argumentReader, out var log);
 				var compiler = new Compiler(arguments);
 
 				if (arguments.RealTime)
@@ -66,20 +68,20 @@ namespace SimplifiedUserInterfaceFramework
 		}
 
 
-		private static CompilerArguments ReadArguments(out Log log)
+		private static CompilerArguments ReadArguments(ArgumentReader argumentReader, out Log log)
 		{
 			var arguments = new CompilerArguments();
-			arguments.LogLevel = ArgumentReader.Enum("l", "log", LogLevel.Info);
+			arguments.LogLevel = argumentReader.Enum("l", "log", LogLevel.Info);
 			log = new Log { LogLevel = arguments.LogLevel };
-			ArgumentReader.Log = log;
+			argumentReader.Log = log;
 
 			log.Trace($"Running compiler with log level {log.LogLevel}");
 
-			arguments.Output = ArgumentReader.String("o", "output");
+			arguments.Output = argumentReader.String("o", "output");
 			if (!string.IsNullOrWhiteSpace(arguments.Output))
 				log.Trace($"Output set to {arguments.Output}");
 
-			arguments.Input = ArgumentReader.Last();
+			arguments.Input = argumentReader.Last();
 			if (string.IsNullOrWhiteSpace(arguments.Input))
 				log.Fatal("No path set. The last argument should be a path to the file to compile.");
 
@@ -88,11 +90,11 @@ namespace SimplifiedUserInterfaceFramework
 
 			log.Trace($"Path set to {arguments.Input}");
 
-			arguments.RealTime = ArgumentReader.Exists("r", "real-time");
+			arguments.RealTime = argumentReader.Exists("r", "real-time");
 			if (arguments.RealTime)
 				log.Trace("Real-time mode enabled");
 
-			var unknownArguments = ArgumentReader.GetUnhandledArguments();
+			var unknownArguments = argumentReader.GetUnhandledArguments();
 			if (unknownArguments.Length > 0)
 			{
 				log.Error($"Unknown {(unknownArguments.Length == 1 ? "argument" : "arguments")}:");
