@@ -11,11 +11,13 @@ namespace SimplifiedUserInterfaceFramework
 		readonly CompilerArguments Arguments;
 		readonly Log Log;
 
-		readonly string Input;
-		readonly string InputDirectory;
+		public readonly string Input;
+		public readonly string InputFileName;
+		public readonly string InputDirectory;
 
-		readonly string Output;
-		readonly string OutputDirectory;
+		public readonly string Output;
+		public readonly string OutputFileName;
+		public readonly string OutputDirectory;
 
 
 
@@ -26,6 +28,9 @@ namespace SimplifiedUserInterfaceFramework
 
 			Input  = Arguments.Input;
 			Output = Arguments.Output;
+
+			InputFileName  = Path.GetFileName(Input);
+			OutputFileName = Path.GetFileName(Output);
 
 			InputDirectory  = Path.GetDirectoryName(Input);
 			OutputDirectory = Path.GetDirectoryName(Output);
