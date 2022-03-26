@@ -5,7 +5,9 @@ VisualStudioVersion = 16.0.32106.194
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Simplified User Interface Framework Compiler", "Simplified User Interface Framework Compiler\Simplified User Interface Framework Compiler.csproj", "{92E64428-9F92-4FF2-917D-C38E1D90A879}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Simplified User Interface Framework", "Simplified User Interface Framework\Simplified User Interface Framework.csproj", "{487230E1-1F16-42C2-8CFF-73525F27BE4A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Simplified User Interface Framework", "Simplified User Interface Framework\Simplified User Interface Framework.csproj", "{487230E1-1F16-42C2-8CFF-73525F27BE4A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests", "Tests\UnitTests.csproj", "{12B81440-BE6B-4150-8934-9D613C520D7A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{487230E1-1F16-42C2-8CFF-73525F27BE4A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{487230E1-1F16-42C2-8CFF-73525F27BE4A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{487230E1-1F16-42C2-8CFF-73525F27BE4A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{12B81440-BE6B-4150-8934-9D613C520D7A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{12B81440-BE6B-4150-8934-9D613C520D7A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{12B81440-BE6B-4150-8934-9D613C520D7A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{12B81440-BE6B-4150-8934-9D613C520D7A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

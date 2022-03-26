@@ -4,22 +4,53 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("UnitTests")]
 namespace SimplifiedUserInterfaceFramework.Internal
 {
-	internal static class ArgumentReader
+	internal class ArgumentReader
 	{
-		static readonly string[] Arguments = Environment.GetCommandLineArgs().Skip(1).ToArray();
-		static readonly bool[] ParsedArguments = new bool[Arguments.Length];
+		readonly string[] Arguments;
+		readonly bool[] ParsedArguments;
+		readonly bool ExitOnFatal;
 
-		public static Log Log { get; set; }
+		public Log Log { get; set; }
 
-		public static bool Exists(string key)
+
+
+		/// <summary> Creates an argument reader using the application arguments. </summary>
+		public ArgumentReader(bool exitOnFatal = false) : this(Environment.GetCommandLineArgs().Skip(1).ToArray(), exitOnFatal) { }
+
+		/// <summary> Creates an argument reader with custom arguments. </summary>
+		public ArgumentReader(string[] arguments, bool exitOnFatal = false)
+		{
+			ExitOnFatal = exitOnFatal;
+
+			// Element level copy to make sure we are thread safe
+			Arguments = new string[arguments?.Length ?? 0];
+			if(Arguments.Length > 0)
+				arguments.CopyTo(Arguments, 0);
+
+			ParsedArguments = new bool[arguments.Length];
+		}
+
+
+
+
+
+
+
+
+
+
+
+
+		public bool Exists(string key)
 		{
 			return RawExists($"--{key}");
 		}
 
 
-		public static bool Exists(string shortKey, string longKey)
+		public bool Exists(string shortKey, string longKey)
 		{
 			if (shortKey != null && RawExists($"-{shortKey}"))
 				return true;
@@ -31,7 +62,7 @@ namespace SimplifiedUserInterfaceFramework.Internal
 		}
 
 
-		static bool RawExists(string key)
+		bool RawExists(string key)
 		{
 			for(int i = 0; i < Arguments.Length; i++)
 			{
@@ -46,9 +77,9 @@ namespace SimplifiedUserInterfaceFramework.Internal
 
 
 
-		public static string String(string key) => String(null, key);
+		public string String(string key) => String(null, key);
 
-		public static string String(string shortKey, string longKey)
+		public string String(string shortKey, string longKey)
 		{
 			if (TryGetIndexOf(out var index, $"-{shortKey}", $"--{longKey}"))
 			{
@@ -60,13 +91,20 @@ namespace SimplifiedUserInterfaceFramework.Internal
 				}
 				else
 				{
-					Log?.Error($"Expected a value after the input argument \"{Arguments[index]}\".");
+					var errorMessage = $"Expected a value after the input argument \"{Arguments[index]}\".";
+
 					if (index == Arguments.Length - 1)
-						Log?.Error(
+						errorMessage += "\n" +
 							$"Remember that the last value is always the input file.\n" +
 							$"Example solution:\n" +
-							$"  {Arguments[index]} some_value \"{Last()}\"");
-					Environment.Exit(1);
+							$"  {Arguments[index]} some_value \"{Last()}\"";
+
+					Log?.Error(errorMessage);
+
+					if (ExitOnFatal)
+						Environment.Exit(1);
+					else
+						throw new Exception(errorMessage);
 				}
 			}
 
@@ -74,9 +112,9 @@ namespace SimplifiedUserInterfaceFramework.Internal
 		}
 
 
-		public static T Enum<T>(string key, T defaultValue = default) where T : struct => Enum(null, key, defaultValue);
+		public T Enum<T>(string key, T defaultValue = default) where T : struct => Enum(null, key, defaultValue);
 
-		public static T Enum<T>(string shortKey, string longKey, T defaultValue = default) where T : struct
+		public T Enum<T>(string shortKey, string longKey, T defaultValue = default) where T : struct
 		{
 			var rawValue = String(shortKey, longKey);
 			if(System.Enum.TryParse<T>(rawValue, true, out var parsed))
@@ -90,14 +128,17 @@ namespace SimplifiedUserInterfaceFramework.Internal
 
 
 
-		public static string Last()
+		public string Last()
 		{
+			if (ParsedArguments.Length == 0)
+				return null;
+
 			ParsedArguments[ParsedArguments.Length - 1] = true;
 			return Arguments.Last();
 		}
 
 
-		public static string[] GetUnhandledArguments()
+		public string[] GetUnhandledArguments()
 		{
 			var output = new List<string>();
 			for(int i = 0; i < Arguments.Length; i++)
@@ -114,7 +155,7 @@ namespace SimplifiedUserInterfaceFramework.Internal
 
 
 		#region Helpers
-		static bool TryGetIndexOf(out int index, params string[] keys)
+		bool TryGetIndexOf(out int index, params string[] keys)
 		{
 			index = -1;
 			for (int i = 0; i < keys.Length && index < 0; i++)
@@ -127,7 +168,7 @@ namespace SimplifiedUserInterfaceFramework.Internal
 		}
 
 
-		static int IndexOf(string key)
+		int IndexOf(string key)
 		{
 			if (key == null)
 				return -1;
