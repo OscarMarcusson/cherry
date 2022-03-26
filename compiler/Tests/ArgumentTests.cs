@@ -87,6 +87,27 @@ namespace Tests
 		}
 
 
+		[TestMethod]
+		public void TestShortString()
+		{
+			var reader = GetReader(ShortStringKeyArgument, StringValue, Path);
+			Assert.AreEqual(reader.Last(), Path);
+			Assert.IsNull(reader.String(LongStringKey));
+			Assert.AreEqual(StringValue, reader.String(ShortStringKey, LongStringKey));
+			TestNotFound(reader);
+		}
+
+		[TestMethod]
+		public void TestLongString()
+		{
+			var reader = GetReader(LongStringKeyArgument, StringValue, Path);
+			Assert.AreEqual(reader.Last(), Path);
+			Assert.AreEqual(StringValue, reader.String(LongStringKey));
+			Assert.AreEqual(StringValue, reader.String(ShortStringKey, LongStringKey));
+			TestNotFound(reader);
+		}
+
+
 		void TestNotFound(ArgumentReader reader)
 		{
 			Assert.IsNull(reader.String("a"));
