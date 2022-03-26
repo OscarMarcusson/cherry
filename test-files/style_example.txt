@@ -1,0 +1,14 @@
+div.panel
+	h1 = "Hello World!"
+	p = "Lorem ipsum"
+  
+style
+	body
+		background-color = #141414
+	.panel
+		width = 500px
+		margin = auto
+		padding = 15px
+		background-color = #1c1c1c
+		color = #c7c7c7
+		border-radius = 8px
