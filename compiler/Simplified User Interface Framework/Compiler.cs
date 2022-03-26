@@ -10,6 +10,7 @@ namespace SimplifiedUserInterfaceFramework
 	{
 		readonly CompilerArguments Arguments;
 		readonly Log Log;
+		readonly bool ThrowOnFail;
 
 		readonly string Input;
 		readonly string InputDirectory;
@@ -19,10 +20,11 @@ namespace SimplifiedUserInterfaceFramework
 
 
 
-		public Compiler(CompilerArguments arguments)
+		public Compiler(CompilerArguments arguments, bool throwExceptionOnFail = false)
 		{
 			Arguments = arguments.CreateCopy();
 			Log = new Log { LogLevel = Arguments.LogLevel };
+			ThrowOnFail = throwExceptionOnFail;
 
 			Input  = Arguments.Input;
 			Output = Arguments.Output;
@@ -46,19 +48,28 @@ namespace SimplifiedUserInterfaceFramework
 
 
 
+		void Error(string message)
+		{
+			if (ThrowOnFail)
+				throw new Exception(message);
+
+			Log.Error(message);
+		}
+
+
 
 		public void Compile()
 		{
 			// Validate
 			if (!File.Exists(Input))
 			{
-				Log.Error($"Input file not found: {Input}");
+				Error($"Input file not found: {Input}");
 				return;
 			}
 
 			if(!Directory.Exists(OutputDirectory))
 			{
-				Log.Error($"Output directory not found: {OutputDirectory}");
+				Error($"Output directory not found: {OutputDirectory}");
 				return;
 			}
 
