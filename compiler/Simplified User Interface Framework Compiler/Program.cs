@@ -1,12 +1,15 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using SimplifiedUserInterfaceFramework.Internal;
 
 namespace SimplifiedUserInterfaceFramework
 {
 	class Program
 	{
+		static bool loopThread;
+
 		static void Main(string[] args)
 		{
 			var argumentReader = new ArgumentReader(args, exitOnFatal:true);
@@ -58,7 +61,34 @@ namespace SimplifiedUserInterfaceFramework
 
 				if (arguments.RealTime)
 				{
-					log.Fatal("Real-time compilation is not implemented yet...");
+					loopThread = true;
+					while (loopThread)
+					{
+						try
+						{
+							Console.Clear();
+							var thread = new Thread(() => CompileThread(compiler));
+							thread.Start();
+
+							while (loopThread)
+							{
+								var input = Console.ReadKey(true);
+								switch (input.Key)
+								{
+									case ConsoleKey.Escape:
+										loopThread = false;
+										thread.Join(1000);
+										return;
+								}
+							}
+						}
+						catch (Exception e)
+						{
+							Console.ForegroundColor = ConsoleColor.Red;
+							Console.WriteLine(e);
+							Thread.Sleep(10000);
+						}
+					}
 				}
 				else
 				{
@@ -105,6 +135,45 @@ namespace SimplifiedUserInterfaceFramework
 
 
 			return arguments;
+		}
+
+
+
+		static void CompileThread(Compiler compiler)
+		{
+			while (loopThread)
+			{
+				try
+				{
+					Compile();
+
+					using (var watcher = new FileSystemWatcher(compiler.InputDirectory, compiler.InputFileName))
+					{
+						while (loopThread)
+						{
+							var result = watcher.WaitForChanged(WatcherChangeTypes.Created | WatcherChangeTypes.Changed, 1000);
+							if (!result.TimedOut)
+								Compile();
+						}
+					}
+				}
+				catch (Exception exc)
+				{
+					Console.ForegroundColor = ConsoleColor.Red;
+					Console.WriteLine(exc);
+					Thread.Sleep(10000);
+				}
+			}
+
+
+
+			void Compile()
+			{
+				Console.Clear();
+				compiler.Compile();
+				Console.WriteLine();
+				Console.WriteLine("Press ESC to exit live mode");
+			}
 		}
 	}
 }
