@@ -40,7 +40,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 
 			var index = IndexOfValueStart(reader.Text); //  reader.Text.IndexOf('=');
 			Name = index > -1 ? reader.Text.Substring(0, index).Trim() : reader.Text.Trim();
-			
+
 			if(index > -1)
 			{
 				Value = reader.Text.Substring(index + 1).Trim();
@@ -49,6 +49,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 			}
 
 			var splitIndex = Name.IndexOf('>');
+			string remainingDataToParse = null;
 
 			// Macro name parsing
 			if (Name.StartsWith("#"))
@@ -57,39 +58,86 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 				Name = "#" + Name.Substring(1).TrimStart();
 				splitIndex = Name.IndexOf('>');
 			}
+
 			// Normal name parsing
+			index = Name.IndexOf('.');
+			if (index > -1 && (splitIndex < 0 || index < splitIndex))
+			{
+				var indexToNextSpace = Name.IndexOf(' ');
+				if(indexToNextSpace < 0)
+				{
+					if (splitIndex > -1)
+						indexToNextSpace = splitIndex;
+				}
+				else if(splitIndex > -1)
+				{
+					indexToNextSpace = Math.Min(indexToNextSpace, splitIndex);
+				}
+
+
+				string stringToParse = null;
+				if(indexToNextSpace > -1)
+				{
+					stringToParse = Name.Substring(index + 1, indexToNextSpace - index - 1);
+					remainingDataToParse = Name.Substring(indexToNextSpace).TrimStart();
+					Classes = stringToParse.Split('.', StringSplitOptions.RemoveEmptyEntries);
+				}
+				else
+				{
+					stringToParse = Name.Substring(index + 1);
+				}
+				
+				Classes = stringToParse.Split('.', StringSplitOptions.RemoveEmptyEntries);
+				Name = Name.Substring(0, index);
+			}
 			else
 			{
-				index = Name.IndexOf('.');
-				if (index > -1 && (splitIndex < 0 || index < splitIndex))
+				index = Name.IndexOf(' ');
+				if (index > -1)
 				{
-					Classes = Name.Substring(index + 1).Split('.', StringSplitOptions.RemoveEmptyEntries);
+					remainingDataToParse = Name.Substring(index).TrimStart();
 					Name = Name.Substring(0, index);
 				}
 			}
 
-			// Early split?
-			if(splitIndex > -1)
+			// Go through all space separated configurations before getting to the value
+			while(remainingDataToParse != null)
 			{
-				var nextElement = Name.Substring(splitIndex + 1).TrimStart();
-				Name = Name.Substring(0, splitIndex).TrimEnd();
+				index = remainingDataToParse.IndexOf(' ');
+				if(index < 0)
+				{
+					// TODO:: Parse whatever the content of remainingDataToParse is now
+					remainingDataToParse = null;
+					break;
+				}
 
-				if (!string.IsNullOrWhiteSpace(Value))
-					nextElement += "=" + Value;
+				var nextWord = remainingDataToParse.Substring(0, index);
+				switch (nextWord)
+				{
+					case ">":
+						var nextElement = remainingDataToParse.Substring(1).TrimStart();
 
-				nextElement = new string('\t', reader.Indentation + 1) + nextElement;
-				var newReader = new LineReader(nextElement);
-				var child = AddChild(newReader);
+						if (!string.IsNullOrWhiteSpace(Value))
+							nextElement += "=" + Value;
 
-				// Resolve the deepest child level, this works since the "a > b > c" logic only has one child
-				while (child.Children.Count > 0)
-					child = child.Children[0];
+						nextElement = new string('\t', reader.Indentation + 1) + nextElement;
+						var newReader = new LineReader(nextElement);
+						var child = AddChild(newReader);
 
-				// Create children
-				foreach (var realChild in reader.Children)
-					child.AddChild(realChild);
+						// Resolve the deepest child level, this works since the "a > b > c" logic only has one child
+						while (child.Children.Count > 0)
+							child = child.Children[0];
 
-				return;
+						// Create children
+						foreach (var realChild in reader.Children)
+							child.AddChild(realChild);
+
+						// Since we've resolved inlined elements we can be certain that we are done with this element, so hard return
+						return;
+
+					default:
+						throw new Exception("Unknown keyword: " + nextWord);
+				}
 			}
 			
 

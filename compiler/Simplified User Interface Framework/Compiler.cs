@@ -124,7 +124,7 @@ namespace SimplifiedUserInterfaceFramework
 				writer.WriteLine();
 				writer.WriteLine("<body>");
 				foreach (var element in document.RootElement.Children)
-					element.ToRecursiveHtmlStream(writer, document);
+					element.ToRecursiveHtmlStream(writer, document, Log);
 				writer.WriteLine("</body>");
 			}
 
