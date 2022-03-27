@@ -40,7 +40,13 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 
 			var index = IndexOfValueStart(reader.Text); //  reader.Text.IndexOf('=');
 			Name = index > -1 ? reader.Text.Substring(0, index).Trim() : reader.Text.Trim();
-			Value = index > -1 ? reader.Text.Substring(index + 1).Trim() : null;
+			
+			if(index > -1)
+			{
+				Value = reader.Text.Substring(index + 1).Trim();
+				if (Value.Length > 1 && Value[0] == '"' && Value[Value.Length - 1] == '"')
+					Value = Value.Substring(1, Value.Length - 2);
+			}
 
 			var splitIndex = Name.IndexOf('>');
 
