@@ -16,8 +16,28 @@ namespace SimplifiedUserInterfaceFramework.Internal.Intermediate
 
 		public Macro(LineReader section)
 		{
-			Name = "#" + section.Text.Substring(1).Trim();
-			Elements = section.Children.Select(x => new Element(x)).ToArray();
+			Name = "#" + section.Text.Substring(1).TrimStart();
+
+			var index = Name.IndexOf('=');
+			
+			// Single line? Like #hw = div > p = Hello World!
+			if(index > 0)
+			{
+				if (section.Children.Count > 0)
+					throw new Exception($"The single line macro \"{section}\" has child content.");
+
+				var value = Name.Substring(index+1).Trim();
+				Name = Name.Substring(0, index).TrimEnd();
+
+				var valueReader = new LineReader(value);
+				var root = new Element(valueReader);
+				Elements = new[] { root };
+			}
+			// Multiple lines, like regular elements
+			else
+			{
+				Elements = section.Children.Select(x => new Element(x)).ToArray();
+			}
 		}
 	}
 }

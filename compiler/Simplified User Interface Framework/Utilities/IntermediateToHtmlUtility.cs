@@ -202,19 +202,18 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 
 
 
-		public static void ToRecursiveHtmlStream(this Intermediate.Element element, StreamWriter writer, Document document, int customIndent = -1, List<Intermediate.Element> customChildren = null)
+		public static void ToRecursiveHtmlStream(this Element element, StreamWriter writer, Document document, Log log, int customIndent = -1, List<Element> customChildren = null)
 		{
 			if (element.Name.StartsWith("#"))
 			{
 				if(document.Macros.TryGetValue(element.Name, out var macro))
 				{
 					foreach(var macroElement in macro.Elements)
-						macroElement.ToRecursiveHtmlStream(writer, document, customIndent:element.Indent+1, customChildren:element.Children);
+						macroElement.ToRecursiveHtmlStream(writer, document, log, customIndent: element.Indent+1, customChildren:element.Children);
 				}
 				else
 				{
-					// TODO:: PROPER WARNING
-					throw new Exception("CANT FIND MACRO " + element.Name);
+					log.Error("Can't find macro " + element.Name);
 				}
 			}
 			else
@@ -234,7 +233,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 					// 	writer.WriteLine($"{indent}\t{element.Value}");
 
 					foreach (var child in customChildren)
-						child.ToRecursiveHtmlStream(writer, document, customIndent: indent+1);
+						child.ToRecursiveHtmlStream(writer, document, log, customIndent: indent+1);
 					writer.Write(indentString);
 				}
 				else
