@@ -32,10 +32,7 @@ namespace SimplifiedUserInterfaceFramework
 			Output = Arguments.Output;
 
 			InputFileName  = Path.GetFileName(Input);
-			OutputFileName = Path.GetFileName(Output);
-
 			InputDirectory  = Path.GetDirectoryName(Input);
-			OutputDirectory = Path.GetDirectoryName(Output);
 
 
 			if (string.IsNullOrWhiteSpace(Arguments.Output))
@@ -49,6 +46,9 @@ namespace SimplifiedUserInterfaceFramework
 				Output = Path.Combine(Path.GetDirectoryName(Input), Output.Substring(2));
 				Log.Trace($"Relative output discovered, re-mapped to: {Output}");
 			}
+			
+			OutputFileName = Path.GetFileName(Output);
+			OutputDirectory = Path.GetDirectoryName(Output);
 		}
 
 
