@@ -7,6 +7,7 @@ This is a simple UI language based on HTML, but built with the intention of simp
   * [Scope](docs/syntax/Scope.md)
   * [Styling](docs/syntax/Styles.md)
   * [Comments](docs/syntax/Comments.md)
+  * [Variable Binding](docs/syntax/VariableBinding.md)
 * #### Compiler
   * [Installation / Setup](docs/compiler/CompilerSetup.md)
   * [Arguments](docs/compiler/CompilerArguments.md)
