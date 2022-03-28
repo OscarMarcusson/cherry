@@ -8,6 +8,13 @@ using static SimplifiedUserInterfaceFramework.Intermediate.Style;
 
 namespace SimplifiedUserInterfaceFramework.Intermediate
 {
+	public enum ElementType
+	{
+		None = 0,
+		Button = 1,
+		Image = 2,
+	}
+
 	public class Element
 	{
 		public readonly Element Parent;
@@ -15,7 +22,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 		public readonly int Indent;
 
 		public readonly string Name;
-		public readonly string Type;
+		public readonly ElementType Type;
 		public readonly string Value;
 		public readonly string[] Classes;
 		public readonly ValueSection[] SeparatedValues;
@@ -100,6 +107,20 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 				}
 			}
 
+			// Resolve the type
+			switch (Name.ToLower())
+			{
+				case "img":
+				case "image":
+					Type = ElementType.Image;
+					break;
+
+				case "btn":
+				case "button":
+					Type = ElementType.Button;
+					break;
+			}
+
 			// Go through all space separated configurations before getting to the value
 			while(remainingDataToParse != null)
 			{
@@ -178,25 +199,6 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 				}
 				SeparatedValues = values.ToArray();
 			}
-
-			index = Name.IndexOf(':');
-			if (index > -1)
-			{
-				Type = Name.Substring(index + 1).TrimStart();
-				Name = Name.Substring(0, index).Trim();
-
-				var argumentsIndex = Type.IndexOf('(');
-				if (argumentsIndex > -1)
-				{
-					var arguments = Type.Substring(argumentsIndex + 1).Trim('(', ')', ' ', '\t');
-					Type = Type.Substring(0, argumentsIndex).TrimEnd();
-
-					ParseEvents(arguments);
-				}
-
-				Type = Type.ToLower();
-			}
-
 
 			// Create children
 			foreach (var child in reader.Children)

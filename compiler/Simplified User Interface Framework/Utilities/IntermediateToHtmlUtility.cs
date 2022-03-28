@@ -153,34 +153,29 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 
 			var classes = element.HtmlFormattedClasses();
 
-			if (!string.IsNullOrWhiteSpace(element.Type))
+			switch (element.Type)
 			{
-				switch (element.Type ?? "")
-				{
-					case "button":
-						writer.Write($"input {classes}type=\"button\"");
-						if (element.HasValue)
-						{
-							writer.Write("value=\"");
-							element.ValueToHtml(writer);
-							writer.Write('"');
-						}
-						writer.Write($" class=\"button {element.Name.Replace(',', ' ').Replace(" ", "")}\"");
-						break;
+				case ElementType.Button:
+					writer.Write($"input {classes}type=\"button\"");
+					if (element.HasValue)
+					{
+						writer.Write("value=\"");
+						element.ValueToHtml(writer);
+						writer.Write('"');
+					}
+					writer.Write($" class=\"button {element.Name.Replace(',', ' ').Replace(" ", "")}\"");
+					break;
 
-					// Ignore no type
-					case "":
-						writer.Write(element.Name + classes);
-						break;
+				case ElementType.Image:
+					writer.Write($"img src=\"{element.Value}\"{classes}"); // alt=\"{element.Value}\"
+					break;
 
-					default:
-						writer.Write($"{element.Name} {classes}type=\"{element.Type}\"");
-						break;
-				}
-			}
-			else
-			{
-				writer.Write(element.Name + classes);
+				case ElementType.None:
+					writer.Write(element.Name + classes);
+					// writer.Write($"{element.Name} {classes}type=\"{element.Type}\"");
+					break;
+
+				default: throw new NotImplementedException("Has not implemented a parser for built-in type " + element.Type);
 			}
 
 			writer.Write('>');
@@ -238,7 +233,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 				}
 				else
 				{
-					if (element.HasValue && element.Type != "button")
+					if (element.HasValue && element.Type == ElementType.None)
 						element.ValueToHtml(writer);
 				}
 				
