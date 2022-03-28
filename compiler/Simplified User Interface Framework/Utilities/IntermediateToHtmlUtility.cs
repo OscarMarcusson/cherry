@@ -167,7 +167,10 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 					break;
 
 				case ElementType.Image:
-					writer.Write($"img src=\"{element.Value}\"{classes}"); // alt=\"{element.Value}\"
+					writer.Write($"img src=\"{element.Value}\"{classes}");
+					if (element.Configurations.TryGetValue("width",  out var width))  writer.Write($" width=\"{width}\"");
+					if (element.Configurations.TryGetValue("height", out var height)) writer.Write($" height=\"{height}\"");
+					if (element.Configurations.TryGetValue("alt",    out var alt))    writer.Write($" alt=\"{alt}\"");
 					break;
 
 				case ElementType.None:
