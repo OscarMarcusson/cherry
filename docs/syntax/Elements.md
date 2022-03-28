@@ -45,7 +45,29 @@ For more details, see [Type](docs/syntax/Types.md).
 
 
 <br>
-### Variable Binding
+
+## Images
+Declaring an image element is done via `img` or `image`, with the value being the path to the image. For example:
+```ini
+img = "some_directory/some_image.png"
+```
+### Image configurations
+Keyword | Description
+---|---
+alt | Provides alternative information if the image can't be displayed
+width | Sets the pixel width to reserve before loading the image
+height | Sets the pixel height to reserve before loading the image
+size | Sets both the width and height to the given value, or sets width to the first value and the height to the second value is two comma separated values are given
+
+A full example of a typical image would be:
+```ini
+img.style alt("Some image") size(150,80) = "some_directory/some_image.png"
+```
+
+
+<br>
+
+## Variable Binding
 By adding a bind section it's possible to sync the UI value to a variable. 
 This works for any element, it's for example possible to bind a paragraph (p), heading (h1, h2, etc) or even a div or button. 
 This will enable changing their text value on the fly by just changing the bound variable, which can be useful for displaying things like user names. 
@@ -53,5 +75,5 @@ Binding is also very useful for reading data, like getting the value of some tex
 #### Example
 ```ini
 textarea bind(description_variable) = "This text can be edited"
-``` to the variable declaration
+```
 For more details, see [Variable Binding](docs/syntax/VariableBinding.md)
