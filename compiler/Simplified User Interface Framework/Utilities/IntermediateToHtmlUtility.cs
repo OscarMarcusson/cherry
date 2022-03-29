@@ -151,12 +151,11 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 			writer.Write(indent);
 			writer.Write('<');
 
-			var classes = element.HtmlFormattedClasses();
-
+			// Core definition
 			switch (element.Type)
 			{
 				case ElementType.Button:
-					writer.Write($"input {classes}type=\"button\"");
+					writer.Write($"input {element.HtmlFormattedClasses()}type=\"button\"");
 					if (element.HasValue)
 					{
 						writer.Write("value=\"");
@@ -167,23 +166,48 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 					break;
 
 				case ElementType.Image:
-					writer.Write($"img src=\"{element.Value}\"{classes}");
+					writer.Write($"img src=\"{element.Value}\"{element.HtmlFormattedClasses()}");
 					if (element.Configurations.TryGetValue("width",  out var width))  writer.Write($" width=\"{width}\"");
 					if (element.Configurations.TryGetValue("height", out var height)) writer.Write($" height=\"{height}\"");
 					if (element.Configurations.TryGetValue("alt",    out var alt))    writer.Write($" alt=\"{alt}\"");
 					break;
 
 				case ElementType.None:
-					writer.Write(element.Name + classes);
+					writer.Write(element.Name + element.HtmlFormattedClasses());
 					// writer.Write($"{element.Name} {classes}type=\"{element.Type}\"");
 					break;
 
 				default: throw new NotImplementedException("Has not implemented a parser for built-in type " + element.Type);
 			}
 
+			// Inlined styles
+			if(element.InlinedStyles != null || element.Parent?.ChildStyles != null)
+			{
+				writer.Write(" style=\"");
+				
+				if (element.InlinedStyles != null)
+					element.InlinedStyles.ToStyleStream(writer);
+
+				if (element.Parent?.ChildStyles != null)
+					element.Parent.ChildStyles.ToStyleStream(writer);
+				
+				writer.Write('"');
+			}
+
 			writer.Write('>');
 
 			return indentNumber;
+		}
+
+		static void ToStyleStream(this Dictionary<string,string> values, StreamWriter writer)
+		{
+			foreach (var keyPair in values)
+			{
+				writer.Write(keyPair.Key);
+				writer.Write(':');
+				writer.Write(keyPair.Value);
+				writer.Write(';');
+			}
 		}
 
 		public static void ToEndHtmlStream(this Intermediate.Element element, StreamWriter writer, int customIndent = 0)
@@ -202,7 +226,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 
 		public static void ToRecursiveHtmlStream(this Element element, StreamWriter writer, Document document, Log log, int customIndent = -1, List<Element> customChildren = null)
 		{
-			if (element.Name.StartsWith("#"))
+			if (false)//element.Name.StartsWith("#"))
 			{
 				if(document.Macros.TryGetValue(element.Name, out var macro))
 				{
