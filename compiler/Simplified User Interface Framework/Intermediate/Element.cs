@@ -8,6 +8,13 @@ using static SimplifiedUserInterfaceFramework.Intermediate.Style;
 
 namespace SimplifiedUserInterfaceFramework.Intermediate
 {
+	public enum ElementType
+	{
+		None = 0,
+		Button = 1,
+		Image = 2,
+	}
+
 	public class Element
 	{
 		public readonly Element Parent;
@@ -15,9 +22,10 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 		public readonly int Indent;
 
 		public readonly string Name;
-		public readonly string Type;
+		public readonly ElementType Type;
 		public readonly string Value;
 		public readonly string[] Classes;
+		public readonly Dictionary<string,string> Configurations;
 		public readonly ValueSection[] SeparatedValues;
 		public Dictionary<string, string> Events { get; private set; }
 
@@ -100,44 +108,100 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 				}
 			}
 
-			// Go through all space separated configurations before getting to the value
-			while(remainingDataToParse != null)
+			// Resolve the type
+			switch (Name.ToLower())
 			{
-				index = remainingDataToParse.IndexOf(' ');
-				if(index < 0)
-				{
-					// TODO:: Parse whatever the content of remainingDataToParse is now
-					remainingDataToParse = null;
+				case "img":
+				case "image":
+					Type = ElementType.Image;
 					break;
-				}
 
-				var nextWord = remainingDataToParse.Substring(0, index);
-				switch (nextWord)
+				case "btn":
+				case "button":
+					Type = ElementType.Button;
+					break;
+			}
+
+
+			// Go through all space separated configurations before getting to the value
+			if(remainingDataToParse != null)
+			{
+				Configurations = new Dictionary<string, string>();
+				while(remainingDataToParse != null && remainingDataToParse.Length > 0)
 				{
-					case ">":
-						var nextElement = remainingDataToParse.Substring(1).TrimStart();
+					index = remainingDataToParse.IndexOf(' ');
+					var nextWord = index > -1 ? remainingDataToParse.Substring(0, index) : remainingDataToParse;
+					switch (nextWord)
+					{
+						case ">":
+							var nextElement = remainingDataToParse.Substring(1).TrimStart();
 
-						if (!string.IsNullOrWhiteSpace(Value))
-							nextElement += "=" + Value;
+							if (!string.IsNullOrWhiteSpace(Value))
+								nextElement += "=" + Value;
 
-						nextElement = new string('\t', reader.Indentation + 1) + nextElement;
-						var newReader = new LineReader(nextElement);
-						var child = AddChild(newReader);
+							nextElement = new string('\t', reader.Indentation + 1) + nextElement;
+							var newReader = new LineReader(nextElement);
+							var child = AddChild(newReader);
 
-						// Resolve the deepest child level, this works since the "a > b > c" logic only has one child
-						while (child.Children.Count > 0)
-							child = child.Children[0];
+							// Resolve the deepest child level, this works since the "a > b > c" logic only has one child
+							while (child.Children.Count > 0)
+								child = child.Children[0];
 
-						// Create children
-						foreach (var realChild in reader.Children)
-							child.AddChild(realChild);
+							// Create children
+							foreach (var realChild in reader.Children)
+								child.AddChild(realChild);
 
-						// Since we've resolved inlined elements we can be certain that we are done with this element, so hard return
-						return;
+							// Since we've resolved inlined elements we can be certain that we are done with this element, so hard return
+							return;
 
-					default:
-						throw new Exception("Unknown keyword: " + nextWord);
+						default:
+							index = remainingDataToParse.IndexOf('(');
+							if(index > 0)
+							{
+								nextWord = remainingDataToParse.Substring(0, index);
+								var nextIndex = remainingDataToParse.IndexOf(')', index);
+								if (nextIndex < index)
+									throw new Exception("Could not parse " + remainingDataToParse); // TODO:: PROPER ERROR
+
+								var dataToParse = remainingDataToParse.Substring(index+1, nextIndex - index - 1);
+								index = 0;
+								remainingDataToParse = remainingDataToParse.Substring(nextIndex+1).TrimStart();
+
+								switch (nextWord)
+								{
+									// case "alt":
+									// 	configurations.Add($"alt={dataToParse}");
+									// 	break;
+
+									case "size":
+										index = dataToParse.IndexOf(',');
+										if(index > 0)
+										{
+											Configurations["width"] = dataToParse.Substring(0, index);
+											Configurations["height"] = dataToParse.Substring(index + 1);
+										}
+										else
+										{
+											Configurations["width"] = dataToParse;
+											Configurations["height"] = dataToParse;
+										}
+										break;
+
+									// case "width":  configurations.Add($"{nextWord}={dataToParse}"); break;
+									// case "height": configurations.Add($"{nextWord}={dataToParse}"); break;
+
+									default:
+										Configurations[nextWord] = dataToParse;
+										break;
+								}
+								break;
+							}
+							throw new Exception("Unknown keyword: " + nextWord);
+					}
 				}
+
+				if (Configurations.Count == 0)
+					Configurations = null;
 			}
 			
 
@@ -178,25 +242,6 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 				}
 				SeparatedValues = values.ToArray();
 			}
-
-			index = Name.IndexOf(':');
-			if (index > -1)
-			{
-				Type = Name.Substring(index + 1).TrimStart();
-				Name = Name.Substring(0, index).Trim();
-
-				var argumentsIndex = Type.IndexOf('(');
-				if (argumentsIndex > -1)
-				{
-					var arguments = Type.Substring(argumentsIndex + 1).Trim('(', ')', ' ', '\t');
-					Type = Type.Substring(0, argumentsIndex).TrimEnd();
-
-					ParseEvents(arguments);
-				}
-
-				Type = Type.ToLower();
-			}
-
 
 			// Create children
 			foreach (var child in reader.Children)
