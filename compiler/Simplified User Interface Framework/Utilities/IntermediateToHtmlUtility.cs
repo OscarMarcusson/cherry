@@ -226,48 +226,43 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 
 		public static void ToRecursiveHtmlStream(this Element element, StreamWriter writer, Document document, Log log, int customIndent = -1, List<Element> customChildren = null)
 		{
-			if (false)//element.Name.StartsWith("#"))
+			// TODO:: Rebuild macros
+			// if(document.Macros.TryGetValue(element.Name, out var macro))
+			// {
+			// 	foreach(var macroElement in macro.Elements)
+			// 		macroElement.ToRecursiveHtmlStream(writer, document, log, customIndent: element.Indent+1, customChildren:element.Children);
+			// }
+			// else
+			// {
+			// 	log.Error("Can't find macro " + element.Name);
+			// }
+
+			var indent = element.ToStartHtmlStream(writer, document, customIndent: customIndent);
+
+
+			// Content  (<ELEMENT>Content</ELEMENT>)
+			customChildren = customChildren ?? element.Children;
+			
+			if(customChildren.Count() > 0)
 			{
-				if(document.Macros.TryGetValue(element.Name, out var macro))
-				{
-					foreach(var macroElement in macro.Elements)
-						macroElement.ToRecursiveHtmlStream(writer, document, log, customIndent: element.Indent+1, customChildren:element.Children);
-				}
-				else
-				{
-					log.Error("Can't find macro " + element.Name);
-				}
+				var indentString = new string('\t', indent);
+				writer.WriteLine();
+				// if (writeValue)
+				// 	writer.WriteLine($"{indent}\t{element.Value}");
+
+				foreach (var child in customChildren)
+					child.ToRecursiveHtmlStream(writer, document, log, customIndent: indent+1);
+				writer.Write(indentString);
 			}
 			else
 			{
-				// <ELEMENT>...
-				var indent = element.ToStartHtmlStream(writer, document, customIndent: customIndent);
-
-
-				// Content  (<ELEMENT>Content</ELEMENT>)
-				customChildren = customChildren ?? element.Children;
-				
-				if(customChildren.Count() > 0)
-				{
-					var indentString = new string('\t', indent);
-					writer.WriteLine();
-					// if (writeValue)
-					// 	writer.WriteLine($"{indent}\t{element.Value}");
-
-					foreach (var child in customChildren)
-						child.ToRecursiveHtmlStream(writer, document, log, customIndent: indent+1);
-					writer.Write(indentString);
-				}
-				else
-				{
-					if (element.HasValue && element.Type == ElementType.None)
-						element.ValueToHtml(writer);
-				}
-				
-
-				// ...</ELEMENT>
-				element.ToEndHtmlStream(writer);
+				if (element.HasValue && element.Type == ElementType.None)
+					element.ValueToHtml(writer);
 			}
+			
+
+			// ...</ELEMENT>
+			element.ToEndHtmlStream(writer);
 		}
 	}
 }
