@@ -10,6 +10,7 @@ This is a simple UI language based on HTML, but built with the intention of simp
   * [Variable Binding](docs/syntax/VariableBinding.md)
 * #### Script
   * [Functions](docs/script/Functions.md)
+  * [Variables](docs/script/Variables.md)
 * #### Compiler
   * [Installation / Setup](docs/compiler/CompilerSetup.md)
   * [Arguments](docs/compiler/CompilerArguments.md)
