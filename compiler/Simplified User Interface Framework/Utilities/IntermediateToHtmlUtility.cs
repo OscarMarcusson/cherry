@@ -151,12 +151,11 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 			writer.Write(indent);
 			writer.Write('<');
 
-			var classes = element.HtmlFormattedClasses();
-
+			// Core definition
 			switch (element.Type)
 			{
 				case ElementType.Button:
-					writer.Write($"input {classes}type=\"button\"");
+					writer.Write($"input {element.HtmlFormattedClasses()}type=\"button\"");
 					if (element.HasValue)
 					{
 						writer.Write("value=\"");
@@ -167,23 +166,48 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 					break;
 
 				case ElementType.Image:
-					writer.Write($"img src=\"{element.Value}\"{classes}");
+					writer.Write($"img src=\"{element.Value}\"{element.HtmlFormattedClasses()}");
 					if (element.Configurations.TryGetValue("width",  out var width))  writer.Write($" width=\"{width}\"");
 					if (element.Configurations.TryGetValue("height", out var height)) writer.Write($" height=\"{height}\"");
 					if (element.Configurations.TryGetValue("alt",    out var alt))    writer.Write($" alt=\"{alt}\"");
 					break;
 
 				case ElementType.None:
-					writer.Write(element.Name + classes);
+					writer.Write(element.Name + element.HtmlFormattedClasses());
 					// writer.Write($"{element.Name} {classes}type=\"{element.Type}\"");
 					break;
 
 				default: throw new NotImplementedException("Has not implemented a parser for built-in type " + element.Type);
 			}
 
+			// Inlined styles
+			if(element.InlinedStyles != null || element.Parent?.ChildStyles != null)
+			{
+				writer.Write(" style=\"");
+				
+				if (element.InlinedStyles != null)
+					element.InlinedStyles.ToStyleStream(writer);
+
+				if (element.Parent?.ChildStyles != null)
+					element.Parent.ChildStyles.ToStyleStream(writer);
+				
+				writer.Write('"');
+			}
+
 			writer.Write('>');
 
 			return indentNumber;
+		}
+
+		static void ToStyleStream(this Dictionary<string,string> values, StreamWriter writer)
+		{
+			foreach (var keyPair in values)
+			{
+				writer.Write(keyPair.Key);
+				writer.Write(':');
+				writer.Write(keyPair.Value);
+				writer.Write(';');
+			}
 		}
 
 		public static void ToEndHtmlStream(this Intermediate.Element element, StreamWriter writer, int customIndent = 0)
@@ -202,48 +226,43 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 
 		public static void ToRecursiveHtmlStream(this Element element, StreamWriter writer, Document document, Log log, int customIndent = -1, List<Element> customChildren = null)
 		{
-			if (element.Name.StartsWith("#"))
+			// TODO:: Rebuild macros
+			// if(document.Macros.TryGetValue(element.Name, out var macro))
+			// {
+			// 	foreach(var macroElement in macro.Elements)
+			// 		macroElement.ToRecursiveHtmlStream(writer, document, log, customIndent: element.Indent+1, customChildren:element.Children);
+			// }
+			// else
+			// {
+			// 	log.Error("Can't find macro " + element.Name);
+			// }
+
+			var indent = element.ToStartHtmlStream(writer, document, customIndent: customIndent);
+
+
+			// Content  (<ELEMENT>Content</ELEMENT>)
+			customChildren = customChildren ?? element.Children;
+			
+			if(customChildren.Count() > 0)
 			{
-				if(document.Macros.TryGetValue(element.Name, out var macro))
-				{
-					foreach(var macroElement in macro.Elements)
-						macroElement.ToRecursiveHtmlStream(writer, document, log, customIndent: element.Indent+1, customChildren:element.Children);
-				}
-				else
-				{
-					log.Error("Can't find macro " + element.Name);
-				}
+				var indentString = new string('\t', indent);
+				writer.WriteLine();
+				// if (writeValue)
+				// 	writer.WriteLine($"{indent}\t{element.Value}");
+
+				foreach (var child in customChildren)
+					child.ToRecursiveHtmlStream(writer, document, log, customIndent: indent+1);
+				writer.Write(indentString);
 			}
 			else
 			{
-				// <ELEMENT>...
-				var indent = element.ToStartHtmlStream(writer, document, customIndent: customIndent);
-
-
-				// Content  (<ELEMENT>Content</ELEMENT>)
-				customChildren = customChildren ?? element.Children;
-				
-				if(customChildren.Count() > 0)
-				{
-					var indentString = new string('\t', indent);
-					writer.WriteLine();
-					// if (writeValue)
-					// 	writer.WriteLine($"{indent}\t{element.Value}");
-
-					foreach (var child in customChildren)
-						child.ToRecursiveHtmlStream(writer, document, log, customIndent: indent+1);
-					writer.Write(indentString);
-				}
-				else
-				{
-					if (element.HasValue && element.Type == ElementType.None)
-						element.ValueToHtml(writer);
-				}
-				
-
-				// ...</ELEMENT>
-				element.ToEndHtmlStream(writer);
+				if (element.HasValue && element.Type == ElementType.None)
+					element.ValueToHtml(writer);
 			}
+			
+
+			// ...</ELEMENT>
+			element.ToEndHtmlStream(writer);
 		}
 	}
 }
