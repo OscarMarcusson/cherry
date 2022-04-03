@@ -15,6 +15,10 @@ The most common way of declaring a variable would be to give the variable a valu
 var int a = 14
 let int b = 5623
 ```
+> Any type errors will be marked by the compiler, for example:
+> 
+> ![image](https://user-images.githubusercontent.com/62374937/161436191-78d7f4dd-623d-4796-b5d0-b11ccac13011.png)
+
 When a value is supplied it is not necessary to define the type, since it can be resolved by the value set. The above example could be simplified to:
 ```d
 var a = 14
