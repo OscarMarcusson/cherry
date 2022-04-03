@@ -50,10 +50,14 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 						}
 						break;
 
-					case "var":
-					case "let":
+					case Variable.DynamicAccessType:
+					case Variable.ReadOnlyAccessType:
 						{
-							var words = new WordReader(section.Text);
+							var variable = new Variable(section.Text);
+							if(Script.VariableExists(variable.Name))
+								throw new Exception($"A variable named {variable.Name} already exists.");
+
+							Script.Add(variable);
 						}
 						break;
 

@@ -16,5 +16,8 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 
 		public bool FunctionExists(string name) => Functions.ContainsKey(name);
 		public bool VariableExists(string name) => Variables.ContainsKey(name);
+
+
+		public void Add(Variable variable) => Variables[variable.Name] = variable;
 	}
 }

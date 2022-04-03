@@ -18,6 +18,8 @@ namespace SimplifiedUserInterfaceFramework.Internal.Reader
 		public string Fifth     => Length > 4 ? Words[4] : null;
 
 
+		private WordReader(IEnumerable<string> words) => Words = words.ToArray();
+
 		public WordReader(string text)
 		{
 			var words = new List<string>();
@@ -53,6 +55,15 @@ namespace SimplifiedUserInterfaceFramework.Internal.Reader
 		}
 
 
+
+		public WordReader GetWords(int index, int length = -1)
+			=> length > 0
+				? new WordReader(Words.Skip(index).Take(length))
+				: new WordReader(Words.Skip(index))
+				;
+
+
+
 		int GetEndOfStringIndex(string text, int index)
 		{
 			while(true)
@@ -84,5 +95,7 @@ namespace SimplifiedUserInterfaceFramework.Internal.Reader
 				return Words[index];
 			}
 		}
+
+		public override string ToString() => string.Join(" ", Words);
 	}
 }
