@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace SimplifiedUserInterfaceFramework.Internal.Reader
@@ -22,16 +23,23 @@ namespace SimplifiedUserInterfaceFramework.Internal.Reader
 			var words = new List<string>();
 			var index = 0;
 			var nextIndex = 0;
+			string word;
 			while (index > -1)
 			{
 				nextIndex = text.IndexOfAny(SplitBy, index);
+				word = nextIndex < 0
+						? text.Substring(index)
+						: text.Substring(index, nextIndex - index);
+
+				// TODO:: Check for strings
+
+				if(word.Length > 0)
+					words.Add(word);
+
+
+				// Prepare the following loop, or exit if this was the last word
 				if (nextIndex < 0)
-				{
-					var remainingText = text.Substring(index);
-					if (remainingText.Length > 0)
-						words.Add(remainingText);
 					break;
-				}
 
 				index = nextIndex + 1;
 			}
