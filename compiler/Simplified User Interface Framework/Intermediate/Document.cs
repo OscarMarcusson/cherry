@@ -14,6 +14,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 		public readonly Dictionary<string, Style> Styles = new Dictionary<string, Style>();
 		public readonly Element RootElement = new Element();
 		public readonly Dictionary<string, Macro> Macros = new Dictionary<string, Macro>();
+		public readonly CodeBlock Script = new CodeBlock();
 
 
 		public Document(DocumentReader reader)
@@ -46,6 +47,13 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 								var functionArguments = functionName.Substring(index + 1).TrimStart();
 								functionName = functionName.Substring(0, index);
 							}
+						}
+						break;
+
+					case "var":
+					case "let":
+						{
+							var words = new WordReader(section.Text);
 						}
 						break;
 

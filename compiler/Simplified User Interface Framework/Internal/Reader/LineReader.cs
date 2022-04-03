@@ -41,6 +41,8 @@ namespace SimplifiedUserInterfaceFramework.Internal.Reader
 
 
 
+
+
 		public static bool TryReadLine(string line, LineReader previousLine, out LineReader reader)
 		{
 			if(string.IsNullOrWhiteSpace(line))
