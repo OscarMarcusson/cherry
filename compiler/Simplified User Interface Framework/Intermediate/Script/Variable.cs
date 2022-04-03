@@ -32,7 +32,8 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 				case DynamicAccessType:     AccessType = VariableType.Dynamic; break;
 
 				default:
-					throw new Exception($"Unknown variable type: {words.First}\n{words}");
+					words.ThrowWordError(0, $"Unknown variable type\nExpected {ReadOnlyAccessType} or {DynamicAccessType}");
+					return;
 			}
 
 			// var a

@@ -78,57 +78,64 @@ namespace SimplifiedUserInterfaceFramework
 				return;
 			}
 
-
-			// Compile
-			Log.Trace("Reading document...");
-			var reader = new DocumentReader(Input);
-			var document = new Document(reader);
-
-			Log.Trace("Creating output file...");
-			using (var file = File.Create(Output))
-			using (var writer = new StreamWriter(file))
+			try
 			{
-				Log.Trace("Writing header...");
-				writer.WriteLine("<!DOCTYPE html>");
+				// Compile
+				Log.Trace("Reading document...");
+				var reader = new DocumentReader(Input);
+				var test = new Variable("plap plop plep");
+				var document = new Document(reader);
 
-				writer.WriteLine();
-				writer.WriteLine("<head>");
-				writer.WriteLine("\t<title>Hello World title</title>");
-
-				foreach (var style in document.Styles)
+				Log.Trace("Creating output file...");
+				using (var file = File.Create(Output))
+				using (var writer = new StreamWriter(file))
 				{
-					Log.Trace($"Adding {style.Key} style...");
+					Log.Trace("Writing header...");
+					writer.WriteLine("<!DOCTYPE html>");
+
 					writer.WriteLine();
-					writer.WriteLine($"\t<!-- {style.Key} style  -->");
-					writer.WriteLine($"\t<style type=\"text/css\" rel=\"{style.Key.ToLower()}\" title=\"{style.Key}\">");
-					style.Value.ToCssStream(writer, 2);
-					writer.WriteLine("\t</style>");
+					writer.WriteLine("<head>");
+					writer.WriteLine("\t<title>Hello World title</title>");
+
+					foreach (var style in document.Styles)
+					{
+						Log.Trace($"Adding {style.Key} style...");
+						writer.WriteLine();
+						writer.WriteLine($"\t<!-- {style.Key} style  -->");
+						writer.WriteLine($"\t<style type=\"text/css\" rel=\"{style.Key.ToLower()}\" title=\"{style.Key}\">");
+						style.Value.ToCssStream(writer, 2);
+						writer.WriteLine("\t</style>");
+					}
+
+					if (document.Style.Elements.Count() > 0 || document.Styles.Count > 0)
+					{
+						Log.Trace($"Adding global style...");
+						writer.WriteLine();
+						writer.WriteLine("\t<!-- Global style  -->");
+						writer.WriteLine("\t<style>");
+						document.Style.ToCssStream(writer, 2);
+						writer.WriteLine("\t</style>");
+					}
+
+					// writer.WriteLine("\t<script>");
+					// writer.WriteLine("\t</script>");
+					writer.WriteLine("</head>");
+
+
+					Log.Trace("Writing body...");
+					writer.WriteLine();
+					writer.WriteLine("<body>");
+					foreach (var element in document.RootElement.Children)
+						element.ToRecursiveHtmlStream(writer, document, Log);
+					writer.WriteLine("</body>");
 				}
 
-				if (document.Style.Elements.Count() > 0 || document.Styles.Count > 0)
-				{
-					Log.Trace($"Adding global style...");
-					writer.WriteLine();
-					writer.WriteLine("\t<!-- Global style  -->");
-					writer.WriteLine("\t<style>");
-					document.Style.ToCssStream(writer, 2);
-					writer.WriteLine("\t</style>");
-				}
-
-				// writer.WriteLine("\t<script>");
-				// writer.WriteLine("\t</script>");
-				writer.WriteLine("</head>");
-
-
-				Log.Trace("Writing body...");
-				writer.WriteLine();
-				writer.WriteLine("<body>");
-				foreach (var element in document.RootElement.Children)
-					element.ToRecursiveHtmlStream(writer, document, Log);
-				writer.WriteLine("</body>");
+				Log.Trace("Done");
 			}
-
-			Log.Trace("Done");
+			catch(SectionException sectionException)
+			{
+				Log.SectionError(sectionException.Left, sectionException.Center, sectionException.Right, sectionException.Message);
+			}
 		}
 	}
 }

@@ -64,6 +64,24 @@ namespace SimplifiedUserInterfaceFramework.Internal.Reader
 
 
 
+		public void ThrowWordError(int wordIndex, string error, int numberOfWords = 1)
+		{
+			var left = wordIndex > 0
+							? (string.Join(" ", Words.Take(wordIndex)) + ' ')
+							: "";
+
+			var center = string.Join(" ", Words.Skip(wordIndex).Take(numberOfWords));
+
+			var right = wordIndex+numberOfWords < Length-1
+							? (' ' + string.Join(" ", Words.Skip(wordIndex + numberOfWords)))
+							: "";
+
+
+			throw new SectionException(left, center, right, error);
+		}
+
+
+
 		int GetEndOfStringIndex(string text, int index)
 		{
 			while(true)
