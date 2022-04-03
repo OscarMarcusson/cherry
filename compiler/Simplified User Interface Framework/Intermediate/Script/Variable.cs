@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using SimplifiedUserInterfaceFramework.Internal.Reader;
 using SimplifiedUserInterfaceFramework.Utilities;
@@ -88,6 +89,33 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 
 			if (Keywords.IsKeyword(Name))
 				words.ThrowWordError(nameIndex, $"Invalid name, can't use reserved keywords");
+		}
+
+
+
+		public void ToJavascriptStream(StreamWriter writer, int indentation = 0)
+		{
+			if (indentation > 0)
+				writer.Write(new string('\t', indentation));
+
+			switch (AccessType)
+			{
+				case VariableType.ReadOnly: writer.Write("const "); break;
+				case VariableType.Dynamic: writer.Write("let "); break;
+			}
+
+			writer.Write(Name);
+
+			if(Value != null)
+			{
+				writer.Write(" = ");
+				writer.Write(Value);
+				writer.WriteLine(";");
+			}
+			else
+			{
+				writer.WriteLine(";");
+			}
 		}
 	}
 }

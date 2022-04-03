@@ -95,6 +95,8 @@ namespace SimplifiedUserInterfaceFramework.Internal.Reader
 							: "";
 
 			var center = string.Join(" ", Words.Skip(wordIndex).Take(numberOfWords));
+			if (string.IsNullOrEmpty(center))
+				center = " ";
 
 			var right = wordIndex+numberOfWords < Length-1
 							? (' ' + string.Join(" ", Words.Skip(wordIndex + numberOfWords)))

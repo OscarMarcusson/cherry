@@ -116,8 +116,30 @@ namespace SimplifiedUserInterfaceFramework
 						writer.WriteLine("\t</style>");
 					}
 
-					// writer.WriteLine("\t<script>");
-					// writer.WriteLine("\t</script>");
+					if (document.Script.HasContent)
+					{
+						writer.WriteLine();
+						writer.WriteLine("\t<script>");
+
+						var variables = document.Script.GetVariables();
+						if(variables.Length > 0)
+						{
+							foreach (var variable in variables)
+								variable.ToJavascriptStream(writer, 2);
+							
+							writer.WriteLine();
+						}
+
+						var functions = document.Script.GetFunctions();
+						if(functions.Length > 0)
+						{
+							foreach(var function in functions)
+								function.ToJavascriptStream(writer, 2);
+						}
+
+						writer.WriteLine("\t</script>");
+					}
+
 					writer.WriteLine("</head>");
 
 

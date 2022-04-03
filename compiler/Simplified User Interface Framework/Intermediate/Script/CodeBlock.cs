@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace SimplifiedUserInterfaceFramework.Intermediate
@@ -9,8 +10,10 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 		readonly Dictionary<string, Function> Functions = new Dictionary<string, Function>();
 		readonly Dictionary<string, Variable> Variables = new Dictionary<string, Variable>();
 
+		public bool HasContent => Functions.Count > 0 || Variables.Count > 0;
 
-
+		public Variable[] GetVariables() => Variables.Select(x => x.Value).ToArray();
+		public Function[] GetFunctions() => Functions.Select(x => x.Value).ToArray();
 
 
 
