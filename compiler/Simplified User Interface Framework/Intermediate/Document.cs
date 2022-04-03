@@ -22,13 +22,51 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 		{
 			try
 			{
-				// Start with macro parsing
+				// Start with macro and script parsing
 				foreach (var section in reader.Sections)
 				{
 					if (section.Text.StartsWith("#"))
 					{
 						var macro = new Macro(section);
 						Macros.Add(macro.Name, macro);
+					}
+					else if(section.Text == "script")
+					{
+						foreach(var subSection in section.Children)
+						{
+							switch (subSection.First)
+							{
+								// Script function
+								case Function.Declaration:
+									{
+										var words = new WordReader(subSection);
+										var function = new Function(words);
+										if (Script.FunctionExists(function.Name))
+											words.ThrowWordError(1, "Already defined", words.Length - 1);
+
+										Script.Add(function);
+									}
+									break;
+
+								case Variable.DynamicAccessType:
+								case Variable.ReadOnlyAccessType:
+									{
+										var variable = new Variable(subSection.Text, subSection.LineNumber);
+										if (Script.VariableExists(variable.Name))
+											throw new Exception($"A variable named {variable.Name} already exists.");
+
+										Script.Add(variable);
+									}
+									break;
+
+								default:
+									{
+										var words = new WordReader(subSection);
+										words.ThrowWordError(0, "Unknown keyword\nExpected a variable, function or data definition");
+										break;
+									}
+							}
+						}
 					}
 				}
 
@@ -40,28 +78,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 
 					switch (section.First)
 					{
-						// Script function
-						case Function.Declaration:
-							{
-								var words = new WordReader(section);
-								var function = new Function(words);
-								if (Script.FunctionExists(function.Name))
-									words.ThrowWordError(1, "Already defined", words.Length - 1);
-
-								Script.Add(function);
-							}
-							break;
-
-						case Variable.DynamicAccessType:
-						case Variable.ReadOnlyAccessType:
-							{
-								var variable = new Variable(section.Text, section.LineNumber);
-								if(Script.VariableExists(variable.Name))
-									throw new Exception($"A variable named {variable.Name} already exists.");
-
-								Script.Add(variable);
-							}
-							break;
+						case "script": continue;
 
 						// Styles
 						case "style":
