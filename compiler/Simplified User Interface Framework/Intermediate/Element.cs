@@ -26,6 +26,8 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 		public readonly string Value;
 		public readonly string[] Classes;
 		public readonly Dictionary<string,string> Configurations;
+		public readonly Dictionary<string, string> InlinedStyles;
+		public readonly Dictionary<string, string> ChildStyles;
 		public readonly ValueSection[] SeparatedValues;
 		public Dictionary<string, string> Events { get; private set; }
 
@@ -60,12 +62,18 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 			string remainingDataToParse = null;
 
 			// Macro name parsing
-			if (Name.StartsWith("#"))
-			{
-				// TODO:: Variables? Not sure how though...
-				Name = "#" + Name.Substring(1).TrimStart();
-				splitIndex = Name.IndexOf('>');
-			}
+			// if (Name.StartsWith("#"))
+			// {
+			// 	if (Name.StartsWith("##"))
+			// 	{
+			// 		Name = "## " + Name.Substring(2).TrimStart();
+			// 	}
+			// 	else
+			// 	{
+			// 		Name = "# " + Name.Substring(1).TrimStart();
+			// 	}
+			// 	return;
+			// }
 
 			// Normal name parsing
 			index = Name.IndexOf('.');
@@ -243,9 +251,48 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 				SeparatedValues = values.ToArray();
 			}
 
-			// Create children
+
+			// Parse the child objects, either as element children or as inlined styles
 			foreach (var child in reader.Children)
-				AddChild(child);
+			{
+				if (child.Text.StartsWith("#"))
+				{
+					string rawLine;
+					Dictionary<string, string> list;
+					if (child.Text.Length > 1 && child.Text[1] == '#')
+					{
+						if (ChildStyles == null)
+							ChildStyles = new Dictionary<string, string>();
+						list = ChildStyles;
+						rawLine = child.Text.Substring(2).TrimStart();
+					}
+					else
+					{
+						if (InlinedStyles == null)
+							InlinedStyles = new Dictionary<string, string>();
+						list = InlinedStyles;
+						rawLine = child.Text.Substring(1).TrimStart();
+					}
+
+					index = rawLine.IndexOf('=');
+					if(index > 0)
+					{
+						var key = rawLine.Substring(0, index).TrimEnd();
+						var value = rawLine.Substring(index+1).TrimStart();
+						// TODO:: Implement some duplicate check
+						list[key] = value;
+					}
+					else
+					{
+						// TODO:: Better error
+						throw new Exception("Could not parse inlined style, no equals sign found: " + child.Text);
+					}
+				}
+				else
+				{
+					AddChild(child);
+				}
+			}
 		}
 
 
