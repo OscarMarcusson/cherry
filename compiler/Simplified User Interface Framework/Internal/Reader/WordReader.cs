@@ -31,7 +31,12 @@ namespace SimplifiedUserInterfaceFramework.Internal.Reader
 						? text.Substring(index)
 						: text.Substring(index, nextIndex - index);
 
-				// TODO:: Check for strings
+				// If this is a string we have to check for the actual end
+				if (word.StartsWith('"'))
+				{
+					var stringEndIndex = GetEndOfStringIndex(text, index+1);
+					word = text.Substring(index, stringEndIndex - index + 1);
+				}
 
 				if(word.Length > 0)
 					words.Add(word);
@@ -47,6 +52,26 @@ namespace SimplifiedUserInterfaceFramework.Internal.Reader
 			Words = words.ToArray();
 		}
 
+
+		int GetEndOfStringIndex(string text, int index)
+		{
+			while(true)
+			{
+				index = text.IndexOf('"', (int)index);
+				if (index < 0)
+					return -1;
+
+				// If the previous index is a backslash it means we have to continue, this is not the end of the string
+				if (text[index - 1] == '\\')
+				{
+					index++;
+					continue;
+				}
+
+				// Otherwise this is it, return
+				return index;
+			}
+		}
 
 
 		public string this[int index]
