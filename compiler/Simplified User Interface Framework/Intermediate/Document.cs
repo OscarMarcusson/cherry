@@ -41,15 +41,14 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 					switch (section.First)
 					{
 						// Script function
-						case "def":
+						case Function.Declaration:
 							{
-								var functionName = section.Text.Substring(4).Trim();
-								var index = functionName.IndexOfAny(new char[] { ' ', ':' });
-								if (index > -1)
-								{
-									var functionArguments = functionName.Substring(index + 1).TrimStart();
-									functionName = functionName.Substring(0, index);
-								}
+								var words = new WordReader(section);
+								var function = new Function(words);
+								if (Script.FunctionExists(function.Name))
+									words.ThrowWordError(1, "Already defined", words.Length - 1);
+
+								Script.Add(function);
 							}
 							break;
 

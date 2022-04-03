@@ -19,5 +19,6 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 
 
 		public void Add(Variable variable) => Variables[variable.Name] = variable;
+		public void Add(Function function) => Functions[function.Name] = function;
 	}
 }

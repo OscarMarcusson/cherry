@@ -24,6 +24,7 @@ namespace SimplifiedUserInterfaceFramework.Internal.Reader
 			Words = words.ToArray();
 			LineNumber = lineNumber;
 		}
+		public WordReader(LineReader reader) : this(reader.Text, reader.LineNumber) { }
 		public WordReader(string text, int lineNumber)
 		{
 			LineNumber = lineNumber;
@@ -66,6 +67,24 @@ namespace SimplifiedUserInterfaceFramework.Internal.Reader
 				? new WordReader(Words.Skip(index).Take(length), LineNumber)
 				: new WordReader(Words.Skip(index), LineNumber)
 				;
+
+
+		public bool TryGetIndexOf(string key, out int index)
+		{
+			index = IndexOf(key);
+			return index > -1;
+		}
+
+		public int IndexOf(string key)
+		{
+			for(int i = 0; i < Length; i++)
+			{
+				if (Words[i] == key)
+					return i;
+			}
+
+			return -1;
+		}
 
 
 
