@@ -36,8 +36,8 @@ namespace SimplifiedUserInterfaceFramework.Internal.Reader
 				// If this is a string we have to check for the actual end
 				if (word.StartsWith('"'))
 				{
-					var stringEndIndex = GetEndOfStringIndex(text, index+1);
-					word = text.Substring(index, stringEndIndex - index + 1);
+					nextIndex = GetEndOfStringIndex(text, index+1);
+					word = text.Substring(index, nextIndex - index + 1);
 				}
 
 				if(word.Length > 0)
