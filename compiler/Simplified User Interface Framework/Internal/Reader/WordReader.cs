@@ -9,6 +9,7 @@ namespace SimplifiedUserInterfaceFramework.Internal.Reader
 	{
 		static readonly char[] SplitBy = new[] { ' ', '\t' };
 		readonly string[] Words;
+		public readonly int LineNumber;
 
 		public int Length => Words.Length;
 		public string First     => Length > 0 ? Words[0] : null;
@@ -18,10 +19,14 @@ namespace SimplifiedUserInterfaceFramework.Internal.Reader
 		public string Fifth     => Length > 4 ? Words[4] : null;
 
 
-		private WordReader(IEnumerable<string> words) => Words = words.ToArray();
-
-		public WordReader(string text)
+		private WordReader(IEnumerable<string> words, int lineNumber)
 		{
+			Words = words.ToArray();
+			LineNumber = lineNumber;
+		}
+		public WordReader(string text, int lineNumber)
+		{
+			LineNumber = lineNumber;
 			var words = new List<string>();
 			var index = 0;
 			var nextIndex = 0;
@@ -58,8 +63,8 @@ namespace SimplifiedUserInterfaceFramework.Internal.Reader
 
 		public WordReader GetWords(int index, int length = -1)
 			=> length > 0
-				? new WordReader(Words.Skip(index).Take(length))
-				: new WordReader(Words.Skip(index))
+				? new WordReader(Words.Skip(index).Take(length), LineNumber)
+				: new WordReader(Words.Skip(index), LineNumber)
 				;
 
 
@@ -77,7 +82,7 @@ namespace SimplifiedUserInterfaceFramework.Internal.Reader
 							: "";
 
 
-			throw new SectionException(left, center, right, error);
+			throw new SectionException(left, center, right, error, lineNumber: LineNumber);
 		}
 
 

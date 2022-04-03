@@ -10,17 +10,19 @@ namespace SimplifiedUserInterfaceFramework.Internal.Reader
 	public class DocumentReader
 	{
 		public readonly LineReader[] Sections;
+		public readonly string File;
 
 
 		public DocumentReader(string path)
 		{
-			var file = File.ReadAllLines(path);
+			File = path;
+			var file = System.IO.File.ReadAllLines(path);
 			var rootReaders = new List<LineReader>();
 
 			LineReader previousReader = null;
-			foreach (var line in file)
+			for(int lineNumber = 0; lineNumber < file.Length; lineNumber++)
 			{
-				if (LineReader.TryReadLine(line, previousReader, out var reader))
+				if (LineReader.TryReadLine(file[lineNumber], previousReader, lineNumber+1, out var reader))
 				{
 					previousReader = reader;
 

@@ -23,7 +23,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 		public readonly WordReader Value;
 
 
-		public Variable(string raw) : this(new WordReader(raw)) { }
+		public Variable(string raw, int lineNumber = -1) : this(new WordReader(raw, lineNumber)) { }
 
 		public Variable(WordReader words)
 		{

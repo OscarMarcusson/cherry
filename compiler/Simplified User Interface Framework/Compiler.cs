@@ -131,9 +131,9 @@ namespace SimplifiedUserInterfaceFramework
 
 				Log.Trace("Done");
 			}
-			catch(SectionException sectionException)
+			catch(SectionException e)
 			{
-				Log.SectionError(sectionException.Left, sectionException.Center, sectionException.Right, sectionException.Message);
+				Log.SectionError($"Failed to parse {e.FileName}{(e.LineNumber > -1 ? $"\nLine {e.LineNumber}" : "")}\n{e.Left}", e.Center, e.Right, e.Message);
 			}
 		}
 	}
