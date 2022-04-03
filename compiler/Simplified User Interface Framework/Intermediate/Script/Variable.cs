@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using SimplifiedUserInterfaceFramework.Internal.Reader;
+using SimplifiedUserInterfaceFramework.Utilities;
 
 namespace SimplifiedUserInterfaceFramework.Intermediate
 {
@@ -36,15 +37,21 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 					return;
 			}
 
+			int typeIndex = 0;
+			int nameIndex = 0;
+
 			// var a
 			if(words.Length == 2)
 			{
 				Name = words.Second;
+				nameIndex = 1;
 			}
 			// var a = 12345
 			else if (words.Third == "=")
 			{
 				Name = words.Second;
+				nameIndex = 1;
+
 				Value = words.GetWords(3);
 			}
 
@@ -52,19 +59,35 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 			else if (words.Length == 3)
 			{
 				Type = words.Second;
+				typeIndex = 1;
+
 				Name = words.Third;
+				nameIndex = 2;
 			}
 			// var int a = 12345
 			else if (words.Fourth == "=")
 			{
 				Type = words.Second;
+				typeIndex = 1;
+
 				Name = words.Third;
+				nameIndex = 2;
+
 				Value = words.GetWords(4);
 			}
 			else
 			{
-				throw new Exception($"Could not parse name and type from {words}");
+				words.ThrowWordError(1, $"Could not parse name and type", words.Length-1);
 			}
+
+
+			if(Keywords.IsKeyword(Type))
+				words.ThrowWordError(typeIndex, $"Can't use reserved keywords as type");
+			else if (Type == "void")
+				words.ThrowWordError(typeIndex, $"A variable can't be void");
+
+			if (Keywords.IsKeyword(Name))
+				words.ThrowWordError(nameIndex, $"Invalid name, can't use reserved keywords");
 		}
 	}
 }
