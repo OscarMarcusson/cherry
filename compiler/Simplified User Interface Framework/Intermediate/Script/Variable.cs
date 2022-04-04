@@ -13,7 +13,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 		ReadOnly,
 	}
 
-	public class Variable
+	public class Variable : CodeLine
 	{
 		public const string ReadOnlyAccessType = "let";
 		public const string DynamicAccessType = "var";
@@ -93,7 +93,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 
 
 
-		public void ToJavascriptStream(StreamWriter writer, int indentation = 0)
+		public override void ToJavascriptStream(StreamWriter writer, int indentation = 0)
 		{
 			if (indentation > 0)
 				writer.Write(new string('\t', indentation));

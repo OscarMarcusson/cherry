@@ -40,7 +40,8 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 								case Function.Declaration:
 									{
 										var words = new WordReader(subSection);
-										var function = new Function(words);
+										var body = subSection.Children.Select(x => new WordReader(x)).ToArray();
+										var function = new Function(words, body);
 										if (Script.FunctionExists(function.Name))
 											words.ThrowWordError(1, "Already defined", words.Length - 1);
 

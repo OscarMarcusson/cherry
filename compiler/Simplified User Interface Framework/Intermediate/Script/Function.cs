@@ -4,10 +4,11 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using SimplifiedUserInterfaceFramework.Internal.Reader;
+using SimplifiedUserInterfaceFramework.Utilities;
 
 namespace SimplifiedUserInterfaceFramework.Intermediate
 {
-	public class Function
+	public class Function : CodeLine
 	{
 		public const string Declaration = "def";
 
@@ -16,11 +17,10 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 		public readonly string Name;
 
 		public readonly FunctionArgument[] Arguments;
+		public readonly CodeLine[] Body;
 
 
-		public Function(string raw, int lineNumber = -1) : this(new WordReader(raw, lineNumber)) { }
-
-		public Function(WordReader words)
+		public Function(WordReader words, params WordReader[] body)
 		{
 			if(words.First != Declaration)
 				words.ThrowWordError(0, $"Invalid definition\nExpected first word to be \"def\"");
@@ -75,10 +75,32 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 				if (arguments.Count > 0)
 					Arguments = arguments.ToArray();
 			}
+
+
+
+			// Parse body
+			var bodyBuilder = new List<CodeLine>();
+			foreach(var line in body)
+			{
+				if(line.First == Variable.DynamicAccessType || line.First == Variable.ReadOnlyAccessType)
+				{
+					var variable = new Variable(line);
+					bodyBuilder.Add(variable);
+				}
+				else if (Keywords.IsOperator(line.Second))
+				{
+					// Variable assignment
+					line.ThrowWordError(1, "Not implemented yet");
+				}
+
+				else
+					line.ThrowWordError(0, "Could not parse line", line.Length);
+			}
+			Body = bodyBuilder.ToArray();
 		}
 
 
-		public void ToJavascriptStream(StreamWriter writer, int indentation = 0)
+		public override void ToJavascriptStream(StreamWriter writer, int indentation = 0)
 		{
 			var indentationString = indentation > 0 ? new string('\t', indentation) : "";
 			writer.Write(indentationString);

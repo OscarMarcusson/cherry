@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 
-namespace SimplifiedUserInterfaceFramework.Intermediate.Script
+namespace SimplifiedUserInterfaceFramework.Intermediate
 {
-	public class CodeLine
+	public abstract class CodeLine
 	{
 
 
 
-
-		public virtual bool TryParse(string[] input) => false;
+		public abstract void ToJavascriptStream(StreamWriter writer, int indentation = 0);
 	}
 }
