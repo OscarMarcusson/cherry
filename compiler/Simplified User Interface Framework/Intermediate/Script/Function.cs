@@ -85,14 +85,17 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 				if(line.First == Variable.DynamicAccessType || line.First == Variable.ReadOnlyAccessType)
 				{
 					var variable = new Variable(line);
+					// TODO:: Add to some dictionary to validate other calls with
 					bodyBuilder.Add(variable);
 				}
 				else if (Keywords.IsOperator(line.Second))
 				{
-					// Variable assignment
-					line.ThrowWordError(1, "Not implemented yet");
+					bodyBuilder.Add(new VariableAssignment(line));
 				}
-
+				else if(line.First == "return")
+				{
+					bodyBuilder.Add(new Return(line));
+				}
 				else
 					line.ThrowWordError(0, "Could not parse line", line.Length);
 			}
@@ -120,7 +123,8 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 			}
 
 			// Body
-
+			foreach (var line in Body)
+				line.ToJavascriptStream(writer, indentation + 1);
 
 			// End
 			writer.Write(indentationString);
