@@ -30,7 +30,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 						var macro = new Macro(section);
 						Macros.Add(macro.Name, macro);
 					}
-					else if(section.Text == "script")
+					else if(section.First == "script")
 					{
 						foreach(var subSection in section.Children)
 						{
