@@ -96,6 +96,10 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 				{
 					bodyBuilder.Add(new Return(line));
 				}
+				else if(line.Second == "(")
+				{
+					bodyBuilder.Add(new FunctionCall(line));
+				}
 				else
 					line.ThrowWordError(0, "Could not parse line", line.Length);
 			}

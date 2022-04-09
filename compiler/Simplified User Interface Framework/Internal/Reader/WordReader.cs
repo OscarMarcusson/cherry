@@ -69,6 +69,25 @@ namespace SimplifiedUserInterfaceFramework.Internal.Reader
 				;
 
 
+		public WordReader[] Split(string word)
+		{
+			var list = new List<WordReader>();
+			var index = 0;
+			for(int i = 0; i < Length; i++)
+			{
+				if(Words[i] == word)
+				{
+					list.Add(GetWords(index, i - index));
+					index = i;
+				}
+			}
+			if(index < Length-1)
+					list.Add(GetWords(index, Length - index));
+
+			return list.ToArray();
+		}
+
+
 		public bool TryGetIndexOf(string key, out int index)
 		{
 			index = IndexOf(key);
