@@ -197,6 +197,13 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 				writer.Write('"');
 			}
 
+			// Shared configurations
+			if(element.Configurations != null)
+			{
+				if (element.Configurations.TryGetValue("id", out var id))
+					writer.Write($" id=\"{id}\"");
+			}
+
 			writer.Write('>');
 
 			return indentNumber;

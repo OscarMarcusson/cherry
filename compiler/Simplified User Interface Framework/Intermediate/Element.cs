@@ -17,6 +17,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 
 	public class Element
 	{
+		readonly LineReader Source;
 		public readonly Element Parent;
 		public readonly List<Element> Children = new List<Element>();
 		public readonly int Indent;
@@ -41,7 +42,9 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 
 		public Element(LineReader reader, Element parent = null)
 		{
-			if(parent != null)
+			Source = reader;
+
+			if (parent != null)
 			{
 				Parent = parent;
 				parent.Children.Add(this);
@@ -172,7 +175,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 								if (nextIndex < index)
 									throw new Exception("Could not parse " + remainingDataToParse); // TODO:: PROPER ERROR
 
-								var dataToParse = remainingDataToParse.Substring(index+1, nextIndex - index - 1);
+								var dataToParse = remainingDataToParse.Substring(index+1, nextIndex - index - 1).Trim('"', ' ', '\t');
 								index = 0;
 								remainingDataToParse = remainingDataToParse.Substring(nextIndex+1).TrimStart();
 
@@ -201,7 +204,8 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 
 									case "bind":
 										Binding = dataToParse;
-										// TODO:: add to some list, check after each config is done. If we have an id, we use that. otherwise we generate an ID with GUID
+										if (!Configurations.ContainsKey("id"))
+											Configurations["id"] = $"bind{Guid.NewGuid().ToString().Replace("-", "")}";
 										break;
 
 									default:
@@ -303,6 +307,30 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 
 
 		public Element AddChild(LineReader reader) => new Element(reader, this);
+
+
+
+		public void ResolveBindings(Document document)
+		{
+			if(Binding != null)
+			{
+				string id = Configurations["id"];
+				if (document.Bindings.ContainsKey(id))
+				{
+					var displayName = Classes?.Length > 0
+										? $"{Name}.{string.Join(".", Classes)}"
+										: Name;
+
+					throw new SectionException($"{displayName} ... bind(", Binding, ")", " ...", Source.LineNumber, document.Source.File);
+				}
+
+				document.Bindings[id] = Binding;
+			}
+
+			foreach (var child in Children)
+				child.ResolveBindings(document);
+		}
+
 
 
 
