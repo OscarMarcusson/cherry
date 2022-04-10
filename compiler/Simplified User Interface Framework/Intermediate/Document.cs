@@ -15,6 +15,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 		public readonly Element Body;
 		public readonly Element RootElement = new Element();
 		public readonly Dictionary<string, Macro> Macros = new Dictionary<string, Macro>();
+		public readonly Include[] Includes;
 
 
 		public Document(DocumentReader reader)
@@ -29,6 +30,8 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 				}
 			}
 
+			var includes = new List<Include>();
+
 			// Parse everything else
 			foreach (var section in reader.Sections)
 			{
@@ -37,6 +40,17 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 
 				switch (section.First)
 				{
+					case "include":
+						{
+							var space = section.Text.IndexOf(' ');
+							if (space < 0)
+								throw new Exception("No include value set");
+
+							var include = section.Text.Substring(space).Trim();
+							includes.Add(new Include(include));
+						}
+						break;
+
 					// Script function
 					case "def":
 						{
@@ -86,6 +100,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 
 			// Make sure that the global style is initialized
 			Style = Style ?? new Style();
+			Includes = includes.ToArray();
 		}
 	}
 }
