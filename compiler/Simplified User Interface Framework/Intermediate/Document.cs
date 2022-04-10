@@ -22,6 +22,8 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 
 		public Document(DocumentReader reader)
 		{
+			var includes = new List<Include>();
+
 			try
 			{
 				// Start with macro and script parsing
