@@ -15,7 +15,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 		public readonly Element Body;
 		public readonly Element RootElement = new Element();
 		public readonly Dictionary<string, Macro> Macros = new Dictionary<string, Macro>();
-		public readonly string[] Includes;
+		public readonly Include[] Includes;
 
 
 		public Document(DocumentReader reader)
@@ -30,7 +30,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 				}
 			}
 
-			var includes = new List<string>();
+			var includes = new List<Include>();
 
 			// Parse everything else
 			foreach (var section in reader.Sections)
@@ -47,7 +47,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 								throw new Exception("No include value set");
 
 							var include = section.Text.Substring(space).Trim();
-							includes.Add(include);
+							includes.Add(new Include(include));
 						}
 						break;
 
