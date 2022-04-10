@@ -13,6 +13,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 	{
 		public readonly Style Style;
 		public readonly Dictionary<string, Style> Styles = new Dictionary<string, Style>();
+		public readonly Element Body;
 		public readonly Element RootElement = new Element();
 		public readonly Dictionary<string, Macro> Macros = new Dictionary<string, Macro>();
 		public readonly CodeBlock Script = new CodeBlock();
@@ -102,11 +103,16 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 							}
 							break;
 
-						// Normal element parsing
-						default:
-							RootElement.AddChild(section);
-							break;
-					}
+					case "head":
+						throw new NotImplementedException("head not implemented");
+
+					case "body":
+						Body = new Element(section);
+						break;
+
+					// Normal element parsing
+					default:
+						throw new NotImplementedException("Unknown keyword: " +  section.First);
 				}
 
 				// Make sure that the global style is initialized

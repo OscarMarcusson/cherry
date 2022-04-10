@@ -145,10 +145,11 @@ namespace SimplifiedUserInterfaceFramework
 
 					Log.Trace("Writing body...");
 					writer.WriteLine();
-					writer.WriteLine("<body>");
-					foreach (var element in document.RootElement.Children)
-						element.ToRecursiveHtmlStream(writer, document, Log);
-					writer.WriteLine("</body>");
+					writer.WriteLine("</head>");
+
+					Log.Trace("Writing body...");
+					writer.WriteLine();
+					document.Body.ToRecursiveHtmlStream(writer, document, Log);
 				}
 
 				Log.Trace("Done");
