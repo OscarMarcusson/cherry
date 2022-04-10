@@ -104,7 +104,8 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 							break;
 
 						case "head":
-							throw new NotImplementedException("head not implemented");
+							new WordReader(section).ThrowWordError(0, "Not implemented yet");
+							break;
 
 						case "body":
 							Body = new Element(section);
@@ -112,7 +113,8 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 
 						// Normal element parsing
 						default:
-							throw new NotImplementedException("Unknown keyword: " + section.First);
+							new WordReader(section).ThrowWordError(0, "Unknown keyword");
+							break;
 					}
 				}
 				// Make sure that the global style is initialized
