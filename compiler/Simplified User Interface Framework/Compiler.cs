@@ -145,7 +145,6 @@ namespace SimplifiedUserInterfaceFramework
 
 					Log.Trace("Writing body...");
 					writer.WriteLine();
-					writer.WriteLine("</head>");
 
 					Log.Trace("Writing body...");
 					writer.WriteLine();
