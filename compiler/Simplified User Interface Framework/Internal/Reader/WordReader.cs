@@ -71,6 +71,9 @@ namespace SimplifiedUserInterfaceFramework.Internal.Reader
 
 		public WordReader[] Split(string word)
 		{
+			if (Length == 1)
+				return new[] { GetWords(0) };
+
 			var list = new List<WordReader>();
 			var index = 0;
 			for(int i = 0; i < Length; i++)
