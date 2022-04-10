@@ -33,7 +33,12 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 			if (indentation > 0)
 				writer.Write(new string('\t', indentation));
 
-			writer.Write(Name);
+			switch (Name)
+			{
+				case "print": writer.Write("console.log"); break;
+
+				default: writer.Write(Name); break;
+			}
 			writer.Write('(');
 			writer.Write(string.Join(", ", Arguments.Select(x => x.ToString())));
 			writer.Write(')');
