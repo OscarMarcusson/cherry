@@ -17,6 +17,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 		public readonly Element RootElement = new Element();
 		public readonly Dictionary<string, Macro> Macros = new Dictionary<string, Macro>();
 		public readonly CodeBlock Script = new CodeBlock();
+		public readonly Include[] Includes;
 
 
 		public Document(DocumentReader reader)
@@ -36,7 +37,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 						foreach(var subSection in section.Children)
 						{
 							switch (subSection.First)
-							{
+							{								
 								// Script function
 								case Function.Declaration:
 									{
@@ -81,6 +82,17 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 					switch (section.First)
 					{
 						case "script": continue;
+						
+						case "include":
+							{
+								var space = section.Text.IndexOf(' ');
+								if (space < 0)
+									throw new Exception("No include value set");
+
+								var include = section.Text.Substring(space).Trim();
+								includes.Add(new Include(include));
+							}
+							break;
 
 						// Styles
 						case "style":
@@ -125,6 +137,10 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 				// Re-throw exception with more information added
 				throw new SectionException(e.Left, e.Center, e.Right, e.Message, e.LineNumber, Path.GetFileName(reader.File));
 			}
+
+			// Make sure that the global style is initialized
+			Style = Style ?? new Style();
+			Includes = includes.ToArray();
 		}
 	}
 }
