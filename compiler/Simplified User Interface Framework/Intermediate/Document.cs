@@ -103,18 +103,18 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 							}
 							break;
 
-					case "head":
-						throw new NotImplementedException("head not implemented");
+						case "head":
+							throw new NotImplementedException("head not implemented");
 
-					case "body":
-						Body = new Element(section);
-						break;
+						case "body":
+							Body = new Element(section);
+							break;
 
-					// Normal element parsing
-					default:
-						throw new NotImplementedException("Unknown keyword: " +  section.First);
+						// Normal element parsing
+						default:
+							throw new NotImplementedException("Unknown keyword: " + section.First);
+					}
 				}
-
 				// Make sure that the global style is initialized
 				Style = Style ?? new Style();
 			}
