@@ -197,6 +197,12 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 				writer.Write('"');
 			}
 
+			if(element.Configurations != null)
+			{
+				if (element.Configurations.TryGetValue("id", out var id))
+					writer.Write($" id=\"{id.Trim('"')}\"");
+			}
+
 			writer.Write('>');
 
 			return indentNumber;
