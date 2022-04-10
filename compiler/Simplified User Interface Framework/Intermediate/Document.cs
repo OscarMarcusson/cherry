@@ -12,6 +12,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 	{
 		public readonly Style Style;
 		public readonly Dictionary<string, Style> Styles = new Dictionary<string, Style>();
+		public readonly Element Body;
 		public readonly Element RootElement = new Element();
 		public readonly Dictionary<string, Macro> Macros = new Dictionary<string, Macro>();
 
@@ -70,10 +71,16 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 						}
 						break;
 
+					case "head":
+						throw new NotImplementedException("head not implemented");
+
+					case "body":
+						Body = new Element(section);
+						break;
+
 					// Normal element parsing
 					default:
-						RootElement.AddChild(section);
-						break;
+						throw new NotImplementedException("Unknown keyword: " +  section.First);
 				}
 			}
 
