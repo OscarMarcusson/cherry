@@ -78,69 +78,100 @@ namespace SimplifiedUserInterfaceFramework
 				return;
 			}
 
-
-			// Compile
-			Log.Trace("Reading document...");
-			var reader = new DocumentReader(Input);
-			var document = new Document(reader);
-
-			Log.Trace("Creating output file...");
-			using (var file = File.Create(Output))
-			using (var writer = new StreamWriter(file))
+			try
 			{
-				Log.Trace("Writing header...");
-				writer.WriteLine("<!DOCTYPE html>");
+				// Compile
+				Log.Trace("Reading document...");
+				var reader = new DocumentReader(Input);
+				var document = new Document(reader);
 
-				writer.WriteLine();
-				writer.WriteLine("<head>");
-				writer.WriteLine("\t<title>Hello World title</title>");
-
-				foreach(var include in document.Includes)
+				Log.Trace("Creating output file...");
+				using (var file = File.Create(Output))
+				using (var writer = new StreamWriter(file))
 				{
-					switch (include.Type)
+					Log.Trace("Writing header...");
+					writer.WriteLine("<!DOCTYPE html>");
+
+					writer.WriteLine();
+					writer.WriteLine("<head>");
+					writer.WriteLine("\t<title>Hello World title</title>");
+
+					foreach(var include in document.Includes)
 					{
-						case IncludeType.CSS:        writer.WriteLine($"\t<link rel=\"stylesheet\" href=\"{include}\">"); break;
-						case IncludeType.Javascript: writer.WriteLine($"\t<script src=\"{include}\"></script>");          break;
+						switch (include.Type)
+						{
+							case IncludeType.CSS:        writer.WriteLine($"\t<link rel=\"stylesheet\" href=\"{include}\">"); break;
+							case IncludeType.Javascript: writer.WriteLine($"\t<script src=\"{include}\"></script>");          break;
 
-						case IncludeType.File: throw new NotImplementedException("No compiler implementation for " + Path.GetExtension(include.Value));
+							case IncludeType.File: throw new NotImplementedException("No compiler implementation for " + Path.GetExtension(include.Value));
 
-						case IncludeType.Directory: throw new NotImplementedException("No compiler implementation for directoreis");
+							case IncludeType.Directory: throw new NotImplementedException("No compiler implementation for directoreis");
 
-						default: throw new NotImplementedException("No compiler implementation for including " + include.Type);
+							default: throw new NotImplementedException("No compiler implementation for including " + include.Type);
+						}
 					}
-				}
 
-				foreach (var style in document.Styles)
-				{
-					Log.Trace($"Adding {style.Key} style...");
+					foreach (var style in document.Styles)
+					{
+						Log.Trace($"Adding {style.Key} style...");
+						writer.WriteLine();
+						writer.WriteLine($"\t<!-- {style.Key} style  -->");
+						writer.WriteLine($"\t<style type=\"text/css\" rel=\"{style.Key.ToLower()}\" title=\"{style.Key}\">");
+						style.Value.ToCssStream(writer, 2);
+						writer.WriteLine("\t</style>");
+					}
+
+					if (document.Style.Elements.Count() > 0 || document.Styles.Count > 0)
+					{
+						Log.Trace($"Adding global style...");
+						writer.WriteLine();
+						writer.WriteLine("\t<!-- Global style  -->");
+						writer.WriteLine("\t<style>");
+						document.Style.ToCssStream(writer, 2);
+						writer.WriteLine("\t</style>");
+					}
+
+					if (document.Script.HasContent)
+					{
+						writer.WriteLine();
+						writer.WriteLine("\t<script>");
+
+						var variables = document.Script.GetVariables();
+						if(variables.Length > 0)
+						{
+							foreach (var variable in variables)
+								variable.ToJavascriptStream(writer, 2);
+							
+							writer.WriteLine();
+						}
+
+						var functions = document.Script.GetFunctions();
+						if(functions.Length > 0)
+						{
+							foreach(var function in functions)
+								function.ToJavascriptStream(writer, 2);
+						}
+
+						writer.WriteLine("\t</script>");
+					}
+
+					writer.WriteLine("</head>");
+
+
+					Log.Trace("Writing body...");
 					writer.WriteLine();
-					writer.WriteLine($"\t<!-- {style.Key} style  -->");
-					writer.WriteLine($"\t<style type=\"text/css\" rel=\"{style.Key.ToLower()}\" title=\"{style.Key}\">");
-					style.Value.ToCssStream(writer, 2);
-					writer.WriteLine("\t</style>");
-				}
 
-				if (document.Style.Elements.Count() > 0 || document.Styles.Count > 0)
-				{
-					Log.Trace($"Adding global style...");
+					Log.Trace("Writing body...");
 					writer.WriteLine();
-					writer.WriteLine("\t<!-- Global style  -->");
-					writer.WriteLine("\t<style>");
-					document.Style.ToCssStream(writer, 2);
-					writer.WriteLine("\t</style>");
+					document.Body.ToRecursiveHtmlStream(writer, document, Log);
 				}
 
-				// writer.WriteLine("\t<script>");
-				// writer.WriteLine("\t</script>");
-				writer.WriteLine("</head>");
-
-
-				Log.Trace("Writing body...");
-				writer.WriteLine();
-				document.Body.ToRecursiveHtmlStream(writer, document, Log);
+				Log.Trace("Done");
 			}
-
-			Log.Trace("Done");
+			catch(SectionException e)
+			{
+				Log.SectionError($"Failed to parse {e.FileName}{(e.LineNumber > -1 ? $"\nLine {e.LineNumber}" : "")}\n{e.Left}", e.Center, e.Right, e.Message);
+			}
 		}
 	}
 }

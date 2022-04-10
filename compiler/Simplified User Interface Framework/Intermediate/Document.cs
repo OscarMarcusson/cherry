@@ -2,6 +2,7 @@
 using SimplifiedUserInterfaceFramework.Internal.Reader;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,87 +16,128 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 		public readonly Element Body;
 		public readonly Element RootElement = new Element();
 		public readonly Dictionary<string, Macro> Macros = new Dictionary<string, Macro>();
+		public readonly CodeBlock Script = new CodeBlock();
 		public readonly Include[] Includes;
 
 
 		public Document(DocumentReader reader)
 		{
-			// Start with macro parsing
-			foreach (var section in reader.Sections)
-			{
-				if (section.Text.StartsWith("#"))
-				{
-					var macro = new Macro(section);
-					Macros.Add(macro.Name, macro);
-				}
-			}
-
 			var includes = new List<Include>();
 
-			// Parse everything else
-			foreach (var section in reader.Sections)
+			try
 			{
-				if (section.Text.StartsWith("#"))
-					continue;
-
-				switch (section.First)
+				// Start with macro and script parsing
+				foreach (var section in reader.Sections)
 				{
-					case "include":
+					if (section.Text.StartsWith("#"))
+					{
+						var macro = new Macro(section);
+						Macros.Add(macro.Name, macro);
+					}
+					else if(section.First == "script")
+					{
+						foreach(var subSection in section.Children)
 						{
-							var space = section.Text.IndexOf(' ');
-							if (space < 0)
-								throw new Exception("No include value set");
+							switch (subSection.First)
+							{								
+								// Script function
+								case Function.Declaration:
+									{
+										var words = new WordReader(subSection);
+										var body = subSection.Children.Select(x => new WordReader(x)).ToArray();
+										var function = new Function(words, body);
+										if (Script.FunctionExists(function.Name))
+											words.ThrowWordError(1, "Already defined", words.Length - 1);
 
-							var include = section.Text.Substring(space).Trim();
-							includes.Add(new Include(include));
-						}
-						break;
+										Script.Add(function);
+									}
+									break;
 
-					// Script function
-					case "def":
-						{
-							var functionName = section.Text.Substring(4).Trim();
-							var index = functionName.IndexOfAny(new char[] { ' ', ':' });
-							if (index > -1)
-							{
-								var functionArguments = functionName.Substring(index + 1).TrimStart();
-								functionName = functionName.Substring(0, index);
+								case Variable.DynamicAccessType:
+								case Variable.ReadOnlyAccessType:
+									{
+										var variable = new Variable(subSection.Text, subSection.LineNumber);
+										if (Script.VariableExists(variable.Name))
+											throw new Exception($"A variable named {variable.Name} already exists.");
+
+										Script.Add(variable);
+									}
+									break;
+
+								default:
+									{
+										var words = new WordReader(subSection);
+										words.ThrowWordError(0, "Unknown keyword\nExpected a variable, function or data definition");
+										break;
+									}
 							}
 						}
-						break;
-
-					// Styles
-					case "style":
-						{
-							var style = new Style(section);
-							if (style.IsGlobal)
-							{
-								if (Style != null)
-									throw new Exception("Already exists");
-
-								Style = style;
-							}
-							else
-							{
-								if (Styles.TryGetValue(style.Name, out var existingStyle))
-									throw new Exception("Already exists");
-
-								Styles[style.Name] = style;
-							}
-						}
-						break;
-
-					case "head":
-						throw new NotImplementedException("head not implemented");
-
-					case "body":
-						Body = new Element(section);
-						break;
-
-					// Normal element parsing
-					default:
-						throw new NotImplementedException("Unknown keyword: " +  section.First);
+					}
 				}
+
+				// Parse everything else
+				foreach (var section in reader.Sections)
+				{
+					if (section.Text.StartsWith("#"))
+						continue;
+
+					switch (section.First)
+					{
+						case "script": continue;
+						
+						case "include":
+							{
+								var space = section.Text.IndexOf(' ');
+								if (space < 0)
+									throw new Exception("No include value set");
+
+								var include = section.Text.Substring(space).Trim();
+								includes.Add(new Include(include));
+							}
+							break;
+
+						// Styles
+						case "style":
+							{
+								var style = new Style(section);
+								if (style.IsGlobal)
+								{
+									if (Style != null)
+										throw new Exception("Already exists");
+
+									Style = style;
+								}
+								else
+								{
+									if (Styles.TryGetValue(style.Name, out var existingStyle))
+										throw new Exception("Already exists");
+
+									Styles[style.Name] = style;
+								}
+							}
+							break;
+
+						case "head":
+							new WordReader(section).ThrowWordError(0, "Not implemented yet");
+							break;
+
+						case "body":
+							Body = new Element(section);
+							break;
+
+						// Normal element parsing
+						default:
+							new WordReader(section).ThrowWordError(0, "Unknown keyword");
+							break;
+					}
+				}
+				// Make sure that the global style is initialized
+				Style = Style ?? new Style();
+			}
+			catch(SectionException e)
+			{
+				// Re-throw exception with more information added
+				throw new SectionException(e.Left, e.Center, e.Right, e.Message, e.LineNumber, Path.GetFileName(reader.File));
 			}
 
 			// Make sure that the global style is initialized

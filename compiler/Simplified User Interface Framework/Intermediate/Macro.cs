@@ -29,7 +29,7 @@ namespace SimplifiedUserInterfaceFramework.Internal.Intermediate
 				var value = Name.Substring(index+1).Trim();
 				Name = Name.Substring(0, index).TrimEnd();
 
-				var valueReader = new LineReader(value);
+				var valueReader = new LineReader(value, lineNumber:section.LineNumber);
 				var root = new Element(valueReader);
 				Elements = new[] { root };
 			}

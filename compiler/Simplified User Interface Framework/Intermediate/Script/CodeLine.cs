@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.IO;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace SimplifiedUserInterfaceFramework.Intermediate
 {
-	class Function
+	public abstract class CodeLine
 	{
+
+
+
+		public abstract void ToJavascriptStream(StreamWriter writer, int indentation = 0);
 	}
 }

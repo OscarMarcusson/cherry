@@ -11,12 +11,15 @@ namespace SimplifiedUserInterfaceFramework.Internal.Reader
 		public LineReader Parent { get; private set; }
 		public readonly List<LineReader> Children = new List<LineReader>();
 
+		public readonly int LineNumber;
 		public readonly int Indentation;
 		public readonly string Text;
 		public readonly string First;
 
-		public LineReader(string line, LineReader parent = null)
+		public LineReader(string line, LineReader parent = null, int lineNumber = -1)
 		{
+			LineNumber = lineNumber;
+
 			if(parent != null)
 			{
 				Parent = parent;
@@ -41,7 +44,9 @@ namespace SimplifiedUserInterfaceFramework.Internal.Reader
 
 
 
-		public static bool TryReadLine(string line, LineReader previousLine, out LineReader reader)
+
+
+		public static bool TryReadLine(string line, LineReader previousLine, int lineNumber, out LineReader reader)
 		{
 			if(string.IsNullOrWhiteSpace(line))
 			{
@@ -49,7 +54,7 @@ namespace SimplifiedUserInterfaceFramework.Internal.Reader
 				return false;
 			}
 
-			reader = new LineReader(line);
+			reader = new LineReader(line, lineNumber:lineNumber);
 			if (reader.First.StartsWith("//"))
 			{
 				reader = null;

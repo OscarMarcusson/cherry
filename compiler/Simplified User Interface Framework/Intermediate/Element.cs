@@ -148,7 +148,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 								nextElement += "=" + Value;
 
 							nextElement = new string('\t', reader.Indentation + 1) + nextElement;
-							var newReader = new LineReader(nextElement);
+							var newReader = new LineReader(nextElement, lineNumber:reader.LineNumber);
 							var child = AddChild(newReader);
 
 							// Resolve the deepest child level, this works since the "a > b > c" logic only has one child

@@ -2,12 +2,15 @@
 This is a simple UI language based on HTML, but built with the intention of simplifying and reducing boilerplate syntax.
 
 #### Table of Contents
-* #### Syntax
+* #### UI
   * [Element Declaration](docs/syntax/Elements.md)
   * [Scope](docs/syntax/Scope.md)
   * [Styling](docs/syntax/Styles.md)
   * [Comments](docs/syntax/Comments.md)
   * [Variable Binding](docs/syntax/VariableBinding.md)
+* #### Script
+  * [Functions](docs/script/Functions.md)
+  * [Variables](docs/script/Variables.md)
 * #### Compiler
   * [Installation / Setup](docs/compiler/CompilerSetup.md)
   * [Arguments](docs/compiler/CompilerArguments.md)
