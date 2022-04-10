@@ -18,6 +18,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 		public readonly Dictionary<string, Macro> Macros = new Dictionary<string, Macro>();
 		public readonly CodeBlock Script = new CodeBlock();
 		public readonly Include[] Includes;
+		public readonly Dictionary<string, string> Bindings = new Dictionary<string, string>();
 
 
 		public Document(DocumentReader reader)
@@ -143,6 +144,30 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 			// Make sure that the global style is initialized
 			Style = Style ?? new Style();
 			Includes = includes.ToArray();
+		}
+
+
+
+
+		public void BindingsToJavascriptStream(StreamWriter writer, int indent = 0)
+		{
+			if (Bindings.Count > 0)
+			{
+				var indentString = indent > 0 ? new string('\t', indent) : "";
+
+				// Declarations
+				writer.WriteLine($"{indentString}// Element binding declarations");
+				foreach (var binding in Bindings)
+					writer.WriteLine($"{indentString}let {binding.Key};");
+
+				// Bindings
+				writer.WriteLine($"{indentString}window.onload = OnLoadWindow;");
+				writer.WriteLine($"{indentString}function OnLoadWindow() {{");
+				writer.WriteLine($"{indentString}\t// Element bindings");
+				foreach (var binding in Bindings)
+					writer.WriteLine($"{indentString}{binding.Key} = document.getElementById('{binding.Value}');");
+				writer.WriteLine($"{indentString}}}");
+			}
 		}
 	}
 }

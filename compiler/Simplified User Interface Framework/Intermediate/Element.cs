@@ -30,6 +30,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 		public readonly Dictionary<string, string> ChildStyles;
 		public readonly ValueSection[] SeparatedValues;
 		public Dictionary<string, string> Events { get; private set; }
+		public readonly string Binding;
 
 		public bool HasValue => !string.IsNullOrWhiteSpace(Value);
 
@@ -197,6 +198,11 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 
 									// case "width":  configurations.Add($"{nextWord}={dataToParse}"); break;
 									// case "height": configurations.Add($"{nextWord}={dataToParse}"); break;
+
+									case "bind":
+										Binding = dataToParse;
+										// TODO:: add to some list, check after each config is done. If we have an id, we use that. otherwise we generate an ID with GUID
+										break;
 
 									default:
 										Configurations[nextWord] = dataToParse;
