@@ -11,17 +11,19 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 {
 	public class Document
 	{
+		public readonly DocumentReader Source;
 		public readonly Style Style;
 		public readonly Dictionary<string, Style> Styles = new Dictionary<string, Style>();
 		public readonly Element Body;
-		public readonly Element RootElement = new Element();
 		public readonly Dictionary<string, Macro> Macros = new Dictionary<string, Macro>();
 		public readonly CodeBlock Script = new CodeBlock();
 		public readonly Include[] Includes;
+		public readonly Dictionary<string, string> Bindings = new Dictionary<string, string>();
 
 
 		public Document(DocumentReader reader)
 		{
+			Source = reader;
 			var includes = new List<Include>();
 
 			try
@@ -143,6 +145,34 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 			// Make sure that the global style is initialized
 			Style = Style ?? new Style();
 			Includes = includes.ToArray();
+
+			// Post processing
+			Body?.ResolveBindings(this);
+		}
+
+
+
+
+		public void BindingsToJavascriptStream(StreamWriter writer, int indent = 0)
+		{
+			if (Bindings.Count > 0)
+			{
+				var indentString = indent > 0 ? new string('\t', indent) : "";
+
+				// Declarations
+				writer.WriteLine($"{indentString}// Element binding declarations");
+				foreach (var binding in Bindings)
+					writer.WriteLine($"{indentString}let {binding.Value};");
+
+				// Bindings
+				writer.WriteLine();
+				writer.WriteLine($"{indentString}window.onload = OnLoadWindow;");
+				writer.WriteLine($"{indentString}function OnLoadWindow() {{");
+				writer.WriteLine($"{indentString}\t// Element bindings");
+				foreach (var binding in Bindings)
+					writer.WriteLine($"{indentString}\t{binding.Value} = document.getElementById('{binding.Key}');");
+				writer.WriteLine($"{indentString}}}");
+			}
 		}
 	}
 }
