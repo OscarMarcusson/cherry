@@ -170,14 +170,23 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 							index = remainingDataToParse.IndexOf('(');
 							if(index > 0)
 							{
-								nextWord = remainingDataToParse.Substring(0, index);
-								var nextIndex = remainingDataToParse.IndexOf(')', index);
+								int nextIndex = 0;
+								nextWord = remainingDataToParse.Substring(0, index).Trim();
+
+								if (remainingDataToParse[index + 1] == '"')
+									nextIndex = remainingDataToParse.IndexOf('"', index + 2);
+								else
+									nextIndex = remainingDataToParse.IndexOf(')', index);
+
 								if (nextIndex < index)
 									throw new Exception("Could not parse " + remainingDataToParse); // TODO:: PROPER ERROR
 
 								var dataToParse = remainingDataToParse.Substring(index+1, nextIndex - index - 1).Trim('"', ' ', '\t');
 								index = 0;
 								remainingDataToParse = remainingDataToParse.Substring(nextIndex+1).TrimStart();
+
+								if (remainingDataToParse.StartsWith(')'))
+									remainingDataToParse = remainingDataToParse.Substring(1);
 
 								switch (nextWord)
 								{
