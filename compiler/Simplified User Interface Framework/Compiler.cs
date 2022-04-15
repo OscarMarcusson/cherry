@@ -96,18 +96,18 @@ namespace SimplifiedUserInterfaceFramework
 					writer.WriteLine("<head>");
 					writer.WriteLine("\t<title>Hello World title</title>");
 
-					foreach(var include in document.Includes)
+					foreach(var link in document.Links)
 					{
-						switch (include.Type)
+						switch (link.Type)
 						{
-							case IncludeType.CSS:        writer.WriteLine($"\t<link rel=\"stylesheet\" href=\"{include}\">"); break;
-							case IncludeType.Javascript: writer.WriteLine($"\t<script src=\"{include}\"></script>");          break;
+							case IncludeType.CSS:        writer.WriteLine($"\t<link rel=\"stylesheet\" href=\"{link}\">"); break;
+							case IncludeType.Javascript: writer.WriteLine($"\t<script src=\"{link}\"></script>");          break;
 
-							case IncludeType.File: throw new NotImplementedException("No compiler implementation for " + Path.GetExtension(include.Value));
+							case IncludeType.File: throw new NotImplementedException("No compiler implementation for " + Path.GetExtension(link.Value));
 
 							case IncludeType.Directory: throw new NotImplementedException("No compiler implementation for directoreis");
 
-							default: throw new NotImplementedException("No compiler implementation for including " + include.Type);
+							default: throw new NotImplementedException("No compiler implementation for including " + link.Type);
 						}
 					}
 

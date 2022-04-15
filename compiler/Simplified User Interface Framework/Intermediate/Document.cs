@@ -17,6 +17,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 		public readonly Element Body;
 		public readonly Dictionary<string, Macro> Macros = new Dictionary<string, Macro>();
 		public readonly CodeBlock Script = new CodeBlock();
+		public readonly Include[] Links;
 		public readonly Include[] Includes;
 		public readonly Dictionary<string, string> Bindings = new Dictionary<string, string>();
 
@@ -25,6 +26,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 		{
 			Source = reader;
 			var includes = new List<Include>();
+			var links = new List<Include>();
 
 			try
 			{
@@ -86,15 +88,17 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 					switch (section.First)
 					{
 						case "script": continue;
-						
+
+						case "link":
+							{
+								var value = GetIncludeOrLinkValue(section);
+								links.Add(new Include(value));
+							}
+							break;
 						case "include":
 							{
-								var space = section.Text.IndexOf(' ');
-								if (space < 0)
-									throw new Exception("No include value set");
-
-								var include = section.Text.Substring(space).Trim();
-								includes.Add(new Include(include));
+								var value = GetIncludeOrLinkValue(section);
+								includes.Add(new Include(value));
 							}
 							break;
 
@@ -145,12 +149,23 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 			// Make sure that the global style is initialized
 			Style = Style ?? new Style();
 			Includes = includes.ToArray();
+			Links = links.ToArray();
 
 			// Post processing
 			Body?.ResolveBindings(this);
 		}
 
 
+		string GetIncludeOrLinkValue(LineReader line)
+		{
+			var raw = line.Text.TrimEnd();
+			var space = raw.IndexOf(' ');
+			if (space < 0)
+				new WordReader(line).ThrowWordError(1, "No value found");
+
+			var value = raw.Substring(space).Trim();
+			return value;
+		}
 
 
 		public void BindingsToJavascriptStream(StreamWriter writer, int indent = 0)
