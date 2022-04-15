@@ -18,7 +18,8 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 		public readonly Dictionary<string, Macro> Macros = new Dictionary<string, Macro>();
 		public readonly CodeBlock Script = new CodeBlock();
 		public readonly Include[] Links;
-		public readonly Include[] Includes;
+		public readonly Include[] IncludeStyles;
+		public readonly Include[] IncludesScripts;
 		public readonly Dictionary<string, string> Bindings = new Dictionary<string, string>();
 
 
@@ -148,7 +149,14 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 
 			// Make sure that the global style is initialized
 			Style = Style ?? new Style();
-			Includes = includes.ToArray();
+			IncludeStyles = includes.Where(x => x.Type == IncludeType.CSS).ToArray();
+			IncludesScripts = includes.Where(x => x.Type == IncludeType.Javascript).ToArray();
+
+			// TODO:: This is some temp stuff, should be removed later when everything is implemented properly
+			var invalid = includes.Where(x => x.Type != IncludeType.CSS && x.Type != IncludeType.Javascript);
+			if(invalid.Count() > 0)
+				throw new NotImplementedException("Include not implemented for:\n * " + string.Join("\n * ", invalid.Select(x => x.Value)));
+			
 			Links = links.ToArray();
 
 			// Post processing

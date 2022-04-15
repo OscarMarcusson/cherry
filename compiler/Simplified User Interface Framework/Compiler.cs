@@ -121,17 +121,21 @@ namespace SimplifiedUserInterfaceFramework
 						writer.WriteLine("\t</style>");
 					}
 
-					if (document.Style.Elements.Count() > 0 || document.Styles.Count > 0)
+					if (document.Style.Elements.Count() > 0 || document.Styles.Count > 0 || document.IncludeStyles.Length > 0)
 					{
 						Log.Trace($"Adding global style...");
 						writer.WriteLine();
 						writer.WriteLine("\t<!-- Global style  -->");
 						writer.WriteLine("\t<style>");
+
+						foreach (var include in document.IncludeStyles)
+							include.ToStream(writer, 2, InputDirectory);
+
 						document.Style.ToCssStream(writer, 2);
 						writer.WriteLine("\t</style>");
 					}
 
-					if (document.Script.HasContent || document.Bindings.Count > 0)
+					if (document.Script.HasContent || document.Bindings.Count > 0 || document.IncludesScripts.Length > 0)
 					{
 						writer.WriteLine();
 						writer.WriteLine("\t<script>");
@@ -152,6 +156,14 @@ namespace SimplifiedUserInterfaceFramework
 						{
 							foreach(var function in functions)
 								function.ToJavascriptStream(writer, 2);
+						}
+
+						if(document.IncludesScripts.Length > 0)
+						{
+							writer.WriteLine();
+							writer.WriteLine("\t\t// Include scripts");
+							foreach (var include in document.IncludesScripts)
+								include.ToStream(writer, 2, InputDirectory);
 						}
 
 						writer.WriteLine("\t</script>");
