@@ -197,10 +197,15 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 				writer.Write('"');
 			}
 
+			// Shared configurations
 			if(element.Configurations != null)
 			{
 				if (element.Configurations.TryGetValue("id", out var id))
-					writer.Write($" id=\"{id.Trim('"')}\"");
+					writer.Write($" id=\"{id}\"");
+
+				
+				if (element.Configurations.TryGetValue("onload", out var onLoad))
+					writer.Write($" onload=\"{onLoad}\"");
 			}
 
 			writer.Write('>');

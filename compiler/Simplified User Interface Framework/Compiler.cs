@@ -131,10 +131,12 @@ namespace SimplifiedUserInterfaceFramework
 						writer.WriteLine("\t</style>");
 					}
 
-					if (document.Script.HasContent)
+					if (document.Script.HasContent || document.Bindings.Count > 0)
 					{
 						writer.WriteLine();
 						writer.WriteLine("\t<script>");
+
+						document.BindingsToJavascriptStream(writer, 2);
 
 						var variables = document.Script.GetVariables();
 						if(variables.Length > 0)
