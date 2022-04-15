@@ -202,6 +202,10 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 			{
 				if (element.Configurations.TryGetValue("id", out var id))
 					writer.Write($" id=\"{id}\"");
+
+				
+				if (element.Configurations.TryGetValue("onload", out var onLoad))
+					writer.Write($" onload=\"{onLoad}\"");
 			}
 
 			writer.Write('>');
