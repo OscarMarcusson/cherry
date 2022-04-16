@@ -13,6 +13,11 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 		None = 0,
 		Button = 1,
 		Image = 2,
+
+		TabSelector = 100,
+		TabContent  = 101,
+		TabSelectorGroup  = 102,
+		TabContentGroup  = 103,
 	}
 
 	public class Element
@@ -64,6 +69,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 
 			var splitIndex = Name.IndexOf('>');
 			string remainingDataToParse = null;
+			List<string> classesBuilder = null;
 
 			// Macro name parsing
 			// if (Name.StartsWith("#"))
@@ -95,19 +101,18 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 				}
 
 
-				string stringToParse = null;
-				if(indexToNextSpace > -1)
+				string stringToParse;
+				if (indexToNextSpace > -1)
 				{
 					stringToParse = Name.Substring(index + 1, indexToNextSpace - index - 1);
 					remainingDataToParse = Name.Substring(indexToNextSpace).TrimStart();
-					Classes = stringToParse.Split('.', StringSplitOptions.RemoveEmptyEntries);
 				}
 				else
 				{
 					stringToParse = Name.Substring(index + 1);
 				}
-				
-				Classes = stringToParse.Split('.', StringSplitOptions.RemoveEmptyEntries);
+
+				classesBuilder = stringToParse.Split('.', StringSplitOptions.RemoveEmptyEntries).ToList();
 				Name = Name.Substring(0, index);
 			}
 			else
@@ -132,11 +137,46 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 				case "button":
 					Type = ElementType.Button;
 					break;
+
+
+				// TABS
+				case "tab-selector":
+				case "ts":
+					{
+						Type = ElementType.TabSelector;
+						Name = "input";
+						// Add class
+						if (classesBuilder == null)
+							classesBuilder = new List<string>();
+						classesBuilder.Add("tab-selector");
+					}
+					break;
+
+				case "tab-content":
+				case "tc":
+					Type = ElementType.TabContent;
+					Name = "tab-content";
+					break;
+
+				case "tab-selector-group":
+				case "tsg":
+					Type = ElementType.TabSelectorGroup;
+					Name = "tab-selector-group";
+					break;
+
+				case "tab-content-group":
+				case "tcg":
+					Type = ElementType.TabContentGroup;
+					Name = "tab-content-group";
+					break;
 			}
 
+			// At this stage we have all the classes, apply them
+			Classes = classesBuilder?.ToArray();
 
 			// Go through all space separated configurations before getting to the value
-			if(remainingDataToParse != null)
+			var isTabType = ((int)ElementType.TabContent >= 100 && (int)ElementType.TabContent <= 103);
+			if (remainingDataToParse != null || isTabType)
 			{
 				Configurations = new Dictionary<string, string>();
 				while(remainingDataToParse != null && remainingDataToParse.Length > 0)
@@ -228,6 +268,35 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 							}
 							throw new Exception("Unknown keyword: " + nextWord);
 					}
+				}
+
+				// Configuration post processing for types
+				switch (Type)
+				{
+					case ElementType.TabContentGroup:
+						Configurations["id"] = "tcg::" + Value;
+						break;
+					case ElementType.TabSelectorGroup:
+						Configurations["id"] = "tsg::" + Value;
+						break;
+
+					case ElementType.TabSelector:
+						{
+							if(Parent == null || Parent.Type != ElementType.TabSelectorGroup)
+								throw new SectionException("", reader.First, reader.Text.Substring(reader.First.Length), "Expected a tab-selector-group parent for this type", reader.LineNumber);
+
+							var selectorGroupId = "tsg::" + Parent.Value;
+							var contentGroupId  = "tcg::"  + Parent.Value;
+
+							if (!Configurations.TryGetValue("id", out var selectorId))
+								Configurations["id"] = selectorId = $"{selectorGroupId}::{Guid.NewGuid().ToString().Replace("-","")}";
+
+							if(!Configurations.TryGetValue("content-id", out var contentId) && !Configurations.TryGetValue("c-id", out contentId))
+								throw new SectionException("", reader.Text, "", "Expected configurator content-id(\"tab-id\")", reader.LineNumber);
+
+							Configurations["onclick"] = $"selectTab('{selectorGroupId}', '{selectorId}', '{contentGroupId}', '{contentId}')";
+						}
+						break;
 				}
 
 				if (Configurations.Count == 0)

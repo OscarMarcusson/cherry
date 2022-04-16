@@ -155,6 +155,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 			switch (element.Type)
 			{
 				case ElementType.Button:
+				case ElementType.TabSelector:
 					writer.Write($"input{element.HtmlFormattedClasses()} type=\"button\"");
 					if (element.HasValue)
 					{
@@ -162,7 +163,6 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 						element.ValueToHtml(writer);
 						writer.Write('"');
 					}
-					writer.Write($" class=\"button {element.Name.Replace(',', ' ').Replace(" ", "")}\"");
 					break;
 
 				case ElementType.Image:
@@ -176,8 +176,10 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 					break;
 
 				case ElementType.None:
+				case ElementType.TabContent:
+				case ElementType.TabSelectorGroup:
+				case ElementType.TabContentGroup:
 					writer.Write(element.Name + element.HtmlFormattedClasses());
-					// writer.Write($"{element.Name} {classes}type=\"{element.Type}\"");
 					break;
 
 				default: throw new NotImplementedException("Has not implemented a parser for built-in type " + element.Type);

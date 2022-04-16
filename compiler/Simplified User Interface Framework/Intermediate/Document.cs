@@ -21,7 +21,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 		public readonly Include[] IncludeStyles;
 		public readonly Include[] IncludesScripts;
 		public readonly Dictionary<string, string> Bindings = new Dictionary<string, string>();
-
+		public readonly bool ContainsFrameworkCode = true; // TODO:: This should be replaced with a proper check for built-in code, like the tabs
 
 		public Document(DocumentReader reader)
 		{
