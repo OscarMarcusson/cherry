@@ -40,5 +40,26 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 		}
 
 		public override string ToString() => Value;
+
+
+
+		public void ToStream(StreamWriter writer, int indentation, string root)
+		{
+			if (Type == IncludeType.Directory)
+				throw new NotSupportedException("Can't embedd a directory");
+
+			var path = Path.Combine(root, Value);
+			if (!File.Exists(path))
+				throw new FileNotFoundException("Can't embedd missing file: " + Value);
+
+			var raw = File.ReadAllText(path);
+			if (indentation > 0)
+			{
+				var indentationString = indentation > 0 ? new string('\t', indentation) : "";
+				raw = indentationString + raw.Replace("\n", $"\n{indentationString}");
+			}
+
+			writer.WriteLine(raw);
+		}
 	}
 }

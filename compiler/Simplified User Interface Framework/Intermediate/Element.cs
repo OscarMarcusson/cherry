@@ -186,40 +186,43 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 								remainingDataToParse = remainingDataToParse.Substring(nextIndex+1).TrimStart();
 
 								if (remainingDataToParse.StartsWith(')'))
-									remainingDataToParse = remainingDataToParse.Substring(1);
+									remainingDataToParse = remainingDataToParse.Substring(1).TrimStart();
 
-								switch (nextWord)
+								if(nextWord.Length > 0)
 								{
-									// case "alt":
-									// 	configurations.Add($"alt={dataToParse}");
-									// 	break;
+									switch (nextWord)
+									{
+										// case "alt":
+										// 	configurations.Add($"alt={dataToParse}");
+										// 	break;
 
-									case "size":
-										index = dataToParse.IndexOf(',');
-										if(index > 0)
-										{
-											Configurations["width"] = dataToParse.Substring(0, index);
-											Configurations["height"] = dataToParse.Substring(index + 1);
-										}
-										else
-										{
-											Configurations["width"] = dataToParse;
-											Configurations["height"] = dataToParse;
-										}
-										break;
+										case "size":
+											index = dataToParse.IndexOf(',');
+											if(index > 0)
+											{
+												Configurations["width"] = dataToParse.Substring(0, index);
+												Configurations["height"] = dataToParse.Substring(index + 1);
+											}
+											else
+											{
+												Configurations["width"] = dataToParse;
+												Configurations["height"] = dataToParse;
+											}
+											break;
 
-									// case "width":  configurations.Add($"{nextWord}={dataToParse}"); break;
-									// case "height": configurations.Add($"{nextWord}={dataToParse}"); break;
+										// case "width":  configurations.Add($"{nextWord}={dataToParse}"); break;
+										// case "height": configurations.Add($"{nextWord}={dataToParse}"); break;
 
-									case "bind":
-										Binding = dataToParse;
-										if (!Configurations.ContainsKey("id"))
-											Configurations["id"] = $"bind{Guid.NewGuid().ToString().Replace("-", "")}";
-										break;
+										case "bind":
+											Binding = dataToParse;
+											if (!Configurations.ContainsKey("id"))
+												Configurations["id"] = $"bind{Guid.NewGuid().ToString().Replace("-", "")}";
+											break;
 
-									default:
-										Configurations[nextWord] = dataToParse;
-										break;
+										default:
+											Configurations[nextWord] = dataToParse;
+											break;
+									}
 								}
 								break;
 							}
