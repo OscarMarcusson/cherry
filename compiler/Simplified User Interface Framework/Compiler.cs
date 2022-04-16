@@ -135,13 +135,15 @@ namespace SimplifiedUserInterfaceFramework
 						writer.WriteLine("\t</style>");
 					}
 
-					if (document.Script.HasContent || document.Bindings.Count > 0 || document.IncludesScripts.Length > 0)
+					if (document.Script.HasContent || document.ContainsFrameworkCode || document.Bindings.Count > 0 || document.IncludesScripts.Length > 0)
 					{
 						writer.WriteLine();
 						writer.WriteLine("\t<script>");
 
+						// Bindings
 						document.BindingsToJavascriptStream(writer, 2);
 
+						// Variables
 						var variables = document.Script.GetVariables();
 						if(variables.Length > 0)
 						{
@@ -151,6 +153,22 @@ namespace SimplifiedUserInterfaceFramework
 							writer.WriteLine();
 						}
 
+						// Framework code
+						if (document.ContainsFrameworkCode)
+						{
+							writer.WriteLine("\t\t// Framework code");
+							// Set defauls on load
+							writer.WriteLine("\t\twindow.addEventListener(\"load\", (event) => {");
+							// TODO:: Loop through each tab selector group and click the default (or first) button
+							// writer.WriteLine("\t\t\tdocument.getElementById('ID').click();");
+							writer.WriteLine("\t\t});");
+
+							// Select tab function
+							var selectTab = CompilerResources.GetJavascript("Tabs");
+							writer.WriteLine("\t\t" + selectTab.Replace("\n", "\n\t\t"));
+						}
+
+						// Functions
 						var functions = document.Script.GetFunctions();
 						if(functions.Length > 0)
 						{
@@ -158,6 +176,7 @@ namespace SimplifiedUserInterfaceFramework
 								function.ToJavascriptStream(writer, 2);
 						}
 
+						// Embedded code from other files
 						if(document.IncludesScripts.Length > 0)
 						{
 							writer.WriteLine();

@@ -166,7 +166,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 
 				case "tab-content-group":
 				case "tcg":
-					Type = ElementType.TabSelectorGroup;
+					Type = ElementType.TabContentGroup;
 					Name = "tab-content-group";
 					break;
 			}
