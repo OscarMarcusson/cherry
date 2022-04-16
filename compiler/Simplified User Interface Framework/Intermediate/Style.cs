@@ -39,6 +39,24 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 				if(elementReader.Children.Count > 0)
 				{
 					var elementName = elementReader.Text;
+
+					// Some types should be hard replaced to make it easier to write
+					switch (elementName)
+					{
+						case "tab-selector":
+						case ".tab-selector":
+						case "ts":
+						case ".ts":
+							elementName = "input[type=button].tab-selector";
+							break;
+
+						case ".tab-content":
+						case "tc":
+						case ".tc":
+							elementName = "tab-content";
+							break;
+					}
+
 					if (!Elements.TryGetValue(elementName, out var element))
 						Elements[elementName] = element = new Element();
 

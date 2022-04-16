@@ -155,6 +155,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 			switch (element.Type)
 			{
 				case ElementType.Button:
+				case ElementType.TabSelector:
 					writer.Write($"input{element.HtmlFormattedClasses()} type=\"button\"");
 					if (element.HasValue)
 					{
@@ -162,7 +163,6 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 						element.ValueToHtml(writer);
 						writer.Write('"');
 					}
-					writer.Write($" class=\"button {element.Name.Replace(',', ' ').Replace(" ", "")}\"");
 					break;
 
 				case ElementType.Image:
@@ -173,6 +173,10 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 						if (element.Configurations.TryGetValue("height", out var height)) writer.Write($" height=\"{height}\"");
 						if (element.Configurations.TryGetValue("alt",    out var alt))    writer.Write($" alt=\"{alt}\"");
 					}
+					break;
+
+				case ElementType.TabContent:
+					writer.Write($"{element.Name}{element.HtmlFormattedClasses()}");
 					break;
 
 				case ElementType.None:
