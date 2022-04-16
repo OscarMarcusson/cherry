@@ -35,10 +35,18 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 			}
 
 			foreach(var elementReader in reader.Children)
+				ParseStyle(elementReader);
+		}
+
+
+
+		void ParseStyle(LineReader elementReader, string parent = null, string elementName = null)
+		{
+			if (elementReader.Children.Count > 0)
 			{
-				if(elementReader.Children.Count > 0)
+				if(elementName == null)
 				{
-					var elementName = elementReader.Text;
+					elementName = elementReader.Text;
 
 					// Some types should be hard replaced to make it easier to write
 					switch (elementName)
@@ -56,14 +64,36 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 							elementName = "tab-content";
 							break;
 					}
+				}
 
-					if (!Elements.TryGetValue(elementName, out var element))
-						Elements[elementName] = element = new Element();
+				if (parent != null)
+					elementName = parent + elementName;
 
-					foreach(var valueReader in elementReader.Children)
+				if (!Elements.TryGetValue(elementName, out var element))
+					Elements[elementName] = element = new Element();
+
+				foreach (var valueReader in elementReader.Children)
+				{
+					// Is this a subtype? (#)
+					if (valueReader.Text.StartsWith("#"))
+					{
+						var key = valueReader.Text.Substring(1).TrimStart();
+
+						// sub-class
+						if (key.StartsWith(".")) ParseStyle(valueReader, elementName, key);
+
+						// Mouse interaction (hover / click)
+						else if (key == "hover")  ParseStyle(valueReader, elementName, ":hover");
+						else if (key == "active") ParseStyle(valueReader, elementName, ":active");
+
+						// Unknown
+						else new WordReader(valueReader).ThrowWordError(valueReader.Text[1] == ' ' || valueReader.Text[1] == '\t' ? 1 : 0, "Unknown subtype");
+					}
+					// Nah, its a normal style
+					else
 					{
 						var index = valueReader.Text.IndexOf('=');
-						if(index > -1)
+						if (index > -1)
 						{
 							var valueName = valueReader.Text.Substring(0, index).TrimEnd().Replace(" ", "");
 							var value = valueReader.Text.Substring(index + 1).TrimStart();
@@ -73,6 +103,8 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 				}
 			}
 		}
+
+
 
 		public void ReadFrom(Style style)
 		{
