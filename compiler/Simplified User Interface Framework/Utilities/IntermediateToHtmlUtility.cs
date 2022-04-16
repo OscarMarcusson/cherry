@@ -155,10 +155,10 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 			switch (element.Type)
 			{
 				case ElementType.Button:
-					writer.Write($"input {element.HtmlFormattedClasses()}type=\"button\"");
+					writer.Write($"input{element.HtmlFormattedClasses()} type=\"button\"");
 					if (element.HasValue)
 					{
-						writer.Write("value=\"");
+						writer.Write(" value=\"");
 						element.ValueToHtml(writer);
 						writer.Write('"');
 					}
@@ -206,6 +206,9 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 				
 				if (element.Configurations.TryGetValue("onload", out var onLoad))
 					writer.Write($" onload=\"{onLoad}\"");
+
+				if (element.Configurations.TryGetValue("onclick", out var onClick))
+					writer.Write($" onclick=\"{(onClick.EndsWith(")") ? onClick : $"{onClick}()")}\"");
 			}
 
 			writer.Write('>');
