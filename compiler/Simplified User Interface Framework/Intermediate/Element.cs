@@ -15,7 +15,9 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 		Image = 2,
 
 		TabSelector = 100,
-		TabContent  = 101
+		TabContent  = 101,
+		TabSelectorGroup  = 102,
+		TabContentGroup  = 103,
 	}
 
 	public class Element
@@ -136,6 +138,8 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 					Type = ElementType.Button;
 					break;
 
+
+				// TABS
 				case "tab-selector":
 				case "ts":
 					{
@@ -153,13 +157,26 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 					Type = ElementType.TabContent;
 					Name = "tab-content";
 					break;
+
+				case "tab-selector-group":
+				case "tsg":
+					Type = ElementType.TabSelectorGroup;
+					Name = "tab-selector-group";
+					break;
+
+				case "tab-content-group":
+				case "tcg":
+					Type = ElementType.TabSelectorGroup;
+					Name = "tab-content-group";
+					break;
 			}
 
 			// At this stage we have all the classes, apply them
 			Classes = classesBuilder?.ToArray();
 
 			// Go through all space separated configurations before getting to the value
-			if (remainingDataToParse != null)
+			var isTabType = ((int)ElementType.TabContent >= 100 && (int)ElementType.TabContent <= 103);
+			if (remainingDataToParse != null || isTabType)
 			{
 				Configurations = new Dictionary<string, string>();
 				while(remainingDataToParse != null && remainingDataToParse.Length > 0)
@@ -251,6 +268,35 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 							}
 							throw new Exception("Unknown keyword: " + nextWord);
 					}
+				}
+
+				// Configuration post processing for types
+				switch (Type)
+				{
+					case ElementType.TabContentGroup:
+						Configurations["id"] = "tcg::" + Value;
+						break;
+					case ElementType.TabSelectorGroup:
+						Configurations["id"] = "tsg::" + Value;
+						break;
+
+					case ElementType.TabSelector:
+						{
+							if(Parent == null || Parent.Type != ElementType.TabSelectorGroup)
+								throw new SectionException("", reader.First, reader.Text.Substring(reader.First.Length), "Expected a tab-selector-group parent for this type", reader.LineNumber);
+
+							var selectorGroupId = "tsg::" + Parent.Value;
+							var contentGroupId  = "tcg::"  + Parent.Value;
+
+							if (!Configurations.TryGetValue("id", out var selectorId))
+								Configurations["id"] = selectorId = $"{selectorGroupId}::{Guid.NewGuid().ToString().Replace("-","")}";
+
+							if(!Configurations.TryGetValue("content-id", out var contentId) && !Configurations.TryGetValue("c-id", out contentId))
+								throw new SectionException("", reader.Text, "", "Expected configurator content-id(\"tab-id\")", reader.LineNumber);
+
+							Configurations["onclick"] = $"selectTab('{selectorGroupId}', '{selectorId}', '{contentGroupId}', '{contentId}')";
+						}
+						break;
 				}
 
 				if (Configurations.Count == 0)

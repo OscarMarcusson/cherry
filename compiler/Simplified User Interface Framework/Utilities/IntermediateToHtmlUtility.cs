@@ -175,13 +175,11 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 					}
 					break;
 
-				case ElementType.TabContent:
-					writer.Write($"{element.Name}{element.HtmlFormattedClasses()}");
-					break;
-
 				case ElementType.None:
+				case ElementType.TabContent:
+				case ElementType.TabSelectorGroup:
+				case ElementType.TabContentGroup:
 					writer.Write(element.Name + element.HtmlFormattedClasses());
-					// writer.Write($"{element.Name} {classes}type=\"{element.Type}\"");
 					break;
 
 				default: throw new NotImplementedException("Has not implemented a parser for built-in type " + element.Type);
