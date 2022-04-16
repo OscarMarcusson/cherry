@@ -5,4 +5,12 @@
     <RootNamespace>SimplifiedUserInterfaceFramework</RootNamespace>
   </PropertyGroup>
 
+  <ItemGroup>
+    <None Remove="Resources\Javascript\Tabs.js" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Javascript\Tabs.js" />
+  </ItemGroup>
+
 </Project>
