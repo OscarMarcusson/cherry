@@ -38,7 +38,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 			{
 				if(elementReader.Children.Count > 0)
 				{
-					var elementName = elementReader.Text.Replace(" ", "");
+					var elementName = elementReader.Text;
 					if (!Elements.TryGetValue(elementName, out var element))
 						Elements[elementName] = element = new Element();
 
