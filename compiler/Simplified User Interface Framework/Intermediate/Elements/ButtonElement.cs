@@ -21,9 +21,11 @@ namespace SimplifiedUserInterfaceFramework.Intermediate.Elements
 			if (HasValue)
 			{
 				writer.Write(" value=\"");
-				this.ValueToHtml(writer);
+				ValueToHtml(writer);
 				writer.Write('"');
 			}
 		}
+
+		protected override bool WriteValueAutomatically => false;
 	}
 }

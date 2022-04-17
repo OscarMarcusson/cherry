@@ -42,5 +42,8 @@ namespace SimplifiedUserInterfaceFramework.Intermediate.Elements
 			if (!string.IsNullOrWhiteSpace(Alt))
 				writer.Write($" alt=\"{Alt}\"");
 		}
+
+
+		protected override bool WriteValueAutomatically => false;
 	}
 }

@@ -455,8 +455,8 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 			}
 			else
 			{
-				if (HasValue && Type == ElementType.None)
-					this.ValueToHtml(writer);
+				if(WriteValueAutomatically)
+					ValueToHtml(writer);
 			}
 
 			// ...</ELEMENT>
@@ -464,7 +464,9 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 		}
 
 
+		protected virtual bool WriteValueAutomatically => Type == ElementType.None;
 
+		
 		private int ToStartHtmlStream(StreamWriter writer, Document document, int customIndent = -1)
 		{
 			var indentNumber = customIndent > -1 ? customIndent : Indent;
@@ -510,6 +512,54 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 		protected virtual void WriteCoreHtmlDefinition(StreamWriter writer)
 		{
 			writer.Write(Name + HtmlFormattedClasses());
+		}
+
+
+
+
+		public virtual void ValueToHtml(StreamWriter writer)
+		{
+			if (!HasValue)
+				return;
+
+			int i;
+			var valueToPrint = Value;
+			// Replace spaces at start with HTML formatted spaces
+			for (i = 0; i < valueToPrint.Length; i++)
+			{
+				if (valueToPrint[i] == ' ')
+					writer.Write("&nbsp;");
+
+				else break;
+			}
+
+			if (i > 0)
+				valueToPrint = valueToPrint.Substring(i);
+
+
+			// Replace spaces at the end with HTML formatted spaces
+			int startAt = valueToPrint.Length - 1;
+			for (i = startAt; i >= 0; i--)
+			{
+				if (valueToPrint[i] != ' ')
+					break;
+			}
+
+			if (i != startAt)
+			{
+				valueToPrint = valueToPrint.Substring(0, i + 1);
+				writer.Write(valueToPrint);
+
+				var numberOfSpaces = startAt - i;
+				for (i = 0; i < numberOfSpaces; i++)
+					writer.Write("&nbsp;");
+			}
+
+			// Nothing at the end
+			else
+			{
+				writer.Write(valueToPrint);
+			}
 		}
 
 

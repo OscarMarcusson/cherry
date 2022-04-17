@@ -64,5 +64,8 @@ namespace SimplifiedUserInterfaceFramework.Intermediate.Elements
 			}
 			Tabs = tabs.ToArray();
 		}
+
+
+		protected override bool WriteValueAutomatically => false;
 	}
 }
