@@ -353,6 +353,21 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 			Classes.Add(c);
 		}
 
+		internal void AddStyle(string key, object value)
+		{
+			if (InlinedStyles == null)
+				InlinedStyles = new Dictionary<string, string>();
+
+			var valueAsString = value?.ToString();
+			if (string.IsNullOrWhiteSpace(valueAsString))
+			{
+				if (InlinedStyles.ContainsKey(key))
+					InlinedStyles.Remove(key);
+			}
+			else
+				InlinedStyles[key] = value?.ToString();
+		}
+
 		protected virtual void OnLoad() { }
 		protected virtual bool AddChildrenAutomatically => true;
 
