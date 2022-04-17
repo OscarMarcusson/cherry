@@ -25,7 +25,6 @@ namespace SimplifiedUserInterfaceFramework.Intermediate.Elements
 		bool isHorizontal;
 		Element listHolder;
 		Element contentHolder;
-		string listSize;
 
 
 		public TabsElement(LineReader reader, Element parent = null) : base(reader, parent, false) 
@@ -89,38 +88,30 @@ namespace SimplifiedUserInterfaceFramework.Intermediate.Elements
 			ApplyClass(this);
 
 			isHorizontal = ListAlignment == ListAlignment.Left || ListAlignment == ListAlignment.Right;
-			listSize = isHorizontal
-				? (List.InlinedStyles?["width"] ?? "15em")
-				: (List.InlinedStyles?["height"] ?? "2em")
-				;
 
+			AddStyle("display", "flex");
 			switch (ListAlignment)
 			{
-				case ListAlignment.Left:
-				case ListAlignment.Top:
-					AddListHolder();
-					AddContentHolder();
-					break;
-					
-				default:
-					AddContentHolder();
-					AddListHolder();
-					break;
+				case ListAlignment.Left: AddStyle("flex-direction", "row"); break;
+				case ListAlignment.Top: AddStyle("flex-direction", "column"); break;
+				case ListAlignment.Right: AddStyle("flex-direction", "row-reverse"); break;
+				case ListAlignment.Bottom: AddStyle("flex-direction", "column-reverse"); break;
 			}
+
+			AddListHolder();
+			AddContentHolder();
 
 			for(int i = 0; i < Tabs.Length; i++)
 			{
 				var tab = Tabs[i];
+				Element listItem = null;
 
 				if(tab.Type == ElementType.Separator)
 				{
-					var listItem = listHolder.AddChild(new LineReader(isHorizontal ? "horizontal-separator" : "vertical-separator"));
-					listItem.AddStyle("display", "block");
+					listItem = listHolder.AddChild(new LineReader(isHorizontal ? "horizontal-separator" : "vertical-separator"));
 					listItem.AddStyle(isHorizontal ? "height" : "width", "1px");
 					listItem.AddStyle(isHorizontal ? "width" : "height", "100%");
 					listItem.AddStyle("background-color", "black");
-					if (!isHorizontal)
-						listItem.AddStyle("float", "left");
 					ApplyClass(listItem);
 				}
 				else
@@ -130,29 +121,22 @@ namespace SimplifiedUserInterfaceFramework.Intermediate.Elements
 					var name = tab.Configurations?["name"] ?? value;
 					
 					// List item
-					var listItem = listHolder.AddChild(new LineReader("tab-button = " + name));
-					listItem.AddStyle("display", "block");
+					listItem = listHolder.AddChild(new LineReader("tab-button = " + name));
 					if(List.ChildStyles != null)
 					{
 						foreach (var style in List.ChildStyles)
 							listItem.AddStyle(style.Key, style.Value);
 					}
-					if (!isHorizontal)
-					{
-						listItem.AddStyle("float", "left");
-						listItem.AddStyle("height", "100%"); // TODO:: calc(100% - margin);
-					}
+					
 					ApplyClass(listItem);
 
 					// Tab
 					var content = contentHolder.AddChild(tab.Source);
-					content.AddStyle("position", "absolute");
-					content.AddStyle("left", "0");
-					content.AddStyle("top", "0");
-					content.AddStyle("right", "0");
-					// content.AddStyle("bottom", "0");
 					ApplyClass(content);
 				}
+
+				// Shared listitem values
+				listItem.AddStyle("display", isHorizontal ? "block" : "table-cell");
 			}
 		}
 
@@ -169,23 +153,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate.Elements
 		{
 			var className = isHorizontal ? "horizontal" : "vertical";
 			listHolder = AddChild(new LineReader($"tab-list.{className}", Source));
-
-			if (isHorizontal)
-			{
-				listHolder.AddStyle("width", "15em");	// TODO:: Replace with default css
-				listHolder.AddStyle("top", "0");
-				listHolder.AddStyle("bottom", "0");
-				listHolder.AddStyle(ListAlignment == ListAlignment.Left ? "left" : "right", "0");
-			}
-			else
-			{
-				listHolder.AddStyle("height", "2em");  // TODO:: Replace with default css
-				listHolder.AddStyle("left", "0");
-				listHolder.AddStyle("right", "0");
-				listHolder.AddStyle(ListAlignment == ListAlignment.Top ? "top" : "bottom", "0");
-			}
 			listHolder.AddStyle("display", "block");
-			listHolder.AddStyle("position", "absolute");
 
 			if (List.InlinedStyles != null)
 			{
@@ -195,12 +163,12 @@ namespace SimplifiedUserInterfaceFramework.Intermediate.Elements
 					{
 						case "width":
 							if(isHorizontal)
-								listHolder.InlinedStyles[style.Key] = style.Value;
+								listHolder.AddStyle(style.Key, style.Value);
 							break;
 
 						case "height":
 							if (!isHorizontal)
-								listHolder.InlinedStyles[style.Key] = style.Value;
+								listHolder.AddStyle(style.Key, style.Value);
 							break;
 
 						// Ignore
@@ -212,7 +180,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate.Elements
 							break;
 
 						default:
-							listHolder.InlinedStyles[style.Key] = style.Value;
+							listHolder.AddStyle(style.Key, style.Value);
 							break;
 					}
 				}
@@ -223,40 +191,10 @@ namespace SimplifiedUserInterfaceFramework.Intermediate.Elements
 		void AddContentHolder()
 		{
 			contentHolder = AddChild(new LineReader("tab-content", Source));
-			contentHolder.AddStyle("position", "absolute");
-			contentHolder.AddStyle("display", "block");
 			contentHolder.AddStyle("overflow", "auto");
+			
 
-			if (isHorizontal)
-			{
-				contentHolder.AddStyle("top", "0");
-				contentHolder.AddStyle("bottom", "0");
-				if (ListAlignment == ListAlignment.Left)
-				{
-					contentHolder.AddStyle("left", listSize);
-					contentHolder.AddStyle("right", 0);
-				}
-				else
-				{
-					contentHolder.AddStyle("left", 0);
-					contentHolder.AddStyle("right", listSize);
-				}
-			}
-			else
-			{
-				contentHolder.AddStyle("left", "0");
-				contentHolder.AddStyle("right", "0");
-				if (ListAlignment == ListAlignment.Top)
-				{
-					contentHolder.AddStyle("top", listSize);
-					contentHolder.AddStyle("bottom", 0);
-				}
-				else
-				{
-					contentHolder.AddStyle("top", 0);
-					contentHolder.AddStyle("bottom", listSize);
-				}
-			}
+			contentHolder.AddStyle("flex-grow", "1");
 
 			if (Content.InlinedStyles != null)
 			{
