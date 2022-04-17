@@ -23,6 +23,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 		TabContent  = 101,
 		TabSelectorGroup  = 102,
 		TabContentGroup  = 103,
+		Tabs = 104,
 	}
 
 	public class Element

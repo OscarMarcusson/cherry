@@ -21,7 +21,11 @@ namespace SimplifiedUserInterfaceFramework.Intermediate.Elements
 		public Element[] Tabs { get; private set; }
 
 
-		public TabsElement(LineReader reader, Element parent = null) : base(reader, parent, false) { }
+		public TabsElement(LineReader reader, Element parent = null) : base(reader, parent, false) 
+		{
+			Name = "tabs";
+			Type = ElementType.Tabs;
+		}
 
 
 		protected override void OnLoad()
