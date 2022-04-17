@@ -8,11 +8,10 @@ namespace SimplifiedUserInterfaceFramework.Intermediate.Elements
 {
 	public class ButtonElement : Element
 	{
-		public ButtonElement(LineReader reader, Element parent = null) : base(reader, parent, false) { }
-
-		protected override void OnLoad()
+		public ButtonElement(LineReader reader, Element parent = null) : base(reader, parent, false)
 		{
-			
+			Name = "button";
+			Type = ElementType.Button;
 		}
 
 

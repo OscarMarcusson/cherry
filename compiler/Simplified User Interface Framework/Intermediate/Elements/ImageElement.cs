@@ -12,7 +12,11 @@ namespace SimplifiedUserInterfaceFramework.Intermediate.Elements
 		public int? Height { get; private set; }
 		public string Alt { get; private set; }
 
-		public ImageElement(LineReader reader, Element parent = null) : base(reader, parent, false) { }
+		public ImageElement(LineReader reader, Element parent = null) : base(reader, parent, false) 
+		{
+			Name = "image";
+			Type = ElementType.Image;
+		}
 
 		protected override void OnLoad()
 		{

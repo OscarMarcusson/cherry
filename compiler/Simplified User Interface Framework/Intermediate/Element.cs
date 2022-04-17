@@ -96,12 +96,6 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 			{
 				switch (Name.ToLower())
 				{
-					case "btn":
-					case "button":
-						Type = ElementType.Button;
-						break;
-
-
 					// TABS
 					case "tab-selector":
 					case "ts":
@@ -380,9 +374,9 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 			{
 				case "tabs":   return new TabsElement(reader, this) { Name = name }.LoadContent();
 				case "img":
-				case "image":  return new ImageElement(reader, this) { Name = "image", Type = ElementType.Image }.LoadContent();
+				case "image":  return new ImageElement(reader, this).LoadContent();
 				case "btn":
-				case "button": return new ButtonElement(reader, this) { Name = "button", Type = ElementType.Button }.LoadContent();
+				case "button": return new ButtonElement(reader, this).LoadContent();
 				default:       return new Element(reader, this, false) { Name = name }.LoadContent();
 			}
 		}
