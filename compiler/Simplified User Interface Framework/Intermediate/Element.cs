@@ -1,6 +1,8 @@
-﻿using SimplifiedUserInterfaceFramework.Internal.Reader;
+﻿using SimplifiedUserInterfaceFramework.Intermediate.Elements;
+using SimplifiedUserInterfaceFramework.Internal.Reader;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,6 +16,8 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 		Button = 1,
 		Image = 2,
 
+		Separator = 10,
+
 		TabSelector = 100,
 		TabContent  = 101,
 		TabSelectorGroup  = 102,
@@ -22,30 +26,33 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 
 	public class Element
 	{
-		readonly LineReader Source;
+		internal readonly LineReader Source;
 		public readonly Element Parent;
 		public readonly List<Element> Children = new List<Element>();
 		public readonly int Indent;
 
-		public readonly string Name;
-		public readonly ElementType Type;
-		public readonly string Value;
-		public readonly string[] Classes;
-		public readonly Dictionary<string,string> Configurations;
-		public readonly Dictionary<string, string> InlinedStyles;
-		public readonly Dictionary<string, string> ChildStyles;
-		public readonly ValueSection[] SeparatedValues;
+		public string Name { get; protected set; }
+		public ElementType Type { get; protected set; }
+		public string Value { get; protected set; }
+		public string[] Classes { get; private set; }
+		public Dictionary<string,string> Configurations { get; private set; }
+		public Dictionary<string, string> InlinedStyles { get; private set; }
+		public Dictionary<string, string> ChildStyles { get; private set; }
+		public ValueSection[] SeparatedValues { get; private set; }
 		public Dictionary<string, string> Events { get; private set; }
-		public readonly string Binding;
+		public string Binding { get; private set; }
 
 		public bool HasValue => !string.IsNullOrWhiteSpace(Value);
 
 
 		public override string ToString() => Value != null ? $"{Name} = {Value}" : Name;
 
-		public Element() { }
+		public Element() : this(null, null, true) { }
 
-		public Element(LineReader reader, Element parent = null)
+		public Element(LineReader reader, Element parent = null) : this(reader, parent, true) { }
+
+		// A core constructor allows us to hide our content loading shenanigans
+		protected Element(LineReader reader, Element parent, bool loadContentAutomatically)
 		{
 			Source = reader;
 
@@ -56,126 +63,88 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 				Indent = parent.Indent + 1;
 			}
 
+			if (loadContentAutomatically)
+				LoadContent();
+		}
 
-			var index = IndexOfValueStart(reader.Text); //  reader.Text.IndexOf('=');
-			Name = index > -1 ? reader.Text.Substring(0, index).Trim() : reader.Text.Trim();
 
-			if(index > -1)
+		protected virtual void OnLoad() { }
+
+		private Element LoadContent()
+		{
+			var index = ElementParser.IndexOfValueStart(Source.Text);
+			var remainingDataToParse = index > -1 ? Source.Text.Substring(0, index).Trim() : Source.Text.Trim();
+			if (index > -1)
 			{
-				Value = reader.Text.Substring(index + 1).Trim();
+				Value = Source.Text.Substring(index + 1).Trim();
 				if (Value.Length > 1 && Value[0] == '"' && Value[Value.Length - 1] == '"')
 					Value = Value.Substring(1, Value.Length - 2);
 			}
 
-			var splitIndex = Name.IndexOf('>');
-			string remainingDataToParse = null;
-			List<string> classesBuilder = null;
-
-			// Macro name parsing
-			// if (Name.StartsWith("#"))
-			// {
-			// 	if (Name.StartsWith("##"))
-			// 	{
-			// 		Name = "## " + Name.Substring(2).TrimStart();
-			// 	}
-			// 	else
-			// 	{
-			// 		Name = "# " + Name.Substring(1).TrimStart();
-			// 	}
-			// 	return;
-			// }
-
-			// Normal name parsing
-			index = Name.IndexOf('.');
-			if (index > -1 && (splitIndex < 0 || index < splitIndex))
-			{
-				var indexToNextSpace = Name.IndexOf(' ');
-				if(indexToNextSpace < 0)
-				{
-					if (splitIndex > -1)
-						indexToNextSpace = splitIndex;
-				}
-				else if(splitIndex > -1)
-				{
-					indexToNextSpace = Math.Min(indexToNextSpace, splitIndex);
-				}
-
-
-				string stringToParse;
-				if (indexToNextSpace > -1)
-				{
-					stringToParse = Name.Substring(index + 1, indexToNextSpace - index - 1);
-					remainingDataToParse = Name.Substring(indexToNextSpace).TrimStart();
-				}
-				else
-				{
-					stringToParse = Name.Substring(index + 1);
-				}
-
-				classesBuilder = stringToParse.Split('.', StringSplitOptions.RemoveEmptyEntries).ToList();
-				Name = Name.Substring(0, index);
-			}
-			else
-			{
-				index = Name.IndexOf(' ');
-				if (index > -1)
-				{
-					remainingDataToParse = Name.Substring(index).TrimStart();
-					Name = Name.Substring(0, index);
-				}
-			}
+			// If not already done, extract the name
+			if(Name == null)
+				Name = ElementParser.GetName(remainingDataToParse, Source.LineNumber);
+			
+			// Extract classes
+			if(remainingDataToParse != null)
+				remainingDataToParse = Name.Length < remainingDataToParse.Length ? remainingDataToParse.Substring(Name.Length).TrimStart() : null;
+			var classes = ElementParser.ExtractClasses(remainingDataToParse, out remainingDataToParse);
 
 			// Resolve the type
-			switch (Name.ToLower())
+			if(Type == ElementType.None)
 			{
-				case "img":
-				case "image":
-					Type = ElementType.Image;
-					break;
-
-				case "btn":
-				case "button":
-					Type = ElementType.Button;
-					break;
+				switch (Name.ToLower())
+				{
+					case "btn":
+					case "button":
+						Type = ElementType.Button;
+						break;
 
 
-				// TABS
-				case "tab-selector":
-				case "ts":
-					{
-						Type = ElementType.TabSelector;
-						Name = "input";
-						// Add class
-						if (classesBuilder == null)
-							classesBuilder = new List<string>();
-						classesBuilder.Add("tab-selector");
-					}
-					break;
+					// TABS
+					case "tab-selector":
+					case "ts":
+						{
+							Type = ElementType.TabSelector;
+							Name = "input";
+							// Add class
+							if (classes == null)
+								classes = new List<string>();
+							classes.Add("tab-selector");
+						}
+						break;
 
-				case "tab-content":
-				case "tc":
-					Type = ElementType.TabContent;
-					Name = "tab-content";
-					break;
+					case "tab-content":
+					case "tc":
+						Type = ElementType.TabContent;
+						Name = "tab-content";
+						break;
 
-				case "tab-selector-group":
-				case "tsg":
-					Type = ElementType.TabSelectorGroup;
-					Name = "tab-selector-group";
-					break;
+					case "tab-selector-group":
+					case "tsg":
+						Type = ElementType.TabSelectorGroup;
+						Name = "tab-selector-group";
+						break;
 
-				case "tab-content-group":
-				case "tcg":
-					Type = ElementType.TabContentGroup;
-					Name = "tab-content-group";
-					break;
+					case "tab-content-group":
+					case "tcg":
+						Type = ElementType.TabContentGroup;
+						Name = "tab-content-group";
+						break;
+
+					case "---":
+					case "separator":
+						Type = ElementType.Separator;
+						Name = "separator";
+						break;
+				}
 			}
 
 			// At this stage we have all the classes, apply them
-			Classes = classesBuilder?.ToArray();
+			Classes = classes?.ToArray();
 
 			// Go through all space separated configurations before getting to the value
-			var isTabType = ((int)ElementType.TabContent >= 100 && (int)ElementType.TabContent <= 103);
+			var isTabType = ((int)Type >= 100 && (int)Type <= 103);
 			if (remainingDataToParse != null || isTabType)
 			{
 				Configurations = new Dictionary<string, string>();
@@ -191,8 +160,8 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 							if (!string.IsNullOrWhiteSpace(Value))
 								nextElement += "=" + Value;
 
-							nextElement = new string('\t', reader.Indentation + 1) + nextElement;
-							var newReader = new LineReader(nextElement, lineNumber:reader.LineNumber);
+							nextElement = new string('\t', Source.Indentation + 1) + nextElement;
+							var newReader = new LineReader(nextElement, lineNumber: Source.LineNumber);
 							var child = AddChild(newReader);
 
 							// Resolve the deepest child level, this works since the "a > b > c" logic only has one child
@@ -200,11 +169,11 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 								child = child.Children[0];
 
 							// Create children
-							foreach (var realChild in reader.Children)
+							foreach (var realChild in Source.Children)
 								child.AddChild(realChild);
 
 							// Since we've resolved inlined elements we can be certain that we are done with this element, so hard return
-							return;
+							goto CompleteLoad;
 
 						default:
 							index = remainingDataToParse.IndexOf('(');
@@ -283,7 +252,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 					case ElementType.TabSelector:
 						{
 							if(Parent == null || Parent.Type != ElementType.TabSelectorGroup)
-								throw new SectionException("", reader.First, reader.Text.Substring(reader.First.Length), "Expected a tab-selector-group parent for this type", reader.LineNumber);
+								throw new SectionException("", Source.First, Source.Text.Substring(Source.First.Length), "Expected a tab-selector-group parent for this type", Source.LineNumber);
 
 							var selectorGroupId = "tsg::" + Parent.Value;
 							var contentGroupId  = "tcg::"  + Parent.Value;
@@ -292,7 +261,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 								Configurations["id"] = selectorId = $"{selectorGroupId}::{Guid.NewGuid().ToString().Replace("-","")}";
 
 							if(!Configurations.TryGetValue("content-id", out var contentId) && !Configurations.TryGetValue("c-id", out contentId))
-								throw new SectionException("", reader.Text, "", "Expected configurator content-id(\"tab-id\")", reader.LineNumber);
+								throw new SectionException("", Source.Text, "", "Expected configurator content-id(\"tab-id\")", Source.LineNumber);
 
 							Configurations["onclick"] = $"selectTab('{selectorGroupId}', '{selectorId}', '{contentGroupId}', '{contentId}')";
 						}
@@ -344,50 +313,76 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 
 
 			// Parse the child objects, either as element children or as inlined styles
-			foreach (var child in reader.Children)
+			if (AddChildrenAutomatically)
 			{
-				if (child.Text.StartsWith("#"))
+				foreach (var child in Source.Children)
 				{
-					string rawLine;
-					Dictionary<string, string> list;
-					if (child.Text.Length > 1 && child.Text[1] == '#')
+					if (child.Text.StartsWith("#"))
 					{
-						if (ChildStyles == null)
-							ChildStyles = new Dictionary<string, string>();
-						list = ChildStyles;
-						rawLine = child.Text.Substring(2).TrimStart();
-					}
-					else
-					{
-						if (InlinedStyles == null)
-							InlinedStyles = new Dictionary<string, string>();
-						list = InlinedStyles;
-						rawLine = child.Text.Substring(1).TrimStart();
-					}
+						string rawLine;
+						Dictionary<string, string> list;
+						if (child.Text.Length > 1 && child.Text[1] == '#')
+						{
+							if (ChildStyles == null)
+								ChildStyles = new Dictionary<string, string>();
+							list = ChildStyles;
+							rawLine = child.Text.Substring(2).TrimStart();
+						}
+						else
+						{
+							if (InlinedStyles == null)
+								InlinedStyles = new Dictionary<string, string>();
+							list = InlinedStyles;
+							rawLine = child.Text.Substring(1).TrimStart();
+						}
 
-					index = rawLine.IndexOf('=');
-					if(index > 0)
-					{
-						var key = rawLine.Substring(0, index).TrimEnd();
-						var value = rawLine.Substring(index+1).TrimStart();
-						// TODO:: Implement some duplicate check
-						list[key] = value;
+						index = rawLine.IndexOf('=');
+						if(index > 0)
+						{
+							var key = rawLine.Substring(0, index).TrimEnd();
+							var value = rawLine.Substring(index+1).TrimStart();
+							// TODO:: Implement some duplicate check
+							list[key] = value;
+						}
+						else
+						{
+							// TODO:: Better error
+							throw new Exception("Could not parse inlined style, no equals sign found: " + child.Text);
+						}
 					}
 					else
 					{
-						// TODO:: Better error
-						throw new Exception("Could not parse inlined style, no equals sign found: " + child.Text);
+						AddChild(child);
 					}
-				}
-				else
-				{
-					AddChild(child);
 				}
 			}
+
+			CompleteLoad:
+			OnLoad();
+			return this;
 		}
 
+		protected virtual bool AddChildrenAutomatically => true;
 
-		public Element AddChild(LineReader reader) => new Element(reader, this);
+
+		public Element AddChild(LineReader reader)
+		{
+			if (reader.First.StartsWith("#"))
+				new WordReader(reader).ThrowWordError(0, "Can't add inlined styles as a child element");
+
+			var name = ElementParser.GetName(reader.First, reader.LineNumber);
+			var index = name.IndexOf('.');
+			if (index > 0 && index < name.Length-1)
+				name = name.Substring(0, index);
+
+			switch (name)
+			{
+				case "tabs":  return new TabsElement(reader, this) { Name = name }.LoadContent();
+				case "img":
+				case "image": return new ImageElement(reader, this) { Name = name, Type = ElementType.Image }.LoadContent();
+				default:      return new Element(reader, this, false) { Name = name }.LoadContent();
+			}
+		}
 
 
 
@@ -411,32 +406,6 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 			foreach (var child in Children)
 				child.ResolveBindings(document);
 		}
-
-
-
-
-
-
-		static int IndexOfValueStart(string line, int startAt = 0)
-		{
-			var index = line.IndexOf('=', startAt);
-			if (index < 0)
-				return index;
-
-			var groupStart = line.LastIndexOf('(', index);
-			if (groupStart > -1)
-			{
-				var groupEnd = line.IndexOf(')', groupStart);
-				// Does the group end before this split index?
-				if (groupEnd > index)
-					return IndexOfValueStart(line, groupEnd);
-			}
-
-			return index;
-		}
-
-
-
 
 
 

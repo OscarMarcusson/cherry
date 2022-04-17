@@ -179,6 +179,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 				case ElementType.TabContent:
 				case ElementType.TabSelectorGroup:
 				case ElementType.TabContentGroup:
+				case ElementType.Separator:
 					writer.Write(element.Name + element.HtmlFormattedClasses());
 					break;
 
