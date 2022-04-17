@@ -123,6 +123,16 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 						Type = ElementType.Separator;
 						Name = "separator";
 						break;
+
+					// Specials
+					case "horizontal":
+						AddChildStyle("display", "inline");
+						break;
+
+					case "horizontal-fill":
+						AddChildStyle("display", "inline");
+						AddStyle("display", "block");
+						break;
 				}
 			}
 
@@ -366,6 +376,21 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 			}
 			else
 				InlinedStyles[key] = value?.ToString();
+		}
+
+		internal void AddChildStyle(string key, object value)
+		{
+			if (ChildStyles == null)
+				ChildStyles = new Dictionary<string, string>();
+
+			var valueAsString = value?.ToString();
+			if (string.IsNullOrWhiteSpace(valueAsString))
+			{
+				if (ChildStyles.ContainsKey(key))
+					ChildStyles.Remove(key);
+			}
+			else
+				ChildStyles[key] = value?.ToString();
 		}
 
 		protected virtual void OnLoad() { }
