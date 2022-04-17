@@ -119,9 +119,10 @@ namespace SimplifiedUserInterfaceFramework.Intermediate.Elements
 					// Shared data
 					var value = tab.HasValue ? tab.Value : i.ToString();
 					var name = tab.Configurations?["name"] ?? value;
+					var directionClass = isHorizontal ? "vertical" : "horizontal";
 					
 					// List item
-					listItem = listHolder.AddChild(new LineReader("tab-button = " + name));
+					listItem = listHolder.AddChild(new LineReader($"tab-button.{directionClass} = {name}"));
 					if(List.ChildStyles != null)
 					{
 						foreach (var style in List.ChildStyles)
@@ -191,6 +192,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate.Elements
 		void AddContentHolder()
 		{
 			contentHolder = AddChild(new LineReader("tab-content", Source));
+			ApplyClass(contentHolder);
 			contentHolder.AddStyle("overflow", "auto");
 			
 
