@@ -86,7 +86,6 @@ namespace SimplifiedUserInterfaceFramework.Intermediate.Elements
 
 			// Rebuild the actual tabs hierarchy
 			Children.Clear();
-			AddClass("tabs");
 			ApplyClass(this);
 
 			isHorizontal = ListAlignment == ListAlignment.Left || ListAlignment == ListAlignment.Right;
@@ -126,8 +125,11 @@ namespace SimplifiedUserInterfaceFramework.Intermediate.Elements
 				}
 				else
 				{
+					// Shared data
 					var value = tab.HasValue ? tab.Value : i.ToString();
 					var name = tab.Configurations?["name"] ?? value;
+					
+					// List item
 					var listItem = listHolder.AddChild(new LineReader("tab-button = " + name));
 					listItem.AddStyle("display", "block");
 					if(List.ChildStyles != null)
@@ -141,6 +143,10 @@ namespace SimplifiedUserInterfaceFramework.Intermediate.Elements
 						listItem.AddStyle("height", "100%"); // TODO:: calc(100% - margin);
 					}
 					ApplyClass(listItem);
+
+					// Tab
+					var content = contentHolder.AddChild(tab.Source);
+					ApplyClass(content);
 				}
 			}
 		}
