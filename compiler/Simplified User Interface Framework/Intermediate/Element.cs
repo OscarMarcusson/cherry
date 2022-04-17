@@ -32,9 +32,9 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 		public readonly List<Element> Children = new List<Element>();
 		public readonly int Indent;
 
-		public string Name { get; protected set; }
-		public ElementType Type { get; protected set; }
-		public string Value { get; protected set; }
+		public string Name { get; internal set; }
+		public ElementType Type { get; internal set; }
+		public string Value { get; internal set; }
 		public string[] Classes { get; private set; }
 		public Dictionary<string,string> Configurations { get; private set; }
 		public Dictionary<string, string> InlinedStyles { get; private set; }
@@ -45,15 +45,10 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 
 		public bool HasValue => !string.IsNullOrWhiteSpace(Value);
 
-
 		public override string ToString() => Value != null ? $"{Name} = {Value}" : Name;
 
-		public Element() : this(null, null, true) { }
-
-		public Element(LineReader reader, Element parent = null) : this(reader, parent, true) { }
-
 		// A core constructor allows us to hide our content loading shenanigans
-		protected Element(LineReader reader, Element parent, bool loadContentAutomatically)
+		internal Element(LineReader reader, Element parent, bool loadContentAutomatically)
 		{
 			Source = reader;
 
@@ -69,9 +64,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 		}
 
 
-		protected virtual void OnLoad() { }
-
-		private Element LoadContent()
+		internal Element LoadContent()
 		{
 			var index = ElementParser.IndexOfValueStart(Source.Text);
 			var remainingDataToParse = index > -1 ? Source.Text.Substring(0, index).Trim() : Source.Text.Trim();
@@ -357,29 +350,12 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 			return this;
 		}
 
+		protected virtual void OnLoad() { }
 		protected virtual bool AddChildrenAutomatically => true;
 
 
-		public Element AddChild(LineReader reader)
-		{
-			if (reader.First.StartsWith("#"))
-				new WordReader(reader).ThrowWordError(0, "Can't add inlined styles as a child element");
+		public Element AddChild(LineReader reader) => reader.ToElement(this);
 
-			var name = ElementParser.GetName(reader.First, reader.LineNumber);
-			var index = name.IndexOf('.');
-			if (index > 0 && index < name.Length-1)
-				name = name.Substring(0, index);
-
-			switch (name)
-			{
-				case "tabs":   return new TabsElement(reader, this) { Name = name }.LoadContent();
-				case "img":
-				case "image":  return new ImageElement(reader, this).LoadContent();
-				case "btn":
-				case "button": return new ButtonElement(reader, this).LoadContent();
-				default:       return new Element(reader, this, false) { Name = name }.LoadContent();
-			}
-		}
 
 
 

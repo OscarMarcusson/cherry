@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using SimplifiedUserInterfaceFramework.Intermediate.Elements;
+using SimplifiedUserInterfaceFramework.Internal.Reader;
 
 namespace SimplifiedUserInterfaceFramework.Intermediate
 {
@@ -88,6 +90,29 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 			}
 
 			return index;
+		}
+
+
+		/// <summary> Converts a <see cref="LineReader"/> to a UI <see cref="Element"/>. Depending on the values of the reader this may return a specific element implementation. </summary>
+		public static Element ToElement(this LineReader reader, Element parent = null)
+		{
+			if (reader.First.StartsWith("#"))
+				new WordReader(reader).ThrowWordError(0, "Can't add inlined styles as a child element");
+
+			var name = GetName(reader.First, reader.LineNumber);
+			var index = name.IndexOf('.');
+			if (index > 0 && index < name.Length - 1)
+				name = name.Substring(0, index);
+
+			switch (name)
+			{
+				case "tabs":   return new TabsElement(reader, parent).LoadContent();
+				case "img":
+				case "image":  return new ImageElement(reader, parent).LoadContent();
+				case "btn":
+				case "button": return new ButtonElement(reader, parent).LoadContent();
+				default:       return new Element(reader, parent, false) { Name = name }.LoadContent();
+			}
 		}
 	}
 }
