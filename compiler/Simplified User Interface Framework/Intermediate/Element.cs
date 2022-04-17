@@ -3,6 +3,7 @@ using SimplifiedUserInterfaceFramework.Internal.Reader;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -377,10 +378,12 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 
 			switch (name)
 			{
-				case "tabs":  return new TabsElement(reader, this) { Name = name }.LoadContent();
+				case "tabs":   return new TabsElement(reader, this) { Name = name }.LoadContent();
 				case "img":
-				case "image": return new ImageElement(reader, this) { Name = name, Type = ElementType.Image }.LoadContent();
-				default:      return new Element(reader, this, false) { Name = name }.LoadContent();
+				case "image":  return new ImageElement(reader, this) { Name = "image", Type = ElementType.Image }.LoadContent();
+				case "btn":
+				case "button": return new ButtonElement(reader, this) { Name = "button", Type = ElementType.Button }.LoadContent();
+				default:       return new Element(reader, this, false) { Name = name }.LoadContent();
 			}
 		}
 
@@ -458,6 +461,104 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 				value = null;
 				return false;
 			}
+		}
+
+
+
+
+		public void ToHtmlStream(StreamWriter writer, Document document, int customIndent = -1, List<Element> customChildren = null)
+		{
+			var indent = ToStartHtmlStream(writer, document, customIndent: customIndent);
+
+			// Content  (<ELEMENT>Content</ELEMENT>)
+			customChildren = customChildren ?? Children;
+
+			if (customChildren.Count() > 0)
+			{
+				var indentString = new string('\t', indent);
+				writer.WriteLine();
+
+				foreach (var child in customChildren)
+					child.ToHtmlStream(writer, document, customIndent: indent + 1);
+				writer.Write(indentString);
+			}
+			else
+			{
+				if (HasValue && Type == ElementType.None)
+					this.ValueToHtml(writer);
+			}
+
+			// ...</ELEMENT>
+			ToEndHtmlStream(writer);
+		}
+
+
+
+		private int ToStartHtmlStream(StreamWriter writer, Document document, int customIndent = -1)
+		{
+			var indentNumber = customIndent > -1 ? customIndent : Indent;
+			var indent = indentNumber <= 0 ? "" : new string('\t', indentNumber);
+			writer.Write(indent);
+			writer.Write('<');
+
+			WriteCoreHtmlDefinition(writer);
+
+			// Inlined styles
+			if (InlinedStyles != null || Parent?.ChildStyles != null)
+			{
+				writer.Write(" style=\"");
+
+				if (InlinedStyles != null)
+					InlinedStyles.ToStyleStream(writer);
+
+				if (Parent?.ChildStyles != null)
+					Parent.ChildStyles.ToStyleStream(writer);
+
+				writer.Write('"');
+			}
+
+			// Shared configurations
+			if (Configurations != null)
+			{
+				if (Configurations.TryGetValue("id", out var id))
+					writer.Write($" id=\"{id}\"");
+
+				if (Configurations.TryGetValue("onload", out var onLoad))
+					writer.Write($" onload=\"{onLoad}\"");
+
+				if (Configurations.TryGetValue("onclick", out var onClick))
+					writer.Write($" onclick=\"{(onClick.EndsWith(")") ? onClick : $"{onClick}()")}\"");
+			}
+
+			writer.Write('>');
+
+			return indentNumber;
+		}
+
+
+		protected virtual void WriteCoreHtmlDefinition(StreamWriter writer)
+		{
+			writer.Write(Name + HtmlFormattedClasses());
+		}
+
+
+
+		protected virtual void ToEndHtmlStream(StreamWriter writer, int customIndent = 0)
+		{
+			if (customIndent > 0)
+				writer.Write(new string('\t', customIndent));
+
+			writer.WriteLine($"</{Name}>");
+		}
+
+
+
+		public string HtmlFormattedClasses()
+		{
+			if (Classes?.Length > 0)
+				return $" class=\"{string.Join(" ", Classes)}\"";
+
+			return null;
 		}
 	}
 }
