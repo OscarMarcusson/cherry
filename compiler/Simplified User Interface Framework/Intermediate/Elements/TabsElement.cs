@@ -146,6 +146,11 @@ namespace SimplifiedUserInterfaceFramework.Intermediate.Elements
 
 					// Tab
 					var content = contentHolder.AddChild(tab.Source);
+					content.AddStyle("position", "absolute");
+					content.AddStyle("left", "0");
+					content.AddStyle("top", "0");
+					content.AddStyle("right", "0");
+					// content.AddStyle("bottom", "0");
 					ApplyClass(content);
 				}
 			}
@@ -220,6 +225,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate.Elements
 			contentHolder = AddChild(new LineReader("tab-content", Source));
 			contentHolder.AddStyle("position", "absolute");
 			contentHolder.AddStyle("display", "block");
+			contentHolder.AddStyle("overflow", "auto");
 
 			if (isHorizontal)
 			{
