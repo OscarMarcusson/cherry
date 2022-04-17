@@ -36,13 +36,13 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 		public string Name { get; internal set; }
 		public ElementType Type { get; internal set; }
 		public string Value { get; internal set; }
-		public string[] Classes { get; private set; }
-		public Dictionary<string,string> Configurations { get; private set; }
-		public Dictionary<string, string> InlinedStyles { get; private set; }
-		public Dictionary<string, string> ChildStyles { get; private set; }
-		public ValueSection[] SeparatedValues { get; private set; }
-		public Dictionary<string, string> Events { get; private set; }
-		public string Binding { get; private set; }
+		public List<string> Classes { get; internal set; }
+		public Dictionary<string,string> Configurations { get; internal set; }
+		public Dictionary<string, string> InlinedStyles { get; internal set; }
+		public Dictionary<string, string> ChildStyles { get; internal set; }
+		public ValueSection[] SeparatedValues { get; internal set; }
+		public Dictionary<string, string> Events { get; internal set; }
+		public string Binding { get; internal set; }
 
 		public bool HasValue => !string.IsNullOrWhiteSpace(Value);
 
@@ -83,7 +83,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 			// Extract classes
 			if(remainingDataToParse != null)
 				remainingDataToParse = Name.Length < remainingDataToParse.Length ? remainingDataToParse.Substring(Name.Length).TrimStart() : null;
-			var classes = ElementParser.ExtractClasses(remainingDataToParse, out remainingDataToParse);
+			Classes = ElementParser.ExtractClasses(remainingDataToParse, out remainingDataToParse);
 
 			// Resolve the type
 			if(Type == ElementType.None)
@@ -96,10 +96,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 						{
 							Type = ElementType.TabSelector;
 							Name = "input";
-							// Add class
-							if (classes == null)
-								classes = new List<string>();
-							classes.Add("tab-selector");
+							AddClass("tab-selector");
 						}
 						break;
 
@@ -128,9 +125,6 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 						break;
 				}
 			}
-
-			// At this stage we have all the classes, apply them
-			Classes = classes?.ToArray();
 
 			// Go through all space separated configurations before getting to the value
 			var isTabType = ((int)Type >= 100 && (int)Type <= 103);
@@ -351,6 +345,14 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 			return this;
 		}
 
+		internal void AddClass(string c)
+		{
+			// Add class
+			if (Classes == null)
+				Classes = new List<string>();
+			Classes.Add(c);
+		}
+
 		protected virtual void OnLoad() { }
 		protected virtual bool AddChildrenAutomatically => true;
 
@@ -367,7 +369,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 				string id = Configurations["id"];
 				if (document.Bindings.ContainsKey(id))
 				{
-					var displayName = Classes?.Length > 0
+					var displayName = Classes?.Count > 0
 										? $"{Name}.{string.Join(".", Classes)}"
 										: Name;
 
@@ -576,7 +578,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 
 		public string HtmlFormattedClasses()
 		{
-			if (Classes?.Length > 0)
+			if (Classes?.Count > 0)
 				return $" class=\"{string.Join(" ", Classes)}\"";
 
 			return null;
