@@ -26,6 +26,43 @@ namespace SimplifiedUserInterfaceFramework.Intermediate.Elements
 		Element listHolder;
 		Element contentHolder;
 
+		string listHolderId;
+		string ListHolderId
+		{
+			get
+			{
+				if (listHolderId != null)
+					return listHolderId;
+
+				if (listHolder.Configurations == null)
+					listHolder.Configurations = new Dictionary<string, string>();
+
+				if (listHolder.Configurations.TryGetValue("id", out listHolderId))
+					return listHolderId;
+
+				listHolder.Configurations["id"] = listHolderId = $"tab-list::{Guid.NewGuid().ToString().Replace("-", "")}";
+				return listHolderId;
+			}
+		}
+
+		string contentHolderId;
+		string ContentHolderId
+		{
+			get
+			{
+				if (contentHolderId != null)
+					return contentHolderId;
+
+				if (contentHolder.Configurations == null)
+					contentHolder.Configurations = new Dictionary<string, string>();
+
+				if (contentHolder.Configurations.TryGetValue("id", out contentHolderId))
+					return contentHolderId;
+
+				contentHolder.Configurations["id"] = contentHolderId = $"tab-content::{Guid.NewGuid().ToString().Replace("-", "")}";
+				return contentHolderId;
+			}
+		}
 
 		public TabsElement(LineReader reader, Element parent = null) : base(reader, parent, false) 
 		{
@@ -104,6 +141,9 @@ namespace SimplifiedUserInterfaceFramework.Intermediate.Elements
 			for(int i = 0; i < Tabs.Length; i++)
 			{
 				var tab = Tabs[i];
+				if (tab.Configurations == null)
+					tab.Configurations = new Dictionary<string, string>();
+
 				Element listItem = null;
 
 				if(tab.Type == ElementType.Separator)
@@ -120,19 +160,36 @@ namespace SimplifiedUserInterfaceFramework.Intermediate.Elements
 					var value = tab.HasValue ? tab.Value : i.ToString();
 					var name = tab.Configurations?["name"] ?? value;
 					var directionClass = isHorizontal ? "vertical" : "horizontal";
-					
+					var buttonId = "tab-button::" + Guid.NewGuid().ToString().Replace("-", "");
+
+					if (!tab.Configurations.TryGetValue("id", out var tabId))
+					{
+						tabId = Guid.NewGuid().ToString().Replace("-", "");
+						tab.Configurations["id"] = $"tab::{tabId}";
+					}
+
+
 					// List item
-					listItem = listHolder.AddChild(new LineReader($"tab-button.{directionClass} = {name}"));
+					listItem = listHolder.AddChild(new LineReader($"tab-button.{directionClass} id({buttonId}) onclick(\"tabsSelect('{ListHolderId}','{ContentHolderId}','{buttonId}','{tabId}')\")= {name}"));
+					listItem.AddStyle("-webkit-touch-callout", "none");
+					listItem.AddStyle("-webkit-user-select", "none");
+					listItem.AddStyle("-khtml-user-select", "none");
+					listItem.AddStyle("-moz-user-select", "none");
+					listItem.AddStyle("-ms-user-select", "none");
+					listItem.AddStyle("user-select", "none");
+					listItem.AddStyle("white-space", "nowrap");
 					if(List.ChildStyles != null)
 					{
 						foreach (var style in List.ChildStyles)
 							listItem.AddStyle(style.Key, style.Value);
 					}
-					
 					ApplyClass(listItem);
 
 					// Tab
 					var content = contentHolder.AddChild(tab.Source);
+					if (content.Configurations == null)
+						content.Configurations = new Dictionary<string, string>();
+					content.Configurations["id"] = tabId;
 					ApplyClass(content);
 				}
 
@@ -155,6 +212,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate.Elements
 			var className = isHorizontal ? "horizontal" : "vertical";
 			listHolder = AddChild(new LineReader($"tab-list.{className}", Source));
 			listHolder.AddStyle("display", "block");
+			listHolder.AddStyle(isHorizontal ? "overflow-y" : "overflow-x", "auto");
 
 			if (List.InlinedStyles != null)
 			{
