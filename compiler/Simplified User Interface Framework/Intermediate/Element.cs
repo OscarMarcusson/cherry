@@ -485,26 +485,29 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 		{
 			var indent = ToStartHtmlStream(writer, document, customIndent: customIndent);
 
-			// Content  (<ELEMENT>Content</ELEMENT>)
-			customChildren = customChildren ?? Children;
+			WriteContentToHtml(writer, document, indent, customChildren ?? Children);
 
-			if (customChildren.Count() > 0)
+			// ...</ELEMENT>
+			ToEndHtmlStream(writer);
+		}
+
+
+		protected virtual void WriteContentToHtml(StreamWriter writer, Document document, int indent, List<Element> children)
+		{
+			if (children.Count() > 0)
 			{
 				var indentString = new string('\t', indent);
 				writer.WriteLine();
 
-				foreach (var child in customChildren)
+				foreach (var child in children)
 					child.ToHtmlStream(writer, document, customIndent: indent + 1);
 				writer.Write(indentString);
 			}
 			else
 			{
-				if(WriteValueAutomatically)
+				if (WriteValueAutomatically)
 					ValueToHtml(writer);
 			}
-
-			// ...</ELEMENT>
-			ToEndHtmlStream(writer);
 		}
 
 
