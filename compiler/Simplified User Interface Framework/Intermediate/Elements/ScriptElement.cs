@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using SimplifiedUserInterfaceFramework.Internal.Reader;
@@ -44,6 +45,24 @@ namespace SimplifiedUserInterfaceFramework.Intermediate.Elements
 				prefix += '\t';
 				foreach(var line in reader.Children)
 					AddJavascriptLine(lines, line, prefix);
+			}
+		}
+
+
+		protected override void WriteContentToHtml(StreamWriter writer, Document document, int indent, List<Element> children)
+		{
+			// If we have a single row we simply inline it like <script>/*code goes here*/</script>
+			if(Javascript.Length == 1)
+			{
+				writer.Write(Javascript[0]);
+			}
+			else if(Javascript.Length > 1)
+			{
+				var indentString = new string('\t', indent + 1);
+				writer.WriteLine("");
+				writer.Write(indentString);
+				writer.WriteLine(string.Join(writer.NewLine + new string('\t', indent + 1), Javascript));
+				writer.Write(new string('\t', indent));
 			}
 		}
 	}
