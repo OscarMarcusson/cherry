@@ -196,6 +196,13 @@ namespace SimplifiedUserInterfaceFramework.Intermediate.Elements
 				// Shared listitem values
 				listItem.AddStyle("display", isHorizontal ? "block" : "table-cell");
 			}
+
+			var startTab = listHolder.Children.FirstOrDefault(x => x.Name == "tab-button");
+			if(startTab != null)
+			{
+				var script = $"window.addEventListener(\"load\", (event) => document.getElementById('{startTab.Configurations["id"]}').click());";
+				var scriptElement = new ScriptElement(this, script);
+			}
 		}
 
 		void ApplyClass(Element element)
