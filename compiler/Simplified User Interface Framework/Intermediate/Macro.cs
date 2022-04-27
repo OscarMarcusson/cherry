@@ -30,13 +30,13 @@ namespace SimplifiedUserInterfaceFramework.Internal.Intermediate
 				Name = Name.Substring(0, index).TrimEnd();
 
 				var valueReader = new LineReader(value, lineNumber:section.LineNumber);
-				var root = new Element(valueReader);
+				var root = valueReader.ToElement();
 				Elements = new[] { root };
 			}
 			// Multiple lines, like regular elements
 			else
 			{
-				Elements = section.Children.Select(x => new Element(x)).ToArray();
+				Elements = section.Children.Select(x => x.ToElement()).ToArray();
 			}
 		}
 	}

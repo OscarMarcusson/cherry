@@ -196,7 +196,7 @@ namespace SimplifiedUserInterfaceFramework
 
 					Log.Trace("Writing body...");
 					writer.WriteLine();
-					document.Body.ToRecursiveHtmlStream(writer, document, Log);
+					document.Body.ToHtmlStream(writer, document);
 				}
 
 				Log.Trace("Done");

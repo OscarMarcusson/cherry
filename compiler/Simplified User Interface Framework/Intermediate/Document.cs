@@ -129,7 +129,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 							break;
 
 						case "body":
-							Body = new Element(section);
+							Body = section.ToElement();
 							break;
 
 						// Normal element parsing
