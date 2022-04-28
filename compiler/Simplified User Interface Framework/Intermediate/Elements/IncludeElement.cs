@@ -10,7 +10,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate.Elements
 	{
 		public string FullPath { get; set; }
 
-		public IncludeElement(LineReader reader, Element parent = null) : base(reader, parent, false)
+		public IncludeElement(LineReader reader, Element parent, CompilerArguments compilerArguments) : base(reader, parent, false, compilerArguments)
 		{
 		}
 
@@ -25,8 +25,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate.Elements
 			if (extension != ".md" && extension != ".markdown")
 				throw new SectionException(Source.Text.Substring(0, Source.Text.Length - extension.Length + 1), extension?.Substring(1) ?? " ", "", "Expected .md or .markdown", Source.LineNumber);
 
-			var root = "..";	// TODO:: Resolve this, some simple object thats sent into the load argument perhaps?
-			FullPath = Path.Combine(root, Value);
+			FullPath = Path.Combine(CompilerArguments.RootDirectory, Value);
 			if (!File.Exists(FullPath))
 			{
 				var i = Source.Text.LastIndexOf('=') + 1;
@@ -40,6 +39,8 @@ namespace SimplifiedUserInterfaceFramework.Intermediate.Elements
 				var value = Source.Text.Substring(i);
 				throw new SectionException(left, value, "", "Could not find this file", Source.LineNumber);
 			}
+
+			// TODO:: Read content of file and convert to elements
 		}
 	}
 }

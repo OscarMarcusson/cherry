@@ -14,7 +14,7 @@ namespace SimplifiedUserInterfaceFramework.Internal.Intermediate
 		public readonly Element[] Elements;
 
 
-		public Macro(LineReader section)
+		public Macro(LineReader section, CompilerArguments compilerArguments)
 		{
 			Name = "#" + section.Text.Substring(1).TrimStart();
 

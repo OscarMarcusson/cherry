@@ -64,7 +64,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate.Elements
 			}
 		}
 
-		public TabsElement(LineReader reader, Element parent = null) : base(reader, parent, false) 
+		public TabsElement(LineReader reader, Element parent, CompilerArguments compilerArguments) : base(reader, parent, false, compilerArguments) 
 		{
 			Name = "tabs";
 			Type = ElementType.Tabs;
@@ -201,7 +201,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate.Elements
 			if(startTab != null)
 			{
 				var script = $"window.addEventListener(\"load\", (event) => document.getElementById('{startTab.Configurations["id"]}').click());";
-				var scriptElement = new ScriptElement(this, script);
+				var scriptElement = new ScriptElement(this, script, CompilerArguments);
 			}
 		}
 

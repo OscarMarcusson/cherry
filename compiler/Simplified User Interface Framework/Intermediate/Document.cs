@@ -23,7 +23,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 		public readonly Dictionary<string, string> Bindings = new Dictionary<string, string>();
 		public readonly bool ContainsFrameworkCode = true; // TODO:: This should be replaced with a proper check for built-in code, like the tabs
 
-		public Document(DocumentReader reader)
+		public Document(DocumentReader reader, CompilerArguments compilerArguments)
 		{
 			Source = reader;
 			var includes = new List<Include>();
@@ -36,7 +36,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 				{
 					if (section.Text.StartsWith("#"))
 					{
-						var macro = new Macro(section);
+						var macro = new Macro(section, compilerArguments);
 						Macros.Add(macro.Name, macro);
 					}
 					else if(section.First == "script")
@@ -129,7 +129,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 							break;
 
 						case "body":
-							Body = section.ToElement();
+							Body = section.ToElement(compilerArguments: compilerArguments);
 							break;
 
 						// Normal element parsing

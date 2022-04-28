@@ -83,7 +83,7 @@ namespace SimplifiedUserInterfaceFramework
 				// Compile
 				Log.Trace("Reading document...");
 				var reader = new DocumentReader(Input);
-				var document = new Document(reader);
+				var document = new Document(reader, Arguments);
 
 				Log.Trace("Creating output file...");
 				using (var file = File.Create(Output))

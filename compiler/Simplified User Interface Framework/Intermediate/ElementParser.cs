@@ -94,7 +94,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 
 
 		/// <summary> Converts a <see cref="LineReader"/> to a UI <see cref="Element"/>. Depending on the values of the reader this may return a specific element implementation. </summary>
-		public static Element ToElement(this LineReader reader, Element parent = null)
+		public static Element ToElement(this LineReader reader, Element parent = null, CompilerArguments compilerArguments = null)
 		{
 			if (reader.First.StartsWith("#"))
 				new WordReader(reader).ThrowWordError(0, "Can't add inlined styles as a child element");
@@ -104,15 +104,17 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 			if (index > 0 && index < name.Length - 1)
 				name = name.Substring(0, index);
 
+			compilerArguments = compilerArguments ?? parent?.CompilerArguments;
+
 			switch (name)
 			{
-				case "include": return new IncludeElement(reader, parent).LoadContent();
-				case "tabs":    return new TabsElement(reader, parent).LoadContent();
+				case "include": return new IncludeElement(reader, parent, compilerArguments).LoadContent();
+				case "tabs":    return new TabsElement(reader, parent, compilerArguments).LoadContent();
 				case "img":
-				case "image":   return new ImageElement(reader, parent).LoadContent();
+				case "image":   return new ImageElement(reader, parent, compilerArguments).LoadContent();
 				case "btn":
-				case "button":  return new ButtonElement(reader, parent).LoadContent();
-				default:        return new Element(reader, parent, false) { Name = name }.LoadContent();
+				case "button":  return new ButtonElement(reader, parent, compilerArguments).LoadContent();
+				default:        return new Element(reader, parent, false, compilerArguments) { Name = name }.LoadContent();
 			}
 		}
 	}
