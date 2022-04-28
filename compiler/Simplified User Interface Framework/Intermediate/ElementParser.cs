@@ -106,12 +106,13 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 
 			switch (name)
 			{
-				case "tabs":   return new TabsElement(reader, parent).LoadContent();
+				case "include": return new IncludeElement(reader, parent).LoadContent();
+				case "tabs":    return new TabsElement(reader, parent).LoadContent();
 				case "img":
-				case "image":  return new ImageElement(reader, parent).LoadContent();
+				case "image":   return new ImageElement(reader, parent).LoadContent();
 				case "btn":
-				case "button": return new ButtonElement(reader, parent).LoadContent();
-				default:       return new Element(reader, parent, false) { Name = name }.LoadContent();
+				case "button":  return new ButtonElement(reader, parent).LoadContent();
+				default:        return new Element(reader, parent, false) { Name = name }.LoadContent();
 			}
 		}
 	}
