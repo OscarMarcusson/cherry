@@ -92,7 +92,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 			if(remainingDataToParse != null)
 				remainingDataToParse = Name.Length < remainingDataToParse.Length ? remainingDataToParse.Substring(Name.Length).TrimStart() : null;
 			Classes = ElementParser.ExtractClasses(remainingDataToParse, out remainingDataToParse);
-
+			
 			// Resolve the type
 			if(Type == ElementType.None)
 			{
@@ -553,7 +553,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 					writer.Write($" onload=\"{onLoad}\"");
 
 				if (Configurations.TryGetValue("onclick", out var onClick))
-					writer.Write($" onclick=\"{(onClick.EndsWith(")") ? onClick : $"{onClick}()")}\"");
+					writer.Write($" onclick=\"{onClick}\"");
 			}
 
 			writer.Write('>');
