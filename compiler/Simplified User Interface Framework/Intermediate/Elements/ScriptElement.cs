@@ -11,7 +11,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate.Elements
 	{
 		readonly string[] Javascript;
 
-		internal ScriptElement(LineReader reader, Element parent) : base(reader, parent, false)
+		internal ScriptElement(LineReader reader, Element parent, CompilerArguments compilerArguments) : base(reader, parent, false, compilerArguments)
 		{
 			Name = "script";
 			Type = ElementType.Script;
@@ -23,7 +23,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate.Elements
 		}
 
 
-		internal ScriptElement(Element parent, string raw) : base(null, parent, false)
+		internal ScriptElement(Element parent, string raw, CompilerArguments compilerArguments) : base(null, parent, false, compilerArguments)
 		{
 			Name = "script";
 			Type = ElementType.Script;

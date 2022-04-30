@@ -118,6 +118,8 @@ namespace SimplifiedUserInterfaceFramework
 			if (!File.Exists(arguments.Input))
 				log.Fatal("Invalid path. The last argument should be a path to the file to compile.");
 
+			arguments.RootDirectory = Path.GetDirectoryName(arguments.Input);
+
 			log.Trace($"Path set to {arguments.Input}");
 
 			arguments.RealTime = argumentReader.Exists("r", "real-time");

@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 using static SimplifiedUserInterfaceFramework.Intermediate.Style;
 
 namespace SimplifiedUserInterfaceFramework.Intermediate
@@ -31,6 +32,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 
 	public class Element
 	{
+		public readonly CompilerArguments CompilerArguments;
 		internal readonly LineReader Source;
 		public readonly Element Parent;
 		public readonly List<Element> Children = new List<Element>();
@@ -39,6 +41,8 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 		public string Name { get; internal set; }
 		public ElementType Type { get; internal set; }
 		public string Value { get; internal set; }
+		public string ValueAsHtml => string.IsNullOrEmpty(Value) ? null : HttpUtility.HtmlEncode(Value);
+
 		public List<string> Classes { get; internal set; }
 		public Dictionary<string,string> Configurations { get; internal set; }
 		public Dictionary<string, string> InlinedStyles { get; internal set; }
@@ -52,9 +56,10 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 		public override string ToString() => Value != null ? $"{Name} = {Value}" : Name;
 
 		// A core constructor allows us to hide our content loading shenanigans
-		internal Element(LineReader reader, Element parent, bool loadContentAutomatically)
+		internal Element(LineReader reader, Element parent, bool loadContentAutomatically, CompilerArguments compilerArguments)
 		{
 			Source = reader;
+			CompilerArguments = compilerArguments;
 
 			if (parent != null)
 			{
@@ -400,7 +405,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 		protected virtual bool AddChildrenAutomatically => true;
 
 
-		public Element AddChild(LineReader reader) => reader.ToElement(this);
+		public Element AddChild(LineReader reader) => reader.ToElement(this, CompilerArguments);
 
 
 
@@ -571,7 +576,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 				return;
 
 			int i;
-			var valueToPrint = Value;
+			var valueToPrint = ValueAsHtml;
 			// Replace spaces at start with HTML formatted spaces
 			for (i = 0; i < valueToPrint.Length; i++)
 			{
