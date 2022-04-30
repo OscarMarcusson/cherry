@@ -14,12 +14,13 @@ namespace SimplifiedUserInterfaceFramework.Intermediate.Elements
 
 		public ImageElement(LineReader reader, Element parent, CompilerArguments compilerArguments) : base(reader, parent, false, compilerArguments) 
 		{
-			Name = "image";
-			Type = ElementType.Image;
 		}
 
 		protected override void OnLoad()
 		{
+			Name = "image";
+			Type = ElementType.Image;
+
 			if (Configurations != null)
 			{
 				if (Configurations.TryGetValue("width", out var width))   Width = int.Parse(width);
