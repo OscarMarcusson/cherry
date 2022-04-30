@@ -8,6 +8,7 @@ This is a simple UI language based on HTML, but built with the intention of simp
   * [Styling](docs/syntax/Styles.md)
   * [Comments](docs/syntax/Comments.md)
   * [Variable Binding](docs/syntax/VariableBinding.md)
+  * [Meta data](docs/syntax/Meta.md)
 * #### Script
   * [Functions](docs/script/Functions.md)
   * [Variables](docs/script/Variables.md)
