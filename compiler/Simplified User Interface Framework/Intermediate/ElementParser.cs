@@ -113,6 +113,8 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 				case "img":
 				case "image":   return new ImageElement(reader, parent, compilerArguments).LoadContent();
 				case "btn":
+				case "a":
+				case "link": return new LinkElement(reader, parent, compilerArguments).LoadContent();
 				case "button":  return new ButtonElement(reader, parent, compilerArguments).LoadContent();
 				default:        return new Element(reader, parent, false, compilerArguments) { Name = name }.LoadContent();
 			}
