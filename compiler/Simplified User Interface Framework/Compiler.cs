@@ -94,7 +94,7 @@ namespace SimplifiedUserInterfaceFramework
 
 					writer.WriteLine();
 					writer.WriteLine("<head>");
-					writer.WriteLine("\t<title>Hello World title</title>");
+					document.Meta.ToHtmlString(writer, 1);
 
 					foreach(var link in document.Links)
 					{

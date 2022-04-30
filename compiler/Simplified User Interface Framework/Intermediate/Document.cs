@@ -14,6 +14,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 		public readonly DocumentReader Source;
 		public readonly Style Style;
 		public readonly Dictionary<string, Style> Styles = new Dictionary<string, Style>();
+		public readonly Meta Meta = new Meta();
 		public readonly Element Body;
 		public readonly Dictionary<string, Macro> Macros = new Dictionary<string, Macro>();
 		public readonly CodeBlock Script = new CodeBlock();
@@ -125,7 +126,36 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 							break;
 
 						case "head":
-							new WordReader(section).ThrowWordError(0, "Not implemented yet");
+						case "meta":
+							foreach(var child in section.Children)
+							{
+								var valueIndex = child.Text.IndexOf('=');
+								string value = null;
+								if(valueIndex > 0)
+								{
+									value = child.Text.Substring(valueIndex+1).Trim();
+									if (value.StartsWith('"') && value.EndsWith('"'))
+										value = value.Length == 2 ? null : value.Substring(1, value.Length - 2);
+
+									if (value?.Length == 0)
+										value = null;
+
+									if(value != null)
+									{
+										switch (child.First.ToLower())
+										{
+											case "title":            Meta.Title = value;                         break;
+											case "description":      Meta.Description = value;                   break;
+											case "author":           Meta.Author = value;                        break;
+											case "view-port-scale":  Meta.ViewPortScale = decimal.Parse(value);  break;
+
+											case "search-engine-keywords": 
+												Meta.SearchEngineKeywords.AddRange(value.Split(",").Select(x => x.Trim()));
+												break;
+										}
+									}
+								}
+							}
 							break;
 
 						case "body":
