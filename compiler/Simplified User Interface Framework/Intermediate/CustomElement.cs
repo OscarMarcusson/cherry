@@ -10,7 +10,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 	public class CustomElement
 	{
 		public string Name { get; set; }
-		public readonly Dictionary<string, FunctionArgument> Arguments = new Dictionary<string, FunctionArgument>();
+		public readonly Dictionary<string, Variable> Variables = new Dictionary<string, Variable>();
 		public readonly Element RootElement;
 
 		public CustomElement(LineReader reader, CompilerArguments compilerArguments)
@@ -22,39 +22,43 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 				Name = Name.Substring(0, indexOfDot);
 			
 			if(wordReader.Length > 2)
-			{
-				if (wordReader.Length == 3)
-					wordReader.ThrowWordError(2, (wordReader[2] == ":" ? "Argument marker without arguments" : "Unexpected word") + "\nEither remove or add arguments after");
+				wordReader.ThrowWordError(2, "Unexpected content", wordReader.Length - 2);
 
-				var arguments = wordReader.GetWords(3);
-				for(int i = 0; i < arguments.Length; i++)
+			var remainingChildren = new List<LineReader>();
+			remainingChildren.AddRange(reader.Children);
+
+			// Get the variables
+			for(int i = 0; i < remainingChildren.Count; i++)
+			{
+				if(remainingChildren[i].First == Variable.DynamicAccessType || remainingChildren[i].First == Variable.ReadOnlyAccessType)
 				{
-					var type = arguments[i++];
-					var name = arguments[i++];
-					var argument = new FunctionArgument(type, name);
-					Arguments.Add(name, argument);
-					if (i >= arguments.Length)
-						break;
+					var variable = new Variable(remainingChildren[i].Text, remainingChildren[i].LineNumber);
+					if (Variables.ContainsKey(variable.Name))
+						throw new SectionException(remainingChildren[i].First + ' ', (variable.Type + ' ' + variable.Name).Trim(), variable.Value != null ? $" = {variable.Value}" : "", "Already exists", remainingChildren[i].LineNumber);
+
+					Variables[variable.Name] = variable;
+					remainingChildren.RemoveAt(i--);
 				}
 			}
 
+			// Create the element root
 			var rootReader = new LineReader(wordReader.Second, reader.Parent, reader.LineNumber);
-			foreach (var child in reader.Children)
+			for(int i = 0; i < remainingChildren.Count; i++)
 			{
-				if (child.First.StartsWith("#"))
-					new LineReader(child.Text, rootReader, child.LineNumber);
+				if (remainingChildren[i].First.StartsWith("#"))
+				{
+					new LineReader(remainingChildren[i].Text, rootReader, remainingChildren[i].LineNumber);
+					remainingChildren.RemoveAt(i--);
+				}
 			}
-
-
 			RootElement = new Element(rootReader, null, true, compilerArguments);
 			if (RootElement.Type != ElementType.None)
 				throw new SectionException("", Name, rootReader.Text.Substring(Name.Length), "Already exists as a keyword");
 
-			foreach (var child in reader.Children)
-			{
-				if(!child.First.StartsWith("#"))
-					child.ToElement(RootElement);
-			}
+
+			// Iterate through the remaining children and add those
+			foreach (var child in remainingChildren)
+				child.ToElement(RootElement);
 		}
 
 
@@ -64,14 +68,23 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 			var className = Name.Replace("-", "_");
 			var indentString = indent > 0 ? new string('\t', indent) : "";
 			writer.WriteLine($"{indentString}class {className} {{");
-			writer.WriteLine($"{indentString}\tconstructor(parent{(Arguments.Count > 0 ?  $", {string.Join(", ", Arguments.Select(x => x.Key.Replace("-", "_")))}" : "")}) {{");
-			foreach(var argument in Arguments)
+			writer.WriteLine($"{indentString}\tconstructor(parent{(Variables.Count > 0 ?  $", {string.Join(", ", Variables.Select(x => x.Key.Replace("-", "_")))}" : "")}) {{");
+			foreach(var argument in Variables)
 			{
 				var name = argument.Key.Replace("-", "_");
-				writer.WriteLine($"{indentString}\t\tthis.{name} = {name};");
+				if (argument.Value.Value != null)
+				{
+					writer.WriteLine($"{indentString}\t\tthis.{name} = {name} ? {name} : {argument.Value.Value};");
+				}
+				else
+				{
+					writer.WriteLine($"{indentString}\t\tthis.{name} = {name};");
+				}
 			}
 
 			// Dynamic element creation
+			writer.WriteLine();
+			writer.WriteLine($"{indentString}\t\t// Dynamic element creation");
 			writer.WriteLine($"{indentString}\t\tthis.element = document.createElement(\"{className}\");");
 
 			if (RootElement.Classes?.Count > 0)

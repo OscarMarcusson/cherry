@@ -23,6 +23,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 		public readonly string Type;
 		public readonly WordReader Value;
 
+		public override string ToString() => $"{(AccessType == VariableType.Dynamic ? DynamicAccessType : ReadOnlyAccessType)} {(Type != null ? $"{Type} " : "")}{Name}" + (Value != null ? $" = {Value}" : "");
 
 		public Variable(string raw, int lineNumber = -1) : this(new WordReader(raw, lineNumber)) { }
 
@@ -54,6 +55,8 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 				nameIndex = 1;
 
 				Value = words.GetWords(3);
+				if(Value.Any(x => x.StartsWith('"')))
+					Type = "string";
 			}
 
 			// var int a
