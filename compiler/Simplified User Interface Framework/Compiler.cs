@@ -135,7 +135,7 @@ namespace SimplifiedUserInterfaceFramework
 						writer.WriteLine("\t</style>");
 					}
 
-					if (document.Script.HasContent || document.ContainsFrameworkCode || document.Bindings.Count > 0 || document.IncludesScripts.Length > 0)
+					if (document.Script.HasContent || document.ContainsFrameworkCode || document.Bindings.Count > 0 || document.IncludesScripts.Length > 0 || document.CustomElements.Count > 0)
 					{
 						writer.WriteLine();
 						writer.WriteLine("\t<script>");
@@ -151,6 +151,16 @@ namespace SimplifiedUserInterfaceFramework
 								variable.ToJavascriptStream(writer, 2);
 							
 							writer.WriteLine();
+						}
+
+						// Custom elements
+						if(document.CustomElements.Count > 0)
+						{
+							writer.WriteLine("\t\t// Custom elements");
+							foreach (var element in document.CustomElements)
+							{
+								element.Value.ToJavascriptClass(writer, 2);
+							}
 						}
 
 						// Framework code

@@ -23,6 +23,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 		public readonly Include[] IncludesScripts;
 		public readonly Dictionary<string, string> Bindings = new Dictionary<string, string>();
 		public readonly bool ContainsFrameworkCode = true; // TODO:: This should be replaced with a proper check for built-in code, like the tabs
+		public readonly Dictionary<string, CustomElement> CustomElements = new Dictionary<string, CustomElement>();
 
 		public Document(DocumentReader reader, CompilerArguments compilerArguments)
 		{
@@ -122,6 +123,14 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 
 									Styles[style.Name] = style;
 								}
+							}
+							break;
+
+						case "elm":
+						case "element":
+							{
+								var element = new CustomElement(section, compilerArguments);
+								CustomElements[element.Name] = element;
 							}
 							break;
 

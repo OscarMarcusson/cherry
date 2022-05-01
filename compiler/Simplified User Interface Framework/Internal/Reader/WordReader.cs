@@ -129,6 +129,8 @@ namespace SimplifiedUserInterfaceFramework.Internal.Reader
 		}
 
 
+		public bool Any(Func<string, bool> filter) => Words.Any(filter);
+
 
 		int GetEndOfStringIndex(string text, int index)
 		{
