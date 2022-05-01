@@ -11,6 +11,7 @@ namespace SimplifiedUserInterfaceFramework
 	{
 		static bool loopThread;
 		static AutoResetEvent exitLoopThread = new AutoResetEvent(false);
+		static Log log;
 
 		static void Main(string[] args)
 		{
@@ -58,7 +59,7 @@ namespace SimplifiedUserInterfaceFramework
 			}
 			else
 			{
-				var arguments = ReadArguments(argumentReader, out var log);
+				var arguments = ReadArguments(argumentReader, out log);
 				var compiler = new Compiler(arguments);
 
 				if (arguments.RealTime)
@@ -158,18 +159,32 @@ namespace SimplifiedUserInterfaceFramework
 					var allFiles = compiler.GetDocuments();
 					foreach(var document in allFiles)
 					{
-						var directory = Path.GetDirectoryName(document.Source.File);
-						var fileName = Path.GetFileName(document.Source.File);
-						var watcher = new FileSystemWatcher(directory, fileName);
-						watcher.EnableRaisingEvents = true;
-						watcher.Changed += (object sender, FileSystemEventArgs e) =>
+						var filesToWatch = new List<string> { document.Source.File };
+						if(document.IncludesScripts?.Length > 0) filesToWatch.AddRange(document.IncludesScripts.Select(x => Path.Combine(compiler.InputDirectory, x.Value)));
+						if(document.IncludeStyles?.Length > 0)   filesToWatch.AddRange(document.IncludeStyles.Select(x => Path.Combine(compiler.InputDirectory, x.Value)));
+
+						foreach(var file in filesToWatch)
 						{
-							if(e.ChangeType == WatcherChangeTypes.Created || e.ChangeType == WatcherChangeTypes.Changed)
+							if (File.Exists(file))
 							{
-								Compile();
+								var directory = Path.GetDirectoryName(file);
+								var fileName = Path.GetFileName(file);
+								var watcher = new FileSystemWatcher(directory, fileName);
+								watcher.EnableRaisingEvents = true;
+								watcher.Changed += (object sender, FileSystemEventArgs e) =>
+								{
+									if(e.ChangeType == WatcherChangeTypes.Created || e.ChangeType == WatcherChangeTypes.Changed)
+									{
+										Compile();
+									}
+								};
+								watchers.Add(watcher);
 							}
-						};
-						watchers.Add(watcher);
+							else
+							{
+								log.Warning("Could not find " + file);
+							}
+						}
 					}
 
 					exitLoopThread.WaitOne();
