@@ -432,6 +432,19 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 		}
 
 
+		public void ResolveReferencedPages(List<string> pages)
+		{
+			if(Type == ElementType.Link)
+			{
+				if (!pages.Contains(Value))
+					pages.Add(Value);
+			}
+
+			foreach (var child in Children)
+				child.ResolveReferencedPages(pages);
+		}
+
+
 
 		public void ParseEvents(string arguments)
 		{

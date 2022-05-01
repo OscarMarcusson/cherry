@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -9,6 +10,8 @@ namespace SimplifiedUserInterfaceFramework
 	class Program
 	{
 		static bool loopThread;
+		static AutoResetEvent exitLoopThread = new AutoResetEvent(false);
+		static Log log;
 
 		static void Main(string[] args)
 		{
@@ -56,7 +59,7 @@ namespace SimplifiedUserInterfaceFramework
 			}
 			else
 			{
-				var arguments = ReadArguments(argumentReader, out var log);
+				var arguments = ReadArguments(argumentReader, out log);
 				var compiler = new Compiler(arguments);
 
 				if (arguments.RealTime)
@@ -77,6 +80,7 @@ namespace SimplifiedUserInterfaceFramework
 								{
 									case ConsoleKey.Escape:
 										loopThread = false;
+										exitLoopThread.Set();
 										thread.Join(1000);
 										return;
 								}
@@ -143,21 +147,47 @@ namespace SimplifiedUserInterfaceFramework
 
 		static void CompileThread(Compiler compiler)
 		{
+			var watchers = new List<FileSystemWatcher>();
 			while (loopThread)
 			{
+				DisposeWatchers();
+
 				try
 				{
 					Compile();
 
-					using (var watcher = new FileSystemWatcher(compiler.InputDirectory, compiler.InputFileName))
+					var allFiles = compiler.GetDocuments();
+					foreach(var document in allFiles)
 					{
-						while (loopThread)
+						var filesToWatch = new List<string> { document.Source.File };
+						if(document.IncludesScripts?.Length > 0) filesToWatch.AddRange(document.IncludesScripts.Select(x => Path.Combine(compiler.InputDirectory, x.Value)));
+						if(document.IncludeStyles?.Length > 0)   filesToWatch.AddRange(document.IncludeStyles.Select(x => Path.Combine(compiler.InputDirectory, x.Value)));
+
+						foreach(var file in filesToWatch)
 						{
-							var result = watcher.WaitForChanged(WatcherChangeTypes.Created | WatcherChangeTypes.Changed, 1000);
-							if (!result.TimedOut)
-								Compile();
+							if (File.Exists(file))
+							{
+								var directory = Path.GetDirectoryName(file);
+								var fileName = Path.GetFileName(file);
+								var watcher = new FileSystemWatcher(directory, fileName);
+								watcher.EnableRaisingEvents = true;
+								watcher.Changed += (object sender, FileSystemEventArgs e) =>
+								{
+									if(e.ChangeType == WatcherChangeTypes.Created || e.ChangeType == WatcherChangeTypes.Changed)
+									{
+										Compile();
+									}
+								};
+								watchers.Add(watcher);
+							}
+							else
+							{
+								log.Warning("Could not find " + file);
+							}
 						}
 					}
+
+					exitLoopThread.WaitOne();
 				}
 				catch (Exception exc)
 				{
@@ -167,7 +197,15 @@ namespace SimplifiedUserInterfaceFramework
 				}
 			}
 
+			// Make sure to dispose before leaving thread
+			DisposeWatchers();
 
+			void DisposeWatchers()
+			{
+				foreach (var watcher in watchers)
+					watcher?.Dispose();
+				watchers.Clear();
+			}
 
 			void Compile()
 			{
