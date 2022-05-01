@@ -10,6 +10,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 	public class CustomElement
 	{
 		public string Name { get; set; }
+		public string JavascriptName => Name.Replace("-", "_");
 		public readonly Dictionary<string, Variable> Variables = new Dictionary<string, Variable>();
 		public readonly Element RootElement;
 
@@ -63,12 +64,13 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 
 
 
+
 		public void ToJavascriptClass(StreamWriter writer, int indent = 0)
 		{
-			var className = Name.Replace("-", "_");
+			var className = JavascriptName;
 			var indentString = indent > 0 ? new string('\t', indent) : "";
 			writer.WriteLine($"{indentString}class {className} {{");
-			writer.WriteLine($"{indentString}\tconstructor(parent{(Variables.Count > 0 ?  $", {string.Join(", ", Variables.Select(x => x.Key.Replace("-", "_")))}" : "")}) {{");
+			writer.WriteLine($"{indentString}\tconstructor(parent,isRoot{(Variables.Count > 0 ?  $", {string.Join(", ", Variables.Select(x => x.Key.Replace("-", "_")))}" : "")}) {{");
 			foreach(var argument in Variables)
 			{
 				var name = argument.Key.Replace("-", "_");
@@ -98,6 +100,20 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 			// End class definition
 			writer.WriteLine($"{indentString}\t}}");
 			writer.WriteLine($"{indentString}}}");
+		}
+
+		public void ToRawHtml(StreamWriter writer, int indent = 0)
+		{
+			var className = JavascriptName;
+			var indentString = indent > 0 ? new string('\t', indent) : "";
+			var id = Guid.NewGuid().ToString().Replace("-", "");
+
+			var arguments = "onload=\"document.getElementById('{id}'), true";
+			if (Variables.Count > 0)
+				arguments += ", " + string.Join(", ", Variables.Select(x => x.Value.Value));
+
+			writer.WriteLine($"{indentString}<{Name}{RootElement.HtmlFormattedClasses()} id=\"{id}\" onload=\"new {className}({arguments});\"></{Name}>");
+			// RootElement.ToHtmlStream(writer, document, indent);
 		}
 	}
 }
