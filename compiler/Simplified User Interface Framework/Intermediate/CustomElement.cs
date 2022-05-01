@@ -47,6 +47,8 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 
 
 			RootElement = new Element(rootReader, null, true, compilerArguments);
+			if (RootElement.Type != ElementType.None)
+				throw new SectionException("", Name, rootReader.Text.Substring(Name.Length), "Already exists as a keyword");
 
 			foreach (var child in reader.Children)
 			{
