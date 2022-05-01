@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using SimplifiedUserInterfaceFramework.Intermediate;
 using SimplifiedUserInterfaceFramework.Internal.Reader;
 
@@ -84,6 +85,23 @@ namespace SimplifiedUserInterfaceFramework
 				Log.Trace("Reading document...");
 				var reader = new DocumentReader(Input);
 				var document = new Document(reader, Arguments);
+
+				Parallel.ForEach(document.ReferencedPages, new ParallelOptions { }, pageName =>
+				{
+					var targetExtension = Path.GetExtension(Input);
+					var targetFile = Path.ChangeExtension(pageName, targetExtension);
+					targetFile = Path.Combine(InputDirectory, targetFile);
+
+					if (File.Exists(targetFile))
+					{
+						var argumentCopy = Arguments.CreateCopy();
+						argumentCopy.Input = targetFile;
+						argumentCopy.Output = Path.Combine(OutputDirectory, pageName);
+						var compiler = new Compiler(argumentCopy, ThrowOnFail);
+						compiler.Compile();
+					}
+				});
+
 
 				Log.Trace("Creating output file...");
 				using (var file = File.Create(Output))
