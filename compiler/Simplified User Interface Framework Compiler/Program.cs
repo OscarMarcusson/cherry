@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -9,6 +10,7 @@ namespace SimplifiedUserInterfaceFramework
 	class Program
 	{
 		static bool loopThread;
+		static AutoResetEvent exitLoopThread = new AutoResetEvent(false);
 
 		static void Main(string[] args)
 		{
@@ -77,6 +79,7 @@ namespace SimplifiedUserInterfaceFramework
 								{
 									case ConsoleKey.Escape:
 										loopThread = false;
+										exitLoopThread.Set();
 										thread.Join(1000);
 										return;
 								}
@@ -143,21 +146,33 @@ namespace SimplifiedUserInterfaceFramework
 
 		static void CompileThread(Compiler compiler)
 		{
+			var watchers = new List<FileSystemWatcher>();
 			while (loopThread)
 			{
+				DisposeWatchers();
+
 				try
 				{
 					Compile();
 
-					using (var watcher = new FileSystemWatcher(compiler.InputDirectory, compiler.InputFileName))
+					var allFiles = compiler.GetDocuments();
+					foreach(var document in allFiles)
 					{
-						while (loopThread)
+						var directory = Path.GetDirectoryName(document.Source.File);
+						var fileName = Path.GetFileName(document.Source.File);
+						var watcher = new FileSystemWatcher(directory, fileName);
+						watcher.EnableRaisingEvents = true;
+						watcher.Changed += (object sender, FileSystemEventArgs e) =>
 						{
-							var result = watcher.WaitForChanged(WatcherChangeTypes.Created | WatcherChangeTypes.Changed, 1000);
-							if (!result.TimedOut)
+							if(e.ChangeType == WatcherChangeTypes.Created || e.ChangeType == WatcherChangeTypes.Changed)
+							{
 								Compile();
-						}
+							}
+						};
+						watchers.Add(watcher);
 					}
+
+					exitLoopThread.WaitOne();
 				}
 				catch (Exception exc)
 				{
@@ -167,7 +182,15 @@ namespace SimplifiedUserInterfaceFramework
 				}
 			}
 
+			// Make sure to dispose before leaving thread
+			DisposeWatchers();
 
+			void DisposeWatchers()
+			{
+				foreach (var watcher in watchers)
+					watcher?.Dispose();
+				watchers.Clear();
+			}
 
 			void Compile()
 			{

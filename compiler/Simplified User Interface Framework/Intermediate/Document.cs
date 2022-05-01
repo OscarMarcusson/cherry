@@ -26,6 +26,8 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 		public readonly Dictionary<string, CustomElement> CustomElements = new Dictionary<string, CustomElement>();
 		public readonly string[] ReferencedPages;
 
+		public override string ToString() => Source.File;
+
 		public Document(DocumentReader reader, CompilerArguments compilerArguments)
 		{
 			Source = reader;

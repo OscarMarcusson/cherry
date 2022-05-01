@@ -10,6 +10,8 @@ namespace SimplifiedUserInterfaceFramework
 	public sealed class Compiler
 	{
 		readonly CompilerArguments Arguments;
+		readonly SharedCompilerInformation SharedCompilerInformation;
+		readonly bool IsRootDocument;
 		readonly Log Log;
 		readonly bool ThrowOnFail;
 
@@ -23,9 +25,16 @@ namespace SimplifiedUserInterfaceFramework
 
 
 
-		public Compiler(CompilerArguments arguments, bool throwExceptionOnFail = false)
+		public Compiler(CompilerArguments arguments, bool throwExceptionOnFail = false) : this(arguments, throwExceptionOnFail, new SharedCompilerInformation()) 
 		{
+			IsRootDocument = true;
+		}
+
+		private Compiler(CompilerArguments arguments, bool throwExceptionOnFail, SharedCompilerInformation sharedCompilerInformation)
+		{
+			IsRootDocument = false;
 			Arguments = arguments.CreateCopy();
+			SharedCompilerInformation = sharedCompilerInformation;
 			Log = new Log { LogLevel = Arguments.LogLevel };
 			ThrowOnFail = throwExceptionOnFail;
 
@@ -66,6 +75,9 @@ namespace SimplifiedUserInterfaceFramework
 
 		public void Compile()
 		{
+			if (IsRootDocument)
+				SharedCompilerInformation.Documents.Clear();
+
 			// Validate
 			if (!File.Exists(Input))
 			{
@@ -79,13 +91,33 @@ namespace SimplifiedUserInterfaceFramework
 				return;
 			}
 
+			if (SharedCompilerInformation.GetValue(x => x.Documents.ContainsKey(Input)))
+				return;
+
 			try
 			{
-				// Compile
-				Log.Trace("Reading document...");
-				var reader = new DocumentReader(Input);
-				var document = new Document(reader, Arguments);
+				DocumentReader reader = null;
+				Document document = null;
 
+				// We have to duplicate check again due to the time difference. If this document is not already compiled we add it while locked
+				var alreadyExists = false;
+				SharedCompilerInformation.DoThreadSafeWork(x =>
+				{
+					alreadyExists = x.Documents.ContainsKey(Input);
+					if (!alreadyExists)
+					{
+						Log.Trace("Reading document...");
+						reader = new DocumentReader(Input);
+						document = new Document(reader, Arguments);
+						x.Documents[Input] = document;
+					}
+				});
+
+				if (alreadyExists)
+					return;
+
+
+				// Compile children
 				Parallel.ForEach(document.ReferencedPages, new ParallelOptions { }, pageName =>
 				{
 					var targetExtension = Path.GetExtension(Input);
@@ -97,7 +129,7 @@ namespace SimplifiedUserInterfaceFramework
 						var argumentCopy = Arguments.CreateCopy();
 						argumentCopy.Input = targetFile;
 						argumentCopy.Output = Path.Combine(OutputDirectory, pageName);
-						var compiler = new Compiler(argumentCopy, ThrowOnFail);
+						var compiler = new Compiler(argumentCopy, ThrowOnFail, SharedCompilerInformation);
 						compiler.Compile();
 					}
 				});
@@ -234,5 +266,7 @@ namespace SimplifiedUserInterfaceFramework
 				Log.SectionError($"Failed to parse {e.FileName}{(e.LineNumber > -1 ? $"\nLine {e.LineNumber}" : "")}\n{e.Left}", e.Center, e.Right, e.Message);
 			}
 		}
+
+		public Document[] GetDocuments() => SharedCompilerInformation.GetValue(x => x.Documents.Select(d => d.Value).ToArray());
 	}
 }
