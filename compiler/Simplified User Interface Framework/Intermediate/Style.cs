@@ -116,6 +116,10 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 
 		void ParseMediaQuery(LineReader valueReader, string name)
 		{
+			var reader = new WordReader(valueReader);
+			if (reader.First == "else")
+				reader.ThrowWordError(0, "Not implemented yet");
+
 			var mediaElement = new StyleElement(this, name, isMediaQuery: true)
 			{
 				MaxWidth = 400
