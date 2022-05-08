@@ -120,10 +120,54 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 			if (reader.First == "else")
 				reader.ThrowWordError(0, "Not implemented yet");
 
-			var mediaElement = new StyleElement(this, name, isMediaQuery: true)
+			var mediaElement = new StyleElement(this, name, isMediaQuery: true);
+
+			// TODO:: Implement proper reading with (sections & (stuff))
+			for(int i = 1; i < reader.Length; i++)
 			{
-				MaxWidth = 400
-			};
+				switch (reader[i])
+				{
+					case "screen": mediaElement.DisplayLimit |= DisplayLimit.Screen; break;
+					case "print":  mediaElement.DisplayLimit |= DisplayLimit.Print;  break;
+					case "voice":  mediaElement.DisplayLimit |= DisplayLimit.Voice;  break;
+
+					// Ignore for now
+					case "and":
+					case "&&":
+					case "not":
+					case "!":
+						break;
+
+					case "width":
+					case "height":
+						var isWidth = reader[i++] == "width";
+						var comparitor = reader[i++];
+						var type = reader[i].EndsWith("px")
+										? "px"
+										: reader[i].EndsWith("em")
+											? "em"
+											: "px"
+											;
+						var value = int.Parse(new string(reader[i].Where(x => char.IsDigit(x)).ToArray()));
+
+						switch (comparitor)
+						{
+							case ">=": if (isWidth) mediaElement.MinWidth = value;   else mediaElement.MinHeight = value;     break;
+							case ">":  if (isWidth) mediaElement.MinWidth = value+1; else mediaElement.MinHeight = value+1;   break;
+							case "<=": if (isWidth) mediaElement.MaxWidth = value;   else mediaElement.MaxHeight = value;     break;
+							case "<":  if (isWidth) mediaElement.MaxWidth = value-1; else mediaElement.MaxHeight = value - 1; break;
+							case "=":  if (isWidth) mediaElement.MaxWidth = mediaElement.MinWidth = value; else mediaElement.MinHeight = mediaElement.MinHeight = value; break;
+							// TODO:: Implement later, needs an OR between them
+							// case "!=": mediaElement.MaxWidth = mediaElement.MinWidth = value; break;
+						}
+
+						break;
+
+					default:
+						reader.ThrowWordError(i, "Unknown query option");
+						break;
+				}
+			}
 			MediaQueries.Add(mediaElement);
 
 			foreach (var child in valueReader.Children)
