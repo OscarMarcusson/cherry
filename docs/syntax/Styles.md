@@ -60,3 +60,26 @@ style
 	</div>
 </body>
 ```
+
+
+## Media queries
+Media queries like checking for viewport size can be done by simply writing an if-statement in the middle of the style:
+
+**Simplified**
+```ini
+div
+	background-color = red
+	if width >= 700px
+		background-color = green
+```
+**CSS**
+```CSS
+div {
+	background-color: red;
+}
+@media (min-width:700px) {
+	div {
+		background-color: green;
+	}
+}
+```
