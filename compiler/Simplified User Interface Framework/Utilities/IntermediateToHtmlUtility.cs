@@ -10,37 +10,6 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 {
 	public static class IntermediateToHtmlUtility
 	{
-		public static void ToCssStream(this Style style, StreamWriter writer, int indentation)
-		{
-			var indent = indentation > 0 ? new string('\t', indentation) : "";
-			foreach(var element in style.Elements)
-			{
-				if(element.Value.Values.Count() > 0)
-				{
-					writer.Write(indent);
-					writer.Write(element.Key);
-					writer.Write(' ');
-					writer.WriteLine('{');
-
-					foreach(var value in element.Value.Values)
-					{
-						writer.Write(indent);
-						writer.Write('\t');
-						writer.Write(value.Key);
-						writer.Write(": ");
-						writer.Write(value.Value);
-						writer.WriteLine(';');
-					}
-
-					writer.Write(indent);
-					writer.WriteLine('}');
-				}
-			}
-		}
-
-
-
-
 		public static void ToHtmlStream(this ValueSection[] values, StreamWriter writer)
 		{
 			foreach(var value in values)

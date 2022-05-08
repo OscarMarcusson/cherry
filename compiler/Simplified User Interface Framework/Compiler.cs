@@ -171,7 +171,7 @@ namespace SimplifiedUserInterfaceFramework
 						writer.WriteLine("\t</style>");
 					}
 
-					if (document.Style.Elements.Count() > 0 || document.Styles.Count > 0 || document.IncludeStyles.Length > 0)
+					if (document.Style.Elements.Count() > 0 || document.Style.MediaQueries.Count > 0 || document.Styles.Count > 0 || document.IncludeStyles.Length > 0)
 					{
 						Log.Trace($"Adding global style...");
 						writer.WriteLine();
