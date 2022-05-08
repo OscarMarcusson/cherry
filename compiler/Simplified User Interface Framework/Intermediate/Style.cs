@@ -46,7 +46,16 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 			}
 
 			foreach(var elementReader in reader.Children)
-				ParseStyle(this, elementReader);
+			{
+				if (IsMediaQuery(elementReader))
+				{
+					ParseMediaQuery(elementReader, null);
+				}
+				else
+				{
+					ParseStyle(this, elementReader);
+				}
+			}
 		}
 
 
@@ -114,70 +123,90 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 
 
 
-		void ParseMediaQuery(LineReader valueReader, string name)
+		StyleElement ParseMediaQuery(LineReader valueReader, string name, bool isSubMediaElement = true)
 		{
 			var reader = new WordReader(valueReader);
-			if (reader.First == "else")
-				reader.ThrowWordError(0, "Not implemented yet");
-
 			var mediaElement = new StyleElement(this, name, isMediaQuery: true);
 
-			// TODO:: Implement proper reading with (sections & (stuff))
-			for(int i = 1; i < reader.Length; i++)
+			if (isSubMediaElement)
 			{
-				switch (reader[i])
+				if (reader.First == "else")
+					reader.ThrowWordError(0, "Not implemented yet");
+
+				// TODO:: Implement proper reading with (sections & (stuff))
+				for(int i = 1; i < reader.Length; i++)
 				{
-					case "screen": mediaElement.DisplayLimit |= DisplayLimit.Screen; break;
-					case "print":  mediaElement.DisplayLimit |= DisplayLimit.Print;  break;
-					case "voice":  mediaElement.DisplayLimit |= DisplayLimit.Voice;  break;
+					switch (reader[i])
+					{
+						case "screen": mediaElement.DisplayLimit |= DisplayLimit.Screen; break;
+						case "print":  mediaElement.DisplayLimit |= DisplayLimit.Print;  break;
+						case "voice":  mediaElement.DisplayLimit |= DisplayLimit.Voice;  break;
 
-					// Ignore for now
-					case "and":
-					case "&&":
-					case "not":
-					case "!":
-						break;
+						// Ignore for now
+						case "and":
+						case "&&":
+						case "not":
+						case "!":
+							break;
 
-					case "width":
-					case "height":
-						var isWidth = reader[i++] == "width";
-						var comparitor = reader[i++];
-						var type = reader[i].EndsWith("px")
-										? "px"
-										: reader[i].EndsWith("em")
-											? "em"
-											: "px"
-											;
-						var value = int.Parse(new string(reader[i].Where(x => char.IsDigit(x)).ToArray()));
+						case "width":
+						case "height":
+							var isWidth = reader[i++] == "width";
+							var comparitor = reader[i++];
+							var type = reader[i].EndsWith("px")
+											? "px"
+											: reader[i].EndsWith("em")
+												? "em"
+												: "px"
+												;
+							var value = int.Parse(new string(reader[i].Where(x => char.IsDigit(x)).ToArray()));
 
-						switch (comparitor)
-						{
-							case ">=": if (isWidth) mediaElement.MinWidth = value;   else mediaElement.MinHeight = value;     break;
-							case ">":  if (isWidth) mediaElement.MinWidth = value+1; else mediaElement.MinHeight = value+1;   break;
-							case "<=": if (isWidth) mediaElement.MaxWidth = value;   else mediaElement.MaxHeight = value;     break;
-							case "<":  if (isWidth) mediaElement.MaxWidth = value-1; else mediaElement.MaxHeight = value - 1; break;
-							case "=":  if (isWidth) mediaElement.MaxWidth = mediaElement.MinWidth = value; else mediaElement.MinHeight = mediaElement.MinHeight = value; break;
-							// TODO:: Implement later, needs an OR between them
-							// case "!=": mediaElement.MaxWidth = mediaElement.MinWidth = value; break;
-						}
+							switch (comparitor)
+							{
+								case ">=": if (isWidth) mediaElement.MinWidth = value;   else mediaElement.MinHeight = value;     break;
+								case ">":  if (isWidth) mediaElement.MinWidth = value+1; else mediaElement.MinHeight = value+1;   break;
+								case "<=": if (isWidth) mediaElement.MaxWidth = value;   else mediaElement.MaxHeight = value;     break;
+								case "<":  if (isWidth) mediaElement.MaxWidth = value-1; else mediaElement.MaxHeight = value - 1; break;
+								case "=":  if (isWidth) mediaElement.MaxWidth = mediaElement.MinWidth = value; else mediaElement.MinHeight = mediaElement.MinHeight = value; break;
+								// TODO:: Implement later, needs an OR between them
+								// case "!=": mediaElement.MaxWidth = mediaElement.MinWidth = value; break;
+							}
 
-						break;
+							break;
 
-					default:
-						reader.ThrowWordError(i, "Unknown query option");
-						break;
+						default:
+							reader.ThrowWordError(i, "Unknown query option");
+							break;
+					}
 				}
 			}
-			MediaQueries.Add(mediaElement);
 
-			foreach (var child in valueReader.Children)
+			if(name == null)
 			{
-				// TODO:: Implement
-				if (IsSubtype(child)) { }
-				else if (IsMediaQuery(child)) { }
-				
-				else mediaElement.ReadFrom(child);
+				foreach (var child in valueReader.Children)
+				{
+					var element = ParseMediaQuery(child, child.Text, false);
+					element.DisplayLimit = mediaElement.DisplayLimit;
+					element.MinWidth  = mediaElement.MinWidth;
+					element.MaxWidth  = mediaElement.MaxWidth;
+					element.MinHeight = mediaElement.MinHeight;
+					element.MaxHeight = mediaElement.MaxHeight;
+				}
 			}
+			else
+			{
+				MediaQueries.Add(mediaElement);
+				foreach (var child in valueReader.Children)
+				{
+					// TODO:: Implement
+					if (IsSubtype(child)) { }
+					else if (IsMediaQuery(child)) { }
+				
+					else mediaElement.ReadFrom(child);
+				}
+			}
+
+			return mediaElement;
 		}
 
 		public void ReadFrom(Style style)
