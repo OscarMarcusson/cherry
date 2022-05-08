@@ -69,7 +69,7 @@ Media queries like checking for viewport size can be done by simply writing an i
 ```ini
 div
 	background-color = red
-	if width > 700px
+	if width >= 700px
 		background-color = green
 ```
 **CSS**
