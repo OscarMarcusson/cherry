@@ -61,6 +61,33 @@ style
 </body>
 ```
 
+<br>
+
+## Hover & Click
+It's possible to add interactive styling by putting it under a section called **hover** or **click**:
+**Simplified**
+```ini
+div
+	background-color = red
+	hover
+		background-color = green
+	click
+		background-color = blue
+```
+**CSS**
+```CSS
+div {
+	background-color: red;
+}
+div:hover {
+	background-color: green;
+}
+div:active {
+	background-color: blue;
+}
+```
+
+<br>
 
 ## Media queries
 Media queries like checking for viewport size can be done by simply writing an if-statement in the middle of the style:
@@ -83,3 +110,4 @@ div {
 	}
 }
 ```
+It is also possible to add the **if** statement at the root level which will produce the same result but allows multiple elements to be placed under it.
