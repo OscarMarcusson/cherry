@@ -20,6 +20,12 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 			ElementName = elementName;
 		}
 
+		public StyleElement(Style style, LineReader reader, string customName = null) : this(style, customName ?? reader.Text)
+		{
+			foreach (var child in reader.Children)
+				ReadFrom(child);
+		}
+
 
 		public void ReadFrom(StyleElement element)
 		{
@@ -42,25 +48,40 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 
 
 
-		public void ToCssStream(StreamWriter writer, string indentString)
+		public void ToCssStream(StreamWriter writer, string indentString, string overrideName = null)
 		{
 			writer.Write(indentString);
-			writer.Write(ElementName);
+			writer.Write(overrideName ?? ElementName);
 			writer.Write(' ');
-			writer.WriteLine('{');
 
-			foreach (var value in Values)
+			// For multiple value styles we place them on their own lines
+			if(Values.Count > 1)
 			{
+				writer.WriteLine('{');
+
+				foreach (var value in Values)
+				{
+					writer.Write(indentString);
+					writer.Write('\t');
+					writer.Write(value.Key);
+					writer.Write(": ");
+					writer.Write(value.Value);
+					writer.WriteLine(';');
+				}
+
 				writer.Write(indentString);
-				writer.Write('\t');
+				writer.WriteLine('}');
+			}
+			// For 1 value styles we place it all on a single line
+			else
+			{
+				var value = Values.First();
+				writer.Write("{ ");
 				writer.Write(value.Key);
 				writer.Write(": ");
 				writer.Write(value.Value);
-				writer.WriteLine(';');
+				writer.WriteLine("; }");
 			}
-
-			writer.Write(indentString);
-			writer.WriteLine('}');
 		}
 	}
 }

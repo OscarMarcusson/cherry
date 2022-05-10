@@ -56,60 +56,41 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 		{
 			if (elementReader.Children.Count > 0)
 			{
-				if(elementName == null)
-				{
+				if (elementName == null)
 					elementName = elementReader.Text;
-
-					// Some types should be hard replaced to make it easier to write
-					switch (elementName)
-					{
-						case "tab-selector":
-						case ".tab-selector":
-						case "ts":
-						case ".ts":
-							elementName = "input[type=button].tab-selector";
-							break;
-
-						case ".tab-content":
-						case "tc":
-						case ".tc":
-							elementName = "tab-content";
-							break;
-					}
-				}
 
 				if (parent != null)
 					elementName = parent + elementName;
 
 				if (!Elements.TryGetValue(elementName, out var element))
-					Elements[elementName] = element = new RootStyleElement(style, elementName);
+					Elements[elementName] = element = new RootStyleElement(style, elementReader);
 
-				foreach (var valueReader in elementReader.Children)
-				{
-					if (IsSubtype(valueReader))
-					{
-						var key = valueReader.Text.Substring(1).TrimStart();
-
-						// sub-class
-						if (key.StartsWith(".")) ParseStyle(style, valueReader, elementName, key);
-
-						// Mouse interaction (hover / click)
-						else if (key == "hover")  ParseStyle(style, valueReader, elementName, ":hover");
-						else if (key == "active") ParseStyle(style, valueReader, elementName, ":active");
-
-						// Unknown
-						else new WordReader(valueReader).ThrowWordError(valueReader.Text[1] == ' ' || valueReader.Text[1] == '\t' ? 1 : 0, "Unknown subtype");
-					}
-					else if(IsMediaQuery(valueReader))
-					{
-						style.ParseMediaQuery(valueReader, elementName);
-					}
-					// Nah, its a normal style
-					else
-					{
-						element.ReadFrom(valueReader);
-					}
-				}
+				// foreach (var valueReader in elementReader.Children)
+				// {
+				// 	if (IsSubtype(valueReader))
+				// 	{
+				// 		var key = valueReader.Text.Substring(1).TrimStart();
+				// 
+				// 		// sub-class
+				// 		if (key.StartsWith(".")) ParseStyle(style, valueReader, elementName, key);
+				// 
+				// 		// Mouse interaction (hover / click)
+				// 		else if (key == "hover")  ParseStyle(style, valueReader, elementName, ":hover");
+				// 		else if (key == "active") ParseStyle(style, valueReader, elementName, ":active");
+				// 
+				// 		// Unknown
+				// 		else new WordReader(valueReader).ThrowWordError(valueReader.Text[1] == ' ' || valueReader.Text[1] == '\t' ? 1 : 0, "Unknown subtype");
+				// 	}
+				// 	else if(IsMediaQuery(valueReader))
+				// 	{
+				// 		style.ParseMediaQuery(valueReader, elementName);
+				// 	}
+				// 	// Nah, its a normal style
+				// 	else
+				// 	{
+				// 		element.ReadFrom(valueReader);
+				// 	}
+				// }
 			}
 		}
 
