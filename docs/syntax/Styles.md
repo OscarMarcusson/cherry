@@ -65,6 +65,7 @@ style
 
 ## Hover & Click
 It's possible to add interactive styling by putting it under a section called **hover** or **click**:
+
 **Simplified**
 ```ini
 div
