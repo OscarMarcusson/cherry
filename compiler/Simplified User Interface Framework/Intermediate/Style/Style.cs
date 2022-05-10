@@ -13,9 +13,9 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 	{
 		public readonly string Name;
 		public readonly bool IsGlobal;
-		public readonly Dictionary<string, StyleElement> Elements = new Dictionary<string, StyleElement>();
-		public List<StyleElement> MediaQueries = new List<StyleElement>();
-
+		public readonly Dictionary<string, RootStyleElement> Elements = new Dictionary<string, RootStyleElement>();
+		public Dictionary<MediaQuery, Dictionary<string, RootStyleElement>> MediaQueries = new Dictionary<MediaQuery, Dictionary<string, RootStyleElement>>();
+		
 
 
 		public Style()
@@ -82,7 +82,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 					elementName = parent + elementName;
 
 				if (!Elements.TryGetValue(elementName, out var element))
-					Elements[elementName] = element = new StyleElement(style, elementName);
+					Elements[elementName] = element = new RootStyleElement(style, elementName);
 
 				foreach (var valueReader in elementReader.Children)
 				{
@@ -117,84 +117,44 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 
 		StyleElement ParseMediaQuery(LineReader valueReader, string name, bool isSubMediaElement = true)
 		{
-			var reader = new WordReader(valueReader);
-			var mediaElement = new StyleElement(this, name, isMediaQuery: true);
+			var mediaQuery = new MediaQuery(valueReader);
+			if (!MediaQueries.TryGetValue(mediaQuery, out var lookup))
+				MediaQueries[mediaQuery] = lookup = new Dictionary<string, RootStyleElement>();
 
-			if (isSubMediaElement)
-			{
-				if (reader.First == "else")
-					reader.ThrowWordError(0, "Not implemented yet");
 
-				// TODO:: Implement proper reading with (sections & (stuff))
-				for(int i = 1; i < reader.Length; i++)
-				{
-					switch (reader[i])
-					{
-						case "screen": mediaElement.DisplayLimit |= DisplayLimit.Screen; break;
-						case "print":  mediaElement.DisplayLimit |= DisplayLimit.Print;  break;
-						case "voice":  mediaElement.DisplayLimit |= DisplayLimit.Voice;  break;
+			var mediaElement = new RootStyleElement(this, name);
 
-						// Ignore for now
-						case "and":
-						case "&&":
-						case "not":
-						case "!":
-							break;
 
-						case "width":
-						case "height":
-							var isWidth = reader[i++] == "width";
-							var comparitor = reader[i++];
-							var type = reader[i].EndsWith("px")
-											? "px"
-											: reader[i].EndsWith("em")
-												? "em"
-												: "px"
-												;
-							var value = int.Parse(new string(reader[i].Where(x => char.IsDigit(x)).ToArray()));
 
-							switch (comparitor)
-							{
-								case ">=": if (isWidth) mediaElement.MinWidth = value;   else mediaElement.MinHeight = value;     break;
-								case ">":  if (isWidth) mediaElement.MinWidth = value+1; else mediaElement.MinHeight = value+1;   break;
-								case "<=": if (isWidth) mediaElement.MaxWidth = value;   else mediaElement.MaxHeight = value;     break;
-								case "<":  if (isWidth) mediaElement.MaxWidth = value-1; else mediaElement.MaxHeight = value - 1; break;
-								case "=":  if (isWidth) mediaElement.MaxWidth = mediaElement.MinWidth = value; else mediaElement.MinHeight = mediaElement.MinHeight = value; break;
-								// TODO:: Implement later, needs an OR between them
-								// case "!=": mediaElement.MaxWidth = mediaElement.MinWidth = value; break;
-							}
-
-							break;
-
-						default:
-							reader.ThrowWordError(i, "Unknown query option");
-							break;
-					}
-				}
-			}
-
+			// Root media query, indent 1
 			if(name == null)
 			{
 				foreach (var child in valueReader.Children)
 				{
-					var element = ParseMediaQuery(child, child.Text, false);
-					element.DisplayLimit = mediaElement.DisplayLimit;
-					element.MinWidth  = mediaElement.MinWidth;
-					element.MaxWidth  = mediaElement.MaxWidth;
-					element.MinHeight = mediaElement.MinHeight;
-					element.MaxHeight = mediaElement.MaxHeight;
+					var element = new RootStyleElement(this, child);
+
+					if (lookup.TryGetValue(element.ElementName, out var existingElement))
+						existingElement.ReadFrom(element);
+					else 
+						lookup[element.ElementName] = element;
 				}
 			}
+			// Child media query (placed inside a regular declaration, like under a div) indent 2
 			else
 			{
-				MediaQueries.Add(mediaElement);
 				foreach (var child in valueReader.Children)
 				{
 					// TODO:: Implement
 					if (IsSubtype(child)) { }
 					else if (IsMediaQuery(child)) { }
 				
-					else mediaElement.ReadFrom(child);
+					else
+					{
+						if (!lookup.TryGetValue(name, out var element))
+							lookup[name] = element = mediaElement;
+
+						element.ReadFrom(child);
+					}
 				}
 			}
 
@@ -206,7 +166,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 			foreach(var element in style.Elements)
 			{
 				if (!Elements.TryGetValue(element.Key, out var existingElement))
-					Elements[element.Key] = existingElement = new StyleElement(style, element.Key);
+					Elements[element.Key] = existingElement = new RootStyleElement(style, element.Key);
 
 				existingElement.ReadFrom(element.Value);
 			}
@@ -220,17 +180,34 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 
 		public void ToCssStream(StreamWriter writer, int indentation)
 		{
+			// Regular styles
 			var indent = indentation > 0 ? new string('\t', indentation) : "";
 			foreach (var element in Elements)
 			{
 				if (element.Value.Values.Count() > 0)
-					element.Value.ToCssStream(writer, indent, element.Key);
+					element.Value.ToCssStream(writer, indent);
 			}
 
-			foreach (var element in MediaQueries)
+
+			// Media queries
+			var mediaIndent = indent + '\t';
+			foreach (var queries in MediaQueries)
 			{
-				if (element.Values.Count() > 0)
-					element.ToCssStream(writer, indent, element.ElementName);
+				var query = queries.Key;
+				var elements = queries.Value;
+
+				if(elements.Any(x => x.Value.Values.Count() > 0))
+				{
+					query.ToStartCssStream(writer, indent);
+
+					foreach(var element in elements)
+					{
+						if (element.Value.Values.Count() > 0)
+							element.Value.ToCssStream(writer, mediaIndent);
+					}
+
+					query.ToEndCssStream(writer, indent);
+				}
 			}
 		}
 	}
