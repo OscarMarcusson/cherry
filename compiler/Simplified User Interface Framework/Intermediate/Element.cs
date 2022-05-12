@@ -28,6 +28,8 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 		Tabs = 104,
 
 		Script = 200,
+
+		CustomElement = 300,
 	}
 
 	public class Element
@@ -442,6 +444,50 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 
 			foreach (var child in Children)
 				child.ResolveReferencedPages(pages);
+		}
+
+
+		public void ResolveCustomElements(Document document)
+		{
+			if(document.CustomElements.TryGetValue(Name, out var customElement))
+			{
+				Type = ElementType.CustomElement;
+				
+				// Add classes before the custom element level ones. This allows easier overrides per element basis
+				if(customElement.RootElement.Classes?.Count > 0)
+				{
+					if (Classes == null)
+						Classes = new List<string>();
+
+					var classesToAdd = customElement.RootElement.Classes.Where(x => !Classes.Any(c => c == x));
+					Classes.InsertRange(0, classesToAdd);
+				}
+
+				// Copy inlind styles, but only copy those that don't already exist. This allows the user to override styles per element basis
+				if(customElement.RootElement.InlinedStyles?.Count > 0)
+				{
+					if (InlinedStyles == null)
+						InlinedStyles = new Dictionary<string, string>();
+
+					foreach(var style in customElement.RootElement.InlinedStyles)
+					{
+						if (!InlinedStyles.ContainsKey(style.Key))
+							InlinedStyles[style.Key] = style.Value;
+					}
+				}
+				
+				// Add the children
+				foreach (var child in customElement.RootElement.Children)
+					AddChild(child.Source);
+
+				// Replace dynamic values with hard-coded values for this element
+
+			}
+			else if(Children?.Count > 0)
+			{
+				foreach (var child in Children)
+					child.ResolveCustomElements(document);
+			}
 		}
 
 

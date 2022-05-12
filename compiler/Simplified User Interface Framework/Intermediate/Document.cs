@@ -207,6 +207,8 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 			var pages = new List<string>();
 			Body?.ResolveReferencedPages(pages);
 			ReferencedPages = pages.ToArray();
+
+			Body?.ResolveCustomElements(this);
 		}
 
 
