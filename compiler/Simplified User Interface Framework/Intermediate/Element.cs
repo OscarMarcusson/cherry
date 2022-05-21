@@ -18,6 +18,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 		Button = 1,
 		Image = 2,
 		Link = 3,
+		Textbox = 4,
 
 		Separator = 10,
 
