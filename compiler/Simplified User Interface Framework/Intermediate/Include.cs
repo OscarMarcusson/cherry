@@ -10,7 +10,8 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 		Javascript,
 		CSS,
 		File,
-		Directory
+		Directory,
+		Font,
 	}
 
 
@@ -30,6 +31,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 				{
 					case ".css": Type = IncludeType.CSS;        break;
 					case ".js":  Type = IncludeType.Javascript; break;
+					case ".ttf": Type = IncludeType.Font;       break;
 					default:     Type = IncludeType.File;       break;
 				}
 			}
@@ -47,6 +49,9 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 		{
 			if (Type == IncludeType.Directory)
 				throw new NotSupportedException("Can't embedd a directory");
+
+			if(Type == IncludeType.Font)
+				throw new NotSupportedException("Can't embedd a font (yet)");
 
 			var path = Path.Combine(root, Value);
 			if (!File.Exists(path))
