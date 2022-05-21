@@ -50,6 +50,9 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 
 		public void ToCssStream(StreamWriter writer, string indentString, string overrideName = null)
 		{
+			if (Values == null || Values.Count == 0)
+				return;
+
 			writer.Write(indentString);
 			writer.Write(overrideName ?? ElementName);
 			writer.Write(' ');

@@ -23,7 +23,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate.Elements
 
 			DisplayName = Value;
 
-			if (Configurations.TryGetValue("name", out var displayName))
+			if (Configurations != null && Configurations.TryGetValue("name", out var displayName))
 			{
 				DisplayName = displayName;
 				Configurations.Remove("name");
