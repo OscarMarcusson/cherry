@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -146,6 +147,7 @@ namespace SimplifiedUserInterfaceFramework
 					writer.WriteLine("<head>");
 					document.Meta.ToHtmlString(writer, 1);
 
+					var fonts = new List<Include>();
 					foreach(var link in document.Links)
 					{
 						switch (link.Type)
@@ -156,6 +158,11 @@ namespace SimplifiedUserInterfaceFramework
 							case IncludeType.File: throw new NotImplementedException("No compiler implementation for " + Path.GetExtension(link.Value));
 
 							case IncludeType.Directory: throw new NotImplementedException("No compiler implementation for directoreis");
+							
+							// Since fonts are added in the CSS document we have to skip them here, but add them to the list to make it easier to check if a style should be written
+							case IncludeType.Font: 
+								fonts.Add(link); 
+								break;
 
 							default: throw new NotImplementedException("No compiler implementation for including " + link.Type);
 						}
@@ -171,12 +178,23 @@ namespace SimplifiedUserInterfaceFramework
 						writer.WriteLine("\t</style>");
 					}
 
-					if (document.Style.Elements.Count() > 0 || document.Style.MediaQueries.Count > 0 || document.Styles.Count > 0 || document.IncludeStyles.Length > 0)
+					if (document.Style.Elements.Count() > 0 || document.Style.MediaQueries.Count > 0 || document.Styles.Count > 0 || document.IncludeStyles.Length > 0 || fonts.Count > 0)
 					{
 						Log.Trace($"Adding global style...");
 						writer.WriteLine();
 						writer.WriteLine("\t<!-- Global style  -->");
 						writer.WriteLine("\t<style>");
+
+						if(fonts.Count > 0)
+						{
+							foreach(var font in fonts)
+							{
+								writer.WriteLine("\t\t@font-face {");
+								writer.WriteLine($"\t\t\tfont-family: {Path.GetFileNameWithoutExtension(font.Value)};");
+								writer.WriteLine($"\t\t\tsrc: url({font.Value});");
+								writer.WriteLine("\t\t}");
+							}
+						}
 
 						foreach (var include in document.IncludeStyles)
 							include.ToStream(writer, 2, InputDirectory);
