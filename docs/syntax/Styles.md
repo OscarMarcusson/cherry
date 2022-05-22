@@ -64,7 +64,7 @@ style
 <br>
 
 ## Hover & Click
-It's possible to add interactive styling by putting it under a section called **hover** or **click**:
+It's possible to add interactive styling by putting it under a section called **hover**, **click** or **Focus**:
 
 **Simplified**
 ```ini
@@ -74,6 +74,9 @@ div
 		background-color = green
 	click
 		background-color = blue
+	// I only work on input fields!
+	focus
+		background-color = red
 ```
 **CSS**
 ```CSS
@@ -86,7 +89,21 @@ div:hover {
 div:active {
 	background-color: blue;
 }
+div:focus {
+	background-color: red;
+}
 ```
+
+<br>
+
+## Chained styles
+It is also possible to recursively declare a chained style. This is done similarly to the hover style, but by adding a **.** or **:**, depending on the type.
+Key | Description
+--- | ---
+`.`class-name | Syntactial sugar for element.style1.style2....style99.class-name, that is to say that the style here is added to the end of the parent style declaration.<br>This is for example useful when adding ```.enabled``` or ```.disabled``` to lists.
+`:`pseudo-class | Creates a variant of this style for the given pseudo class, like ```first-child``` or ```last-child```.
+`>`class-name | Applies the following style to a child of this style with the given type. Placing ```>button``` under ```div.my-style``` would for example apply the button style to all buttons of a div.my-style element.
+
 
 <br>
 
