@@ -19,6 +19,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 		Image = 2,
 		Link = 3,
 		Textbox = 4,
+		IFrame = 5,
 
 		Separator = 10,
 

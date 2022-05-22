@@ -117,6 +117,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 				case "link":    return new LinkElement(reader, parent, compilerArguments).LoadContent();
 				case "button":  return new ButtonElement(reader, parent, compilerArguments).LoadContent();
 				case "textbox": return new TextboxElement(reader, parent, compilerArguments).LoadContent();
+				case "iframe":  return new IframeElement(reader, parent, compilerArguments).LoadContent();
 				default:        return new Element(reader, parent, false, compilerArguments) { Name = name }.LoadContent();
 			}
 		}
