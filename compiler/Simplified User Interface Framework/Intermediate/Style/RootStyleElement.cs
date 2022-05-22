@@ -16,32 +16,50 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 
 
 		public RootStyleElement(Style style, string elementName) : base(style, elementName) { }
-		public RootStyleElement(Style style, LineReader reader) : base(style, reader.Text) 
+		public RootStyleElement(Style style, LineReader reader) : base(style, reader.Text)
 		{
-			foreach(var child in reader.Children)
+			ParseToContent(style, reader);
+		}
+
+		private void ParseToContent(Style style, LineReader reader)
+		{
+			foreach (var child in reader.Children)
 			{
-				if (child.First == "hover")
+				switch (child.First)
 				{
-					Hover = new StyleElement(style, child, ElementName);
-				}
-				else if(child.First == "active" || child.First == "click") // Include "active" for easier CSS transition
-				{
-					Click = new StyleElement(style, child, ElementName);
-				}
-				else if(child.First == "focus")
-				{
-					Focus = new StyleElement(style, child, ElementName);
-				}
-				else if (!child.Text.Contains("="))
-				{
-					var childStyle = new RootStyleElement(style, child);
-					InheritedStyles.Add(childStyle);
-				}
-				else
-				{
-					ReadFrom(child);
+					case "hover": Hover = new StyleElement(style, child, ElementName); break;
+					case "active":
+					case "click": Click = new StyleElement(style, child, ElementName); break;
+					case "focus": Focus = new StyleElement(style, child, ElementName); break;
+
+					// Hard code accept the known types for the sake of safety
+					case "first-child": AddExtension(style, child, child.First); break;
+					case "last-child": AddExtension(style, child, child.First); break;
+
+					default:
+						// If there is no equals sign we just assume its some css modifier
+						if (!child.Text.Contains("="))
+						{
+							AddExtension(style, child, child.First);
+						}
+						// But if there is an equal sign we read everything after it as the value
+						else
+						{
+							ReadFrom(child);
+						}
+						break;
 				}
 			}
+		}
+
+		void AddExtension(Style style, LineReader reader, string extension)
+		{
+			if (!extension.StartsWith(".") && !extension.StartsWith(":"))
+				extension = "." + extension;
+
+			var extensionStyle = new RootStyleElement(style, ElementName + extension);
+			extensionStyle.ParseToContent(style, reader);
+			InheritedStyles.Add(extensionStyle);
 		}
 
 
@@ -53,6 +71,9 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 			if (Hover != null) Hover.ToCssStream(writer, indent, $"{Hover.ElementName}:hover");
 			if (Click != null) Click.ToCssStream(writer, indent, $"{Click.ElementName}:active");
 			if (Focus != null) Click.ToCssStream(writer, indent, $"{Click.ElementName}:focus");
+
+			foreach (var value in InheritedStyles)
+				value.ToCssStream(writer, indent);
 		}
 	}
 }
