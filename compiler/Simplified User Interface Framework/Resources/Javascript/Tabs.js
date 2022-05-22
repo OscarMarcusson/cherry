@@ -17,8 +17,6 @@
 	document.getElementById(tabSelectorId).className += " active";
 }
 
-
-
 function tabsSelect(listId,contentId,buttonId,tabId) {
 	let i;
 

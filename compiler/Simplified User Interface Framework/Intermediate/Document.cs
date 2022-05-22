@@ -228,19 +228,9 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 			{
 				var indentString = indent > 0 ? new string('\t', indent) : "";
 
-				// Declarations
 				writer.WriteLine($"{indentString}// Element binding declarations");
 				foreach (var binding in Bindings)
-					writer.WriteLine($"{indentString}let {binding.Value};");
-
-				// Bindings
-				writer.WriteLine();
-				writer.WriteLine($"{indentString}window.onload = OnLoadWindow;");
-				writer.WriteLine($"{indentString}function OnLoadWindow() {{");
-				writer.WriteLine($"{indentString}\t// Element bindings");
-				foreach (var binding in Bindings)
-					writer.WriteLine($"{indentString}\t{binding.Value} = document.getElementById('{binding.Key}');");
-				writer.WriteLine($"{indentString}}}");
+					writer.WriteLine($"{indentString}let {binding.Value} = document.getElementById('{binding.Key}');");
 			}
 		}
 	}

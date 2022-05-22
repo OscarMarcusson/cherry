@@ -61,7 +61,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 			if (indentation > 0)
 			{
 				var indentationString = indentation > 0 ? new string('\t', indentation) : "";
-				raw = indentationString + raw.Replace("\n", $"\n{indentationString}");
+				raw = indentationString + raw.Replace("\r", "").Replace("\n\n", "\n").Replace("\n\n", "\n").Replace("\n", $"{Environment.NewLine}{indentationString}");
 			}
 
 			writer.WriteLine(raw);
