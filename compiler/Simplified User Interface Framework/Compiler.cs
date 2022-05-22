@@ -203,6 +203,17 @@ namespace SimplifiedUserInterfaceFramework
 						writer.WriteLine("\t</style>");
 					}
 
+					writer.WriteLine("</head>");
+
+
+					Log.Trace("Writing body...");
+					writer.WriteLine();
+
+					Log.Trace("Writing body...");
+					writer.WriteLine();
+					document.Body.ToStartHtmlStream(writer, document, 0);
+					document.Body.WriteContentToHtml(writer, document, 1);
+
 					if (document.Script.HasContent || document.ContainsFrameworkCode || document.Bindings.Count > 0 || document.IncludesScripts.Length > 0 || document.CustomElements.Count > 0)
 					{
 						writer.WriteLine();
@@ -213,16 +224,16 @@ namespace SimplifiedUserInterfaceFramework
 
 						// Variables
 						var variables = document.Script.GetVariables();
-						if(variables.Length > 0)
+						if (variables.Length > 0)
 						{
 							foreach (var variable in variables)
 								variable.ToJavascriptStream(writer, 2);
-							
+
 							writer.WriteLine();
 						}
 
 						// Custom elements
-						if(document.CustomElements.Count > 0)
+						if (document.CustomElements.Count > 0)
 						{
 							writer.WriteLine("\t\t// Custom elements");
 							foreach (var element in document.CustomElements)
@@ -236,10 +247,10 @@ namespace SimplifiedUserInterfaceFramework
 						{
 							writer.WriteLine("\t\t// Framework code");
 							// Set defauls on load
-							writer.WriteLine("\t\twindow.addEventListener(\"load\", (event) => {");
+							//writer.WriteLine("\t\twindow.addEventListener(\"load\", (event) => {");
 							// TODO:: Loop through each tab selector group and click the default (or first) button
 							// writer.WriteLine("\t\t\tdocument.getElementById('ID').click();");
-							writer.WriteLine("\t\t});");
+							// writer.WriteLine("\t\t});");
 
 							// Select tab function
 							var selectTab = CompilerResources.GetJavascript("Tabs");
@@ -248,14 +259,14 @@ namespace SimplifiedUserInterfaceFramework
 
 						// Functions
 						var functions = document.Script.GetFunctions();
-						if(functions.Length > 0)
+						if (functions.Length > 0)
 						{
-							foreach(var function in functions)
+							foreach (var function in functions)
 								function.ToJavascriptStream(writer, 2);
 						}
 
 						// Embedded code from other files
-						if(document.IncludesScripts.Length > 0)
+						if (document.IncludesScripts.Length > 0)
 						{
 							writer.WriteLine();
 							writer.WriteLine("\t\t// Include scripts");
@@ -265,16 +276,7 @@ namespace SimplifiedUserInterfaceFramework
 
 						writer.WriteLine("\t</script>");
 					}
-
-					writer.WriteLine("</head>");
-
-
-					Log.Trace("Writing body...");
-					writer.WriteLine();
-
-					Log.Trace("Writing body...");
-					writer.WriteLine();
-					document.Body.ToHtmlStream(writer, document);
+					document.Body.ToEndHtmlStream(writer, 0);
 				}
 
 				Log.Trace("Done");

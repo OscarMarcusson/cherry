@@ -512,6 +512,8 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 			ToEndHtmlStream(writer);
 		}
 
+		// Only to allow the root body call from the compiler
+		internal void WriteContentToHtml(StreamWriter writer, Document document, int indent) => WriteContentToHtml(writer, document, indent-1, Children);
 
 		protected virtual void WriteContentToHtml(StreamWriter writer, Document document, int indent, List<Element> children)
 		{
@@ -535,7 +537,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 		protected virtual bool WriteValueAutomatically => Type == ElementType.None;
 
 		
-		private int ToStartHtmlStream(StreamWriter writer, Document document, int customIndent = -1)
+		internal int ToStartHtmlStream(StreamWriter writer, Document document, int customIndent = -1)
 		{
 			var indentNumber = customIndent > -1 ? customIndent : Indent;
 			var indent = indentNumber <= 0 ? "" : new string('\t', indentNumber);
@@ -632,7 +634,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 
 
 
-		protected virtual void ToEndHtmlStream(StreamWriter writer, int customIndent = 0)
+		internal virtual void ToEndHtmlStream(StreamWriter writer, int customIndent = 0)
 		{
 			if (customIndent > 0)
 				writer.Write(new string('\t', customIndent));
