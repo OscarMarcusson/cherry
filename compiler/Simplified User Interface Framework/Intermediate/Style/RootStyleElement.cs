@@ -27,12 +27,17 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 					case "click": Click = new StyleElement(style, child, ElementName); break;
 					case "focus": Focus = new StyleElement(style, child, ElementName); break;
 
+					// Hard code accept the known types for the sake of safety
+					case "first-child": AddExtension(style, child, child.First); break;
+					case "last-child": AddExtension(style, child, child.First); break;
+
 					default:
+						// If there is no equals sign we just assume its some css modifier
 						if (!child.Text.Contains("="))
 						{
-							var childStyle = new RootStyleElement(style, child);
-							InheritedStyles.Add(childStyle);
+							AddExtension(style, child, child.First);
 						}
+						// But if there is an equal sign we read everything after it as the value
 						else
 						{
 							ReadFrom(child);
@@ -40,6 +45,14 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 						break;
 				}
 			}
+		}
+
+		void AddExtension(Style style, LineReader reader, string extension)
+		{
+			var extensionStyle = new RootStyleElement(style, ElementName + ":" + extension);
+			foreach (var child in reader.Children)
+				extensionStyle.ReadFrom(child);
+			InheritedStyles.Add(extensionStyle);
 		}
 
 
@@ -51,6 +64,9 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 			if (Hover != null) Hover.ToCssStream(writer, indent, $"{Hover.ElementName}:hover");
 			if (Click != null) Click.ToCssStream(writer, indent, $"{Click.ElementName}:active");
 			if (Focus != null) Click.ToCssStream(writer, indent, $"{Click.ElementName}:focus");
+
+			foreach (var value in InheritedStyles)
+				value.ToCssStream(writer, indent);
 		}
 	}
 }
