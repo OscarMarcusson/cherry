@@ -49,7 +49,10 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 
 		void AddExtension(Style style, LineReader reader, string extension)
 		{
-			var extensionStyle = new RootStyleElement(style, ElementName + ":" + extension);
+			if (!extension.StartsWith(".") && !extension.StartsWith(":"))
+				extension = "." + extension;
+
+			var extensionStyle = new RootStyleElement(style, ElementName + extension);
 			foreach (var child in reader.Children)
 				extensionStyle.ReadFrom(child);
 			InheritedStyles.Add(extensionStyle);
