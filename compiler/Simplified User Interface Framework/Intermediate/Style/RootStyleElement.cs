@@ -16,14 +16,19 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 
 
 		public RootStyleElement(Style style, string elementName) : base(style, elementName) { }
-		public RootStyleElement(Style style, LineReader reader) : base(style, reader.Text) 
+		public RootStyleElement(Style style, LineReader reader) : base(style, reader.Text)
 		{
-			foreach(var child in reader.Children)
+			ParseToContent(style, reader);
+		}
+
+		private void ParseToContent(Style style, LineReader reader)
+		{
+			foreach (var child in reader.Children)
 			{
 				switch (child.First)
 				{
-					case "hover":  Hover = new StyleElement(style, child, ElementName); break;
-					case "active": 
+					case "hover": Hover = new StyleElement(style, child, ElementName); break;
+					case "active":
 					case "click": Click = new StyleElement(style, child, ElementName); break;
 					case "focus": Focus = new StyleElement(style, child, ElementName); break;
 
@@ -53,8 +58,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 				extension = "." + extension;
 
 			var extensionStyle = new RootStyleElement(style, ElementName + extension);
-			foreach (var child in reader.Children)
-				extensionStyle.ReadFrom(child);
+			extensionStyle.ParseToContent(style, reader);
 			InheritedStyles.Add(extensionStyle);
 		}
 
