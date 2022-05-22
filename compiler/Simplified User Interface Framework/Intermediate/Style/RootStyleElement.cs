@@ -10,6 +10,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 	{
 		public StyleElement Hover { get; set; }
 		public StyleElement Click { get; set; }
+		public StyleElement Focus { get; set; }
 
 		public List<RootStyleElement> InheritedStyles = new List<RootStyleElement>();
 
@@ -26,6 +27,10 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 				else if(child.First == "active" || child.First == "click") // Include "active" for easier CSS transition
 				{
 					Click = new StyleElement(style, child, ElementName);
+				}
+				else if(child.First == "focus")
+				{
+					Focus = new StyleElement(style, child, ElementName);
 				}
 				else if (!child.Text.Contains("="))
 				{
@@ -47,6 +52,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 
 			if (Hover != null) Hover.ToCssStream(writer, indent, $"{Hover.ElementName}:hover");
 			if (Click != null) Click.ToCssStream(writer, indent, $"{Click.ElementName}:active");
+			if (Focus != null) Click.ToCssStream(writer, indent, $"{Click.ElementName}:focus");
 		}
 	}
 }
