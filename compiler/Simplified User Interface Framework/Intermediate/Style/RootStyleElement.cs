@@ -33,8 +33,8 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 					case "focus": Focus = new StyleElement(style, child, ElementName); break;
 
 					// Hard code accept the known types for the sake of safety
-					case "first-child": AddExtension(style, child, child.First); break;
-					case "last-child": AddExtension(style, child, child.First); break;
+					case ":first-child": AddExtension(style, child, child.First); break;
+					case ":last-child": AddExtension(style, child, child.First); break;
 
 					default:
 						// If there is no equals sign we just assume its some css modifier
