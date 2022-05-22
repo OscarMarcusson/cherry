@@ -202,12 +202,8 @@ namespace SimplifiedUserInterfaceFramework
 						document.Style.ToCssStream(writer, 2);
 						writer.WriteLine("\t</style>");
 					}
-
 					writer.WriteLine("</head>");
 
-
-					Log.Trace("Writing body...");
-					writer.WriteLine();
 
 					Log.Trace("Writing body...");
 					writer.WriteLine();
