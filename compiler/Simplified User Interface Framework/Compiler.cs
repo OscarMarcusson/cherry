@@ -212,7 +212,6 @@ namespace SimplifiedUserInterfaceFramework
 
 					if (document.Script.HasContent || document.ContainsFrameworkCode || document.Bindings.Count > 0 || document.IncludesScripts.Length > 0 || document.CustomElements.Count > 0)
 					{
-						writer.WriteLine();
 						writer.WriteLine("\t<script>");
 
 						// Bindings
@@ -243,10 +242,7 @@ namespace SimplifiedUserInterfaceFramework
 						{
 							writer.WriteLine("\t\t// Framework code");
 							// Set defauls on load
-							//writer.WriteLine("\t\twindow.addEventListener(\"load\", (event) => {");
 							// TODO:: Loop through each tab selector group and click the default (or first) button
-							// writer.WriteLine("\t\t\tdocument.getElementById('ID').click();");
-							// writer.WriteLine("\t\t});");
 
 							// Select tab function
 							var selectTab = CompilerResources.GetJavascript("Tabs");
@@ -264,7 +260,6 @@ namespace SimplifiedUserInterfaceFramework
 						// Embedded code from other files
 						if (document.IncludesScripts.Length > 0)
 						{
-							writer.WriteLine();
 							writer.WriteLine("\t\t// Include scripts");
 							foreach (var include in document.IncludesScripts)
 								include.ToStream(writer, 2, InputDirectory);

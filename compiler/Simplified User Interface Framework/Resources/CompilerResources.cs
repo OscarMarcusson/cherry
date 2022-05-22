@@ -21,7 +21,7 @@ namespace SimplifiedUserInterfaceFramework
 			using (Stream stream = Assembly.GetManifestResourceStream(path))
 			using (StreamReader reader = new StreamReader(stream))
 			{
-				string result = reader.ReadToEnd();
+				string result = reader.ReadToEnd().Replace("\r", "").Replace("\n\n", "\n").Replace("\n\n", "\n").Replace("\n", Environment.NewLine).Trim();
 				return result;
 			}
 		}
