@@ -52,10 +52,18 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 			}
 		}
 
+		/// <summary>
+		/// See CSS specs for details, this is translated as:
+		/// . == parent-name + '.' + child-name
+		/// : == parent-name + ':' + child-name
+		/// > == parent-name + ' ' + child-name
+		/// </summary>
 		void AddExtension(Style style, LineReader reader, string extension)
 		{
-			if (!extension.StartsWith(".") && !extension.StartsWith(":"))
-				extension = "." + extension;
+			if (extension.StartsWith(">"))
+				extension = " " + extension.Substring(1).Trim();
+			else if (!extension.StartsWith(".") && !extension.StartsWith(":"))
+				extension = " " + extension;
 
 			var extensionStyle = new RootStyleElement(style, ElementName + extension);
 			extensionStyle.ParseToContent(style, reader);
