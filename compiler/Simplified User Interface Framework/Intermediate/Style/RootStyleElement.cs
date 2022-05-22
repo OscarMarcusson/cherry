@@ -20,26 +20,24 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 		{
 			foreach(var child in reader.Children)
 			{
-				if (child.First == "hover")
+				switch (child.First)
 				{
-					Hover = new StyleElement(style, child, ElementName);
-				}
-				else if(child.First == "active" || child.First == "click") // Include "active" for easier CSS transition
-				{
-					Click = new StyleElement(style, child, ElementName);
-				}
-				else if(child.First == "focus")
-				{
-					Focus = new StyleElement(style, child, ElementName);
-				}
-				else if (!child.Text.Contains("="))
-				{
-					var childStyle = new RootStyleElement(style, child);
-					InheritedStyles.Add(childStyle);
-				}
-				else
-				{
-					ReadFrom(child);
+					case "hover":  Hover = new StyleElement(style, child, ElementName); break;
+					case "active": 
+					case "click": Click = new StyleElement(style, child, ElementName); break;
+					case "focus": Focus = new StyleElement(style, child, ElementName); break;
+
+					default:
+						if (!child.Text.Contains("="))
+						{
+							var childStyle = new RootStyleElement(style, child);
+							InheritedStyles.Add(childStyle);
+						}
+						else
+						{
+							ReadFrom(child);
+						}
+						break;
 				}
 			}
 		}
