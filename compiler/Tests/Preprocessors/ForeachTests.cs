@@ -30,6 +30,12 @@ namespace Tests
 		}
 
 		[TestMethod]
+		public void ThrowsExceptionForMissingIn()
+		{
+			Assert.ThrowsException<SectionException>(() => new Foreach("foreach i something-incorrect-here range:1-10"));
+		}
+
+		[TestMethod]
 		public void CanGenerateRange()
 		{
 			var loop = new Foreach("foreach i in range:1-10");

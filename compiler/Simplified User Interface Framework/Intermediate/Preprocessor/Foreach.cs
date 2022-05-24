@@ -13,9 +13,9 @@ namespace SimplifiedUserInterfaceFramework.Intermediate.Preprocessor
 
 	public class Foreach
 	{
-		public string VariableName { get; set; }
-		public ForeachResourceType ResourceType { get; set; }
-		public string[] Values { get; set; }
+		public readonly string VariableName;
+		public readonly ForeachResourceType ResourceType;
+		public readonly string[] Values;
 
 
 		public Foreach(string rawDeclaration, int lineNumber = -1, string fileName = null)
@@ -24,17 +24,16 @@ namespace SimplifiedUserInterfaceFramework.Intermediate.Preprocessor
 				throw new SectionException("", "", "", "Expected a foreach statement", lineNumber, fileName);
 
 			rawDeclaration = rawDeclaration.Trim();
-			if (!rawDeclaration.StartsWith("foreach"))
+			if(!TryGetNextWord(rawDeclaration, 0, out var firstWord, out var index))
 				throw new SectionException("", rawDeclaration, "", "Foreach statements must start with foreach, was this called incorrectly?", lineNumber, fileName);
+			if (firstWord != "foreach")
+				throw new SectionException("", firstWord, rawDeclaration.Substring(index), "Foreach statements must start with foreach, was this called incorrectly?", lineNumber, fileName);
 
-			if(!TryGetNextSpace(rawDeclaration, 0, out var index))
+
+			if (!TryGetNextWord(rawDeclaration, index, out VariableName, out index))
 				throw new SectionException(rawDeclaration, "", "", "Expected a variable name", lineNumber, fileName);
 
-			index = GetEndOfSpace(rawDeclaration, index);
-			if (!TryGetNextSpace(rawDeclaration, index, out var nextIndex))
-				throw new SectionException(rawDeclaration, "", "", "Expected an \"in\" statement after the variable", lineNumber, fileName);
-
-			VariableName = rawDeclaration.Substring(index, nextIndex - index);
+			ValidateNextWord(rawDeclaration, ref index, "in", "Expected an \"in\" statement after the variable", "Expected an \"in\" statement after the variable", lineNumber, fileName);
 		}
 
 
@@ -64,6 +63,35 @@ namespace SimplifiedUserInterfaceFramework.Intermediate.Preprocessor
 				index++;
 
 			return index;
+		}
+
+
+		static bool TryGetNextWord(string str, int index, out string word, out int nextIndex)
+		{
+			index = GetEndOfSpace(str, index);
+			if(!TryGetNextSpace(str, index, out nextIndex))
+			{
+				word = null;
+				return false;
+			}
+
+			word = str.Substring(index, nextIndex - index);
+			return true;
+		}
+
+		static void ValidateNextWord(string str, ref int index, string expectedWord, string onNotFoundError, string onIncorrectError, int lineNumber, string fileName)
+		{
+			if(TryGetNextWord(str, index, out var word, out var nextIndex))
+			{
+				if (word != expectedWord)
+					throw new SectionException(str.Substring(0, index), word, str.Substring(nextIndex), onIncorrectError, lineNumber, fileName);
+
+				index = nextIndex;
+			}
+			else
+			{
+				throw new SectionException(str.Substring(0, index), str.Substring(nextIndex), "", onNotFoundError, lineNumber, fileName);
+			}
 		}
 	}
 }
