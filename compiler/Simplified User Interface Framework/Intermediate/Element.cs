@@ -1,4 +1,5 @@
 ﻿using SimplifiedUserInterfaceFramework.Intermediate.Elements;
+using SimplifiedUserInterfaceFramework.Intermediate.Preprocessor;
 using SimplifiedUserInterfaceFramework.Internal.Reader;
 using System;
 using System.Collections.Generic;
@@ -352,6 +353,11 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 							// TODO:: Better error
 							throw new Exception("Could not parse inlined style, no equals sign found: " + child.Text);
 						}
+					}
+					else if(child.First == "foreach")
+					{
+						var foreachData = new Foreach(child.Text, child.LineNumber);
+						// TODO:: foreach through the children
 					}
 					else
 					{
