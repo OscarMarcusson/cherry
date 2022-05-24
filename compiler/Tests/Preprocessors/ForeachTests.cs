@@ -57,7 +57,7 @@ namespace Tests
 
 			// Double check that the range is valid by sampling each value
 			for (int i = 1; i <= 10; i++)
-				Assert.AreEqual(i, loop.Values[i - 1]);
+				Assert.AreEqual(i.ToString(), loop.Values[i - 1]);
 		}
 
 		[TestMethod]

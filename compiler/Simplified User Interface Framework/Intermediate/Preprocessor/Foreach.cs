@@ -51,9 +51,37 @@ namespace SimplifiedUserInterfaceFramework.Intermediate.Preprocessor
 			var resourceType = rawDeclaration.Substring(index, indexOfValueStart - index);
 			if (!Enum.TryParse(resourceType, true, out ResourceType) || !Enum.IsDefined(typeof(ForeachResourceType), ResourceType) || ResourceType == ForeachResourceType.Undefined)
 				throw new SectionException(rawDeclaration.Substring(0, index), resourceType, rawDeclaration.Substring(indexOfValueStart), $"Unknown resource type, expected one of:\n * {string.Join("\n * ", GetResourceTypeChoices())}", lineNumber, fileName);
-		
-			
+
+
 			// value
+			switch (ResourceType)
+			{
+				case ForeachResourceType.Range:
+					index = indexOfValueStart+1;
+					var rangeSplitIndex = rawDeclaration.IndexOf('-', index);
+					if(rangeSplitIndex < 0)
+						throw new SectionException(rawDeclaration.Substring(0, index), rawDeclaration.Substring(index), "", $"Could not find the \"-\" range separator\nExpected a value like \"1-3\" or \"0.01-0.1\"", lineNumber, fileName);
+
+					var leftValue = rawDeclaration.Substring(index, rangeSplitIndex - index).Trim();
+					var rightValue = rawDeclaration.Substring(rangeSplitIndex + 1).Trim();
+					
+					if(!decimal.TryParse(leftValue, out var leftDecimalValue))
+						throw new SectionException(rawDeclaration.Substring(0, index), leftValue, rawDeclaration.Substring(rangeSplitIndex), $"Could not convert \"{leftValue}\" to a number", lineNumber, fileName);
+					
+					if (!decimal.TryParse(rightValue, out var rightDecimalValue))
+						throw new SectionException(rawDeclaration.Substring(0, rangeSplitIndex), rightValue, "", $"Could not convert \"{rightValue}\" to a number", lineNumber, fileName);
+
+					// TODO:: Implement decimal point support, always iterate on the smallest given size (0.1 goes 0.1, 0.2, 0.3... while 0.10 goes 0.10, 0.11, 0.12...)
+					var valueToAdd = rightDecimalValue > leftDecimalValue ? 1m : -1m;
+					var iterations = Convert.ToInt32(Math.Abs(leftDecimalValue - rightDecimalValue)) + 1;
+					Values = new string[iterations];
+					for (int i = 0; i < iterations; i++)
+						Values[i] = (leftDecimalValue + valueToAdd * i).ToString();
+					break;
+
+				default:
+					throw new SectionException(rawDeclaration.Substring(0, index), resourceType, rawDeclaration.Substring(indexOfValueStart), "No parser exists for this resource type", lineNumber, fileName);
+			}
 		}
 
 
