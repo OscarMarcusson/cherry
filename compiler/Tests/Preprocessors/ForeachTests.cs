@@ -28,5 +28,26 @@ namespace Tests
 			var loop = new Foreach("foreach var-name in range:1-10");
 			Assert.AreEqual("var-name", loop.VariableName);
 		}
+
+		[TestMethod]
+		public void CanGenerateRange()
+		{
+			var loop = new Foreach("foreach i in range:1-10");
+			Assert.AreEqual(ForeachResourceType.Range, loop.ResourceType);
+			Assert.IsNotNull(loop.Values);
+			Assert.AreEqual(10, loop.Values.Length);
+
+			// Double check that the range is valid by sampling each value
+			for (int i = 1; i <= 10; i++)
+				Assert.AreEqual(i, loop.Values[i - 1]);
+		}
+
+		[TestMethod]
+		public void CanGenerateFiles()
+		{
+			var loop = new Foreach("foreach i in file:*.txt");
+			Assert.AreEqual(ForeachResourceType.File, loop.ResourceType);
+			Assert.IsNotNull(loop.Values);
+		}
 	}
 }

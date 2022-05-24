@@ -4,9 +4,18 @@ using System.Text;
 
 namespace SimplifiedUserInterfaceFramework.Intermediate.Preprocessor
 {
+	public enum ForeachResourceType
+	{
+		Undefined = 0,
+		Range,
+		File
+	}
+
 	public class Foreach
 	{
 		public string VariableName { get; set; }
+		public ForeachResourceType ResourceType { get; set; }
+		public string[] Values { get; set; }
 
 
 		public Foreach(string rawDeclaration, int lineNumber = -1, string fileName = null)
