@@ -12,7 +12,7 @@ This is a simple UI language based on HTML, but built with the intention of simp
   * Element list
     * [IFrame (inline frame)](docs/syntax/elements/IFrame.md)
   * Preprocessor
-    * [Foreach](docs/syntax/preprocessors/foreach.md)
+    * [Foreach](docs/syntax/preprocessor/Foreach.md)
 * #### Script
   * [Functions](docs/script/Functions.md)
   * [Variables](docs/script/Variables.md)
