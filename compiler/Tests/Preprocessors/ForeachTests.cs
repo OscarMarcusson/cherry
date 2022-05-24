@@ -36,6 +36,18 @@ namespace Tests
 		}
 
 		[TestMethod]
+		public void ThrowsExceptionForMissingResourceMarker()
+		{
+			Assert.ThrowsException<SectionException>(() => new Foreach("foreach i in range 1-10"));
+		}
+
+		[TestMethod]
+		public void ThrowsExceptionForIncorrectResourceType()
+		{
+			Assert.ThrowsException<SectionException>(() => new Foreach("foreach i in I'm-completely-wrong:1-10"));
+		}
+
+		[TestMethod]
 		public void CanGenerateRange()
 		{
 			var loop = new Foreach("foreach i in range:1-10");

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace SimplifiedUserInterfaceFramework.Intermediate.Preprocessor
@@ -24,7 +25,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate.Preprocessor
 				throw new SectionException("", "", "", "Expected a foreach statement", lineNumber, fileName);
 
 			rawDeclaration = rawDeclaration.Trim();
-			if(!TryGetNextWord(rawDeclaration, 0, out var firstWord, out var index))
+			if (!TryGetNextWord(rawDeclaration, 0, out var firstWord, out var index))
 				throw new SectionException("", rawDeclaration, "", "Foreach statements must start with foreach, was this called incorrectly?", lineNumber, fileName);
 			if (firstWord != "foreach")
 				throw new SectionException("", firstWord, rawDeclaration.Substring(index), "Foreach statements must start with foreach, was this called incorrectly?", lineNumber, fileName);
@@ -33,12 +34,26 @@ namespace SimplifiedUserInterfaceFramework.Intermediate.Preprocessor
 			if (!TryGetNextWord(rawDeclaration, index, out VariableName, out index))
 				throw new SectionException(rawDeclaration, "", "", "Expected a variable name", lineNumber, fileName);
 
+
 			ValidateNextWord(rawDeclaration, ref index, "in", "Expected an \"in\" statement after the variable", "Expected an \"in\" statement after the variable", lineNumber, fileName);
+
+
+			index = GetEndOfSpace(rawDeclaration, index);
+			var indexOfValueStart = rawDeclaration.IndexOf(':');
+			if (indexOfValueStart < 0)
+				throw new SectionException(rawDeclaration.Substring(0, index), rawDeclaration.Substring(index), "", "Could not find the resource marker (:)", lineNumber, fileName);
+
+			var resourceType = rawDeclaration.Substring(index, indexOfValueStart - index);
+			if (!Enum.TryParse(resourceType, true, out ResourceType) || !Enum.IsDefined(typeof(ForeachResourceType), ResourceType) || ResourceType == ForeachResourceType.Undefined)
+				throw new SectionException(rawDeclaration.Substring(0, index), resourceType, rawDeclaration.Substring(indexOfValueStart), $"Unknown resource type, expected one of:\n * {string.Join("\n * ", GetResourceTypeChoices())}", lineNumber, fileName);
 		}
 
 
 
-
+		static IEnumerable<string> GetResourceTypeChoices() => Enum.GetNames(typeof(ForeachResourceType))
+																	.Where(x => x != nameof(ForeachResourceType.Undefined))
+																	.Select(x => x.ToLower())
+																	;
 
 
 
