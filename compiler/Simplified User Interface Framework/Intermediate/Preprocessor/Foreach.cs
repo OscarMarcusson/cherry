@@ -25,19 +25,24 @@ namespace SimplifiedUserInterfaceFramework.Intermediate.Preprocessor
 				throw new SectionException("", "", "", "Expected a foreach statement", lineNumber, fileName);
 
 			rawDeclaration = rawDeclaration.Trim();
+			
+			// foreach
 			if (!TryGetNextWord(rawDeclaration, 0, out var firstWord, out var index))
 				throw new SectionException("", rawDeclaration, "", "Foreach statements must start with foreach, was this called incorrectly?", lineNumber, fileName);
 			if (firstWord != "foreach")
 				throw new SectionException("", firstWord, rawDeclaration.Substring(index), "Foreach statements must start with foreach, was this called incorrectly?", lineNumber, fileName);
 
 
+			// variable
 			if (!TryGetNextWord(rawDeclaration, index, out VariableName, out index))
 				throw new SectionException(rawDeclaration, "", "", "Expected a variable name", lineNumber, fileName);
 
 
+			// in
 			ValidateNextWord(rawDeclaration, ref index, "in", "Expected an \"in\" statement after the variable", "Expected an \"in\" statement after the variable", lineNumber, fileName);
 
 
+			// resource:
 			index = GetEndOfSpace(rawDeclaration, index);
 			var indexOfValueStart = rawDeclaration.IndexOf(':');
 			if (indexOfValueStart < 0)
@@ -46,6 +51,9 @@ namespace SimplifiedUserInterfaceFramework.Intermediate.Preprocessor
 			var resourceType = rawDeclaration.Substring(index, indexOfValueStart - index);
 			if (!Enum.TryParse(resourceType, true, out ResourceType) || !Enum.IsDefined(typeof(ForeachResourceType), ResourceType) || ResourceType == ForeachResourceType.Undefined)
 				throw new SectionException(rawDeclaration.Substring(0, index), resourceType, rawDeclaration.Substring(indexOfValueStart), $"Unknown resource type, expected one of:\n * {string.Join("\n * ", GetResourceTypeChoices())}", lineNumber, fileName);
+		
+			
+			// value
 		}
 
 
