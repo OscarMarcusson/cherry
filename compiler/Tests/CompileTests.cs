@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SimplifiedUserInterfaceFramework;
 
-namespace UnitTests
+namespace Compilation
 {
 	[TestClass]
 	public class CompileTests

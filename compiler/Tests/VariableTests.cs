@@ -7,7 +7,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SimplifiedUserInterfaceFramework;
 using SimplifiedUserInterfaceFramework.Intermediate;
 
-namespace UnitTests
+namespace Parser
 {
 	[TestClass]
 	public class VariableTests

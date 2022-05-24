@@ -4,7 +4,7 @@ using SimplifiedUserInterfaceFramework;
 using SimplifiedUserInterfaceFramework.Intermediate.Preprocessor;
 using SimplifiedUserInterfaceFramework.Internal;
 
-namespace Tests
+namespace Preprocessor
 {
 	[TestClass]
 	public class ForeachTests
@@ -61,11 +61,28 @@ namespace Tests
 		}
 
 		[TestMethod]
+		public void WildCardInFilesDirectoryThrowsException()
+		{
+			Assert.ThrowsException<SectionException>(() => new ForeachFilesTester("foreach i in file:dir1/dir2/dir*/data.txt"));
+		}
+
+		[TestMethod]
 		public void CanGenerateFiles()
 		{
-			var loop = new Foreach("foreach i in file:*.txt");
+			var loop = new ForeachFilesTester("foreach i in file:*.txt");
 			Assert.AreEqual(ForeachResourceType.File, loop.ResourceType);
 			Assert.IsNotNull(loop.Values);
+			Assert.AreEqual(3, loop.Values.Length);
+			Assert.AreEqual("test1.txt", loop.Values[0]);
+			Assert.AreEqual("test2.txt", loop.Values[1]);
+			Assert.AreEqual("test3.txt", loop.Values[2]);
+		}
+
+		// Test wrapper to enable easier IO with full control over test cases, which also allows us to skip interfaces or generics later down the road
+		class ForeachFilesTester : Foreach
+		{
+			public ForeachFilesTester(string rawDeclaration) : base(rawDeclaration) { }
+			protected override string[] GetFiles(string directory, string filter) => new[] { "test1.txt", "test2.txt", "test3.txt" };
 		}
 	}
 }

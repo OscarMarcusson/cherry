@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 
@@ -79,10 +80,33 @@ namespace SimplifiedUserInterfaceFramework.Intermediate.Preprocessor
 						Values[i] = (leftDecimalValue + valueToAdd * i).ToString();
 					break;
 
+
+				case ForeachResourceType.File:
+					var fullPath = rawDeclaration.Substring(indexOfValueStart + 1);
+					var directory = Path.GetDirectoryName(fullPath);
+					var filter = Path.GetFileName(fullPath);
+
+					index = rawDeclaration.IndexOf('*', indexOfValueStart + 1);
+					if (index > 0 && index < indexOfValueStart + directory.Length + 1)
+						throw new SectionException(rawDeclaration.Substring(0, index), rawDeclaration[index].ToString(), rawDeclaration.Substring(index + 1), "Can't use wildcards in directories", lineNumber, fileName);
+
+					Values = GetFiles(directory, filter);
+					break;
+
 				default:
 					throw new SectionException(rawDeclaration.Substring(0, index), resourceType, rawDeclaration.Substring(indexOfValueStart), "No parser exists for this resource type", lineNumber, fileName);
 			}
 		}
+
+
+
+		protected virtual string[] GetFiles(string directory, string filter)
+		{
+			return Directory.GetFiles(directory, filter, SearchOption.TopDirectoryOnly);
+		}
+
+
+
 
 
 
