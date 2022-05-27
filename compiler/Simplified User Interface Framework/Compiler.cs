@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using SimplifiedUserInterfaceFramework.Intermediate;
+using SimplifiedUserInterfaceFramework.Internal;
 using SimplifiedUserInterfaceFramework.Internal.Reader;
 
 namespace SimplifiedUserInterfaceFramework
@@ -274,7 +275,7 @@ namespace SimplifiedUserInterfaceFramework
 			}
 			catch(SectionException e)
 			{
-				Log.SectionError($"Failed to parse {e.FileName}{(e.LineNumber > -1 ? $"\nLine {e.LineNumber}" : "")}\n{e.Left}", e.Center, e.Right, e.Message);
+				Log.SectionError(e);
 			}
 		}
 
