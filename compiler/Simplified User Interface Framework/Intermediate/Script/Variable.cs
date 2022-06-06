@@ -21,7 +21,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 		public readonly VariableType AccessType;
 		public readonly string Name;
 		public readonly string Type;
-		public readonly WordReader Value;
+		public readonly VariableValue Value;
 
 		public override string ToString() => $"{(AccessType == VariableType.Dynamic ? DynamicAccessType : ReadOnlyAccessType)} {(Type != null ? $"{Type} " : "")}{Name}" + (Value != null ? $" = {Value}" : "");
 
