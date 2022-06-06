@@ -68,5 +68,16 @@ namespace Variables
 			Assert.AreEqual(true, bool.Parse(new VariableValue("true").Value));
 			Assert.AreEqual(false, bool.Parse(new VariableValue("false").Value));
 		}
+
+
+		[TestMethod]
+		public void CanParseVariableReference()
+		{
+			Assert.AreEqual(VariableValueType.Reference, new VariableValue("a").Type);
+			Assert.AreEqual(VariableValueType.Reference, new VariableValue("some-value").Type);
+
+			Assert.AreEqual("a", new VariableValue("a").Value);
+			Assert.AreEqual("some-value", new VariableValue("some-value").Value);
+		}
 	}
 }

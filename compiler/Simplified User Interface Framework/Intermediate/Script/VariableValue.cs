@@ -61,6 +61,16 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 								: raw
 							;
 			}
+			else if(raw.Contains(' '))
+			{
+				// TODO:: Resolve left & right
+				// TODO:: Resolve type based on above
+			}
+			else
+			{
+				Type = VariableValueType.Reference;
+				Value = raw;
+			}
 		}
 	}
 }
