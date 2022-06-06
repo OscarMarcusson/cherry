@@ -11,6 +11,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 		String,
 		DynamicString,
 		Integer,
+		Float,
 		Reference,
 	}
 
@@ -43,6 +44,16 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 			{
 				Type = VariableValueType.Integer;
 				Value = raw;
+			}
+			else if (raw.All(x => char.IsDigit(x) || x == '.'))
+			{
+				Type = VariableValueType.Float;
+				Value = raw.StartsWith('.')
+							? "0" + raw
+							: raw.EndsWith('.')
+								? raw.Trim('.')
+								: raw
+							;
 			}
 		}
 	}
