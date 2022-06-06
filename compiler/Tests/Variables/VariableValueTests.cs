@@ -41,5 +41,18 @@ namespace Variables
 			Assert.AreEqual(0.2, double.Parse(new VariableValue("0.2").Value));
 			Assert.AreEqual(1572.32324, double.Parse(new VariableValue("1572.32324").Value));
 		}
+
+
+		[TestMethod]
+		public void CanParseStringLiteral()
+		{
+			Assert.AreEqual(VariableValueType.String, new VariableValue("\"abc123\"").Type);
+			Assert.AreEqual(VariableValueType.String, new VariableValue("\"\"").Type);
+			Assert.AreEqual(VariableValueType.String, new VariableValue("\"1\"").Type);
+
+			Assert.AreEqual("abc123", new VariableValue("\"abc123\"").Value);
+			Assert.AreEqual("1", new VariableValue("\"1\"").Value);
+			Assert.AreEqual("", new VariableValue("\"\"").Value);
+		}
 	}
 }
