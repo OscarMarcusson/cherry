@@ -79,5 +79,35 @@ namespace Variables
 			Assert.AreEqual("a", new VariableValue("a").Value);
 			Assert.AreEqual("some-value", new VariableValue("some-value").Value);
 		}
+
+
+		[TestMethod]
+		public void CanParse2VariableMath()
+		{
+			Assert.AreEqual(VariableValueType.Integer, new VariableValue("1 + 2").Type);
+			Assert.AreEqual(VariableValueType.Float, new VariableValue("1.5 + 3").Type);
+
+			Assert.AreEqual(VariableValueType.Integer, new VariableValue("3 - 1").Type);
+			Assert.AreEqual(VariableValueType.Float, new VariableValue("5 - 0.1").Type);
+
+			Assert.AreEqual(VariableValueType.Integer, new VariableValue("5 * 82").Type);
+			Assert.AreEqual(VariableValueType.Float, new VariableValue("0.63 * 99").Type);
+
+			Assert.AreEqual(VariableValueType.Integer, new VariableValue("10 / 5").Type);
+			Assert.AreEqual(VariableValueType.Float, new VariableValue("13 / 7.0").Type);
+
+
+			Assert.AreEqual(1, int.Parse(new VariableValue("-1 + 2").Value));
+			Assert.AreEqual(2.5m, decimal.Parse(new VariableValue("0.5 + 2").Value));
+
+			Assert.AreEqual(5, int.Parse(new VariableValue("7 - 2").Value));
+			Assert.AreEqual(0.75m, decimal.Parse(new VariableValue("3 - 2.25").Value));
+
+			Assert.AreEqual(10, int.Parse(new VariableValue("5 * 2").Value));
+			Assert.AreEqual(5.2m, decimal.Parse(new VariableValue("1.3 * 4").Value));
+
+			Assert.AreEqual(5, int.Parse(new VariableValue("20 / 4").Value));
+			Assert.AreEqual(0.65m, decimal.Parse(new VariableValue("5.2 / 8").Value));
+		}
 	}
 }
