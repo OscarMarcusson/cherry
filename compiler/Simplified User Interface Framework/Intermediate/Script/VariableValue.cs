@@ -43,7 +43,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 			}
 
 			raw = raw.Trim();
-			if (raw.StartsWith('"') && raw.EndsWith('"'))
+			if (IsStringLiteral(raw))
 			{
 				Type = VariableValueType.String;
 				raw = raw.Length > 2
@@ -141,6 +141,22 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 					Operator = Operator.Undefined;
 					Type = VariableValueType.Float;
 				}
+				else if(Left.Type == VariableValueType.String || Right.Type == VariableValueType.String)
+				{
+					if(Operator == Operator.Multiply)
+					{
+						throw new NotImplementedException("String repetition not implemented yet, should be like \"a\" * 5  == \"aaaaa\"");
+					}
+
+					if (Operator != Operator.Add)
+						throw new SectionException(Left.Value + ' ', Operator.ToString(), ' ' + Right.Value, "Invalid operator for string, expected +");
+
+					Value = Left.Value + Right.Value;
+					Left = null;
+					Right = null;
+					Operator = Operator.Undefined;
+					Type = VariableValueType.String;
+				}
 			}
 			else
 			{
@@ -183,6 +199,22 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 			}
 		}
 
+
+		static bool IsStringLiteral(string raw)
+		{
+			if(raw.StartsWith('"') && raw.EndsWith('"'))
+			{
+				var target = raw.Length - 2;
+				for(int i = 1; i < target; i++)
+				{
+					if (raw[i] == '"' && raw[i - 1] != '\\')
+						return false;
+				}
+				return true;
+			}
+
+			return false;
+		}
 
 		static bool IsIntegerLiteral(string raw)
 		{

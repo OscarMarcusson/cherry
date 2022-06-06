@@ -109,5 +109,18 @@ namespace Variables
 			Assert.AreEqual(5, int.Parse(new VariableValue("20 / 4").Value));
 			Assert.AreEqual(0.65m, decimal.Parse(new VariableValue("5.2 / 8").Value));
 		}
+
+
+		[TestMethod]
+		public void CanConcatinate2ValuesToString()
+		{
+			Assert.AreEqual(VariableValueType.String, new VariableValue("\"abc\" + \"123\"").Type);
+			Assert.AreEqual(VariableValueType.String, new VariableValue("\"\" + 123").Type);
+			Assert.AreEqual(VariableValueType.String, new VariableValue("123 + \"\"").Type);
+			Assert.AreEqual(VariableValueType.String, new VariableValue("\"\" + \"\"").Type);
+
+			Assert.AreEqual("", new VariableValue("\"\" + \"\"").Value);
+			Assert.AreEqual("abc123", new VariableValue("\"abc\" + 123").Value);
+		}
 	}
 }
