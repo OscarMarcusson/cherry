@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace SimplifiedUserInterfaceFramework.Intermediate
@@ -9,14 +10,15 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 		Empty,
 		String,
 		DynamicString,
-		Reference
+		Integer,
+		Reference,
 	}
 
 	public class VariableValue
 	{
 		public readonly VariableValueType Type;
 		public readonly Dictionary<string, Variable> ReferencedVariables;
-
+		public readonly string Value;
 
 
 		public VariableValue(string raw)
@@ -35,6 +37,12 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 						? raw.Substring(1, raw.Length - 2)
 						: ""
 						;
+				Value = raw;
+			}
+			else if(raw.All(x => char.IsDigit(x)))
+			{
+				Type = VariableValueType.Integer;
+				Value = raw;
 			}
 		}
 	}
