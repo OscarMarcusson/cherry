@@ -12,6 +12,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 		DynamicString,
 		Integer,
 		Float,
+		Bool,
 		Reference,
 	}
 
@@ -38,6 +39,11 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 						? raw.Substring(1, raw.Length - 2)
 						: ""
 						;
+				Value = raw;
+			}
+			else if(raw == "true" || raw == "false")
+			{
+				Type = VariableValueType.Bool;
 				Value = raw;
 			}
 			else if(raw.All(x => char.IsDigit(x)))

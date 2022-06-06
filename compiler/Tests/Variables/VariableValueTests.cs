@@ -54,5 +54,19 @@ namespace Variables
 			Assert.AreEqual("1", new VariableValue("\"1\"").Value);
 			Assert.AreEqual("", new VariableValue("\"\"").Value);
 		}
+
+
+		[TestMethod]
+		public void CanParseBoolLiteral()
+		{
+			Assert.AreEqual(VariableValueType.Bool, new VariableValue("true").Type);
+			Assert.AreEqual(VariableValueType.Bool, new VariableValue("false").Type);
+			// Make sure that we ignore true / false that are not lowercase
+			Assert.AreNotEqual(VariableValueType.Bool, new VariableValue("TRUE").Type);
+			Assert.AreNotEqual(VariableValueType.Bool, new VariableValue("FALSE").Type);
+
+			Assert.AreEqual(true, bool.Parse(new VariableValue("true").Value));
+			Assert.AreEqual(false, bool.Parse(new VariableValue("false").Value));
+		}
 	}
 }
