@@ -122,5 +122,22 @@ namespace Variables
 			Assert.AreEqual("", new VariableValue("\"\" + \"\"").Value);
 			Assert.AreEqual("abc123", new VariableValue("\"abc\" + 123").Value);
 		}
+
+
+		[TestMethod]
+		public void CanDoMultipliedStringConcatinate()
+		{
+			Assert.AreEqual(VariableValueType.String, new VariableValue("\"abc\" * 5").Type);
+			Assert.AreEqual(VariableValueType.String, new VariableValue("\"\" * 5").Type);
+			
+			Assert.AreEqual("", new VariableValue("\"\" * 5").Value);
+			Assert.AreEqual("-----", new VariableValue("\"-\" * 5").Value);
+			Assert.AreEqual("abcabcabc", new VariableValue("\"abc\" * 3").Value);
+
+			// Make sure that the order does not matter
+			Assert.AreEqual("", new VariableValue("5 * \"\"").Value);
+			Assert.AreEqual("-----", new VariableValue("5 * \"-\"").Value);
+			Assert.AreEqual("abcabcabc", new VariableValue("3 * \"abc\"").Value);
+		}
 	}
 }

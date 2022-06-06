@@ -143,15 +143,58 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 				}
 				else if(Left.Type == VariableValueType.String || Right.Type == VariableValueType.String)
 				{
+					// Multiplied string concatination, useful when generating indentations or other repeated sequences
 					if(Operator == Operator.Multiply)
 					{
-						throw new NotImplementedException("String repetition not implemented yet, should be like \"a\" * 5  == \"aaaaa\"");
-					}
+						if((Left.Type == VariableValueType.String && Right.Type == VariableValueType.Integer) || (Left.Type == VariableValueType.Integer && Right.Type == VariableValueType.String))
+						{
+							string valueToRepeat;
+							int integer;
 
-					if (Operator != Operator.Add)
+							if(Left.Type == VariableValueType.String)
+							{
+								valueToRepeat = Left.Value;
+								integer = int.Parse(Right.Value);
+								if (integer < 0)
+									throw new SectionException($"{valueToRepeat} * ", integer.ToString(), "", "Multiplied string concatination can't be done with a negative value");
+							}
+							else
+							{
+								valueToRepeat = Right.Value;
+								integer = int.Parse(Left.Value);
+								if (integer < 0)
+									throw new SectionException("", integer.ToString(), $" * {valueToRepeat}", "Multiplied string concatination can't be done with a negative value");
+							}
+
+							if(integer == 0)
+							{
+								Value = "";
+							}
+							else
+							{
+								Value = valueToRepeat;
+								for (int i = 1; i < integer; i++)
+									Value += valueToRepeat;
+							}
+						}
+						else
+						{
+							var error = Left.Type == VariableValueType.String && Right.Type == VariableValueType.String 
+											? "Can't multiply two strings, but a string and an integer can be multiplied" 
+											: "Multiplied string concatination requires one string and one integer"
+											;
+							throw new SectionException("", $"{Left.Value} * {Right.Value}", "", error);
+						}
+					}
+					// Normal string concatination
+					else if(Operator == Operator.Add)
+					{
+						Value = Left.Value + Right.Value;
+					}
+					// User error
+					else 
 						throw new SectionException(Left.Value + ' ', Operator.ToString(), ' ' + Right.Value, "Invalid operator for string, expected +");
 
-					Value = Left.Value + Right.Value;
 					Left = null;
 					Right = null;
 					Operator = Operator.Undefined;
