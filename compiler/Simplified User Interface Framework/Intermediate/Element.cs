@@ -356,7 +356,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 					}
 					else if(child.First == "foreach")
 					{
-						var foreachData = new Foreach(child.Text, child.LineNumber);
+						var foreachData = new Foreach(child, this, CompilerArguments);
 						// TODO:: foreach through the children
 					}
 					else

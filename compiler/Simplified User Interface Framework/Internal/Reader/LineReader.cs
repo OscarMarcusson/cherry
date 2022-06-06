@@ -35,6 +35,8 @@ namespace SimplifiedUserInterfaceFramework.Internal.Reader
 					break;
 				}
 			}
+			if (Text == null)
+				Text = "";
 
 			var space = Text.IndexOf(' ');
 			First = space > -1

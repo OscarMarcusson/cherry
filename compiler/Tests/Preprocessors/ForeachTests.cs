@@ -3,6 +3,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SimplifiedUserInterfaceFramework;
 using SimplifiedUserInterfaceFramework.Intermediate.Preprocessor;
 using SimplifiedUserInterfaceFramework.Internal;
+using SimplifiedUserInterfaceFramework.Internal.Reader;
 
 namespace Preprocessor
 {
@@ -12,45 +13,45 @@ namespace Preprocessor
 		[TestMethod]
 		public void ThrowsOnEmptyInput ()
 		{
-			Assert.ThrowsException<SectionException>(() => new Foreach(null));
-			Assert.ThrowsException<SectionException>(() => new Foreach(""));
+			Assert.ThrowsException<SectionException>(() => new Foreach(new LineReader(""), null, null));
+			Assert.ThrowsException<SectionException>(() => new Foreach(new LineReader(" \t   \t\t\t  "), null, null));
 		}
 
 		[TestMethod]
 		public void ThrowsWhenNotStartingWithForeach()
 		{
-			Assert.ThrowsException<SectionException>(() => new Foreach("not-the-correct-start 132"));
+			Assert.ThrowsException<SectionException>(() => new Foreach(new LineReader("not-the-correct-start 132"), null, null));
 		}
 
 		[TestMethod]
 		public void CanReadTheVariableName()
 		{
-			var loop = new Foreach("foreach var-name in range:1-10");
+			var loop = new Foreach(new LineReader("foreach var-name in range:1-10"), null, null);
 			Assert.AreEqual("var-name", loop.VariableName);
 		}
 
 		[TestMethod]
 		public void ThrowsExceptionForMissingIn()
 		{
-			Assert.ThrowsException<SectionException>(() => new Foreach("foreach i something-incorrect-here range:1-10"));
+			Assert.ThrowsException<SectionException>(() => new Foreach(new LineReader("foreach i something-incorrect-here range:1-10"), null, null));
 		}
 
 		[TestMethod]
 		public void ThrowsExceptionForMissingResourceMarker()
 		{
-			Assert.ThrowsException<SectionException>(() => new Foreach("foreach i in range 1-10"));
+			Assert.ThrowsException<SectionException>(() => new Foreach(new LineReader("foreach i in range 1-10"), null, null));
 		}
 
 		[TestMethod]
 		public void ThrowsExceptionForIncorrectResourceType()
 		{
-			Assert.ThrowsException<SectionException>(() => new Foreach("foreach i in I'm-completely-wrong:1-10"));
+			Assert.ThrowsException<SectionException>(() => new Foreach(new LineReader("foreach i in I'm-completely-wrong:1-10"), null, null));
 		}
 
 		[TestMethod]
 		public void CanGenerateRange()
 		{
-			var loop = new Foreach("foreach i in range:1-10");
+			var loop = new Foreach(new LineReader("foreach i in range:1-10"), null, null);
 			Assert.AreEqual(ForeachResourceType.Range, loop.ResourceType);
 			Assert.IsNotNull(loop.Values);
 			Assert.AreEqual(10, loop.Values.Length);
@@ -81,7 +82,7 @@ namespace Preprocessor
 		// Test wrapper to enable easier IO with full control over test cases, which also allows us to skip interfaces or generics later down the road
 		class ForeachFilesTester : Foreach
 		{
-			public ForeachFilesTester(string rawDeclaration) : base(rawDeclaration) { }
+			public ForeachFilesTester(string rawDeclaration) : base(new LineReader(rawDeclaration), null, null) { }
 			protected override string[] GetFiles(string directory, string filter) => new[] { "test1.txt", "test2.txt", "test3.txt" };
 		}
 	}
