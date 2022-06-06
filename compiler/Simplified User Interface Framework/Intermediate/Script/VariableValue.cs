@@ -78,21 +78,28 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 				var previousIndex = 0;
 				for (int i = 0; i < raw.Length; i++)
 				{
-					if(raw[i] == ' ')
+					if(raw[i] == ' ' || raw[i] == '(' || raw[i] == ')')
 					{
-						var value = raw.Substring(previousIndex, i - previousIndex);
-						values.Add(value);
+						if(i != previousIndex)
+						{
+							var value = raw.Substring(previousIndex, i - previousIndex);
+							values.Add(value);
+						}
 
-						while (raw[i] == ' ' && i < raw.Length - 1)
+						if (raw[i] == '(' || raw[i] == ')')
+						{
+							values.Add(raw[i].ToString());
 							i++;
-
-						previousIndex = i;
-						var next = raw[i];
-					}
-					else if(raw[i] == '(' || raw[i] == ')')
-					{
-						values.Add(raw[i].ToString());
-						previousIndex = i + 1;
+							while (i < raw.Length - 1 && raw[i] == ' ')
+								i++;
+						}
+						else
+						{
+							while (i < raw.Length - 1 && raw[i] == ' ')
+								i++;
+						}
+						
+						previousIndex = i--;
 					}
 				}
 
@@ -101,9 +108,20 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 					values.Add(raw.Substring(previousIndex));
 
 				RecursivelyResolveLeftRight(values, out Left, out Operator, out Right);
-
+				// If we don't have a right for whatever reason we just use the lefts content as our own
+				if(Right == null)
+				{
+					if(Left != null)
+					{
+						Value = Left.Value;
+						Type = Left.Type;
+						Operator = Left.Operator;
+						Right = Left.Right;
+						Left = Left.Left;
+					}
+				}
 				// If both the left and right are integer literals we do the math here at compiler level
-				if(Left.Type == VariableValueType.Integer && Right.Type == VariableValueType.Integer)
+				else if(Left.Type == VariableValueType.Integer && Right.Type == VariableValueType.Integer)
 				{
 					var leftInteger = int.Parse(Left.Value);
 					var rightInteger = int.Parse(Right.Value);
@@ -211,7 +229,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 
 		void RecursivelyResolveLeftRight(List<string> values, out VariableValue left, out Operator leftRightOperator, out VariableValue right)
 		{
-			if (values.Count == 1)
+			if (values.Count <= 1)
 			{
 				throw new NotImplementedException("This really should not be possible, fixme if we somehow end up here");
 			}
@@ -223,23 +241,82 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 			{
 				left = new VariableValue(values[0]);
 				right = new VariableValue(values[2]);
-				switch (values[1])
-				{
-					case "+": leftRightOperator = Operator.Add;       break;
-					case "-": leftRightOperator = Operator.Subtract;  break;
-					case "*": leftRightOperator = Operator.Multiply;  break;
-					case "/": leftRightOperator = Operator.Divide;
-						if((right.Type == VariableValueType.Integer && int.Parse(right.Value) == 0) || (right.Type == VariableValueType.Float && float.Parse(right.Value) == 0f))
-							throw new SectionException(values[0] + ' ' + values[1], values[2], "", "Division by zero");
-						break;
-					default: throw new SectionException(values[0] + ' ', values[1], ' ' + values[2], "Unknown operator, expected +, -, *, or /");
-				}
-
+				if(!TryParseOperator(values[1], out leftRightOperator))
+					throw new SectionException(values[0] + ' ', values[1], ' ' + values[2], "Unknown operator, expected +, -, *, or /");
+				else if (leftRightOperator == Operator.Divide && ((right.Type == VariableValueType.Integer && int.Parse(right.Value) == 0) || (right.Type == VariableValueType.Float && float.Parse(right.Value) == 0f)))
+					throw new SectionException(values[0] + ' ' + values[1], values[2], "", "Division by zero");
 			}
 			else
 			{
-				throw new NotImplementedException("More than 2 values are not supported yet");
+				if(values[0] == "(")
+				{
+					var leftValue = GetParenthesesGroup(values, 0, out var endsAt);
+					if(endsAt < values.Count - 1)
+					{
+						var leftValueString = string.Join(" ", leftValue);
+						left = new VariableValue(leftValueString);
+						if (!TryParseOperator(values[endsAt+1], out leftRightOperator))
+							throw new SectionException(leftValueString + ' ', values[endsAt + 1], ' ' + string.Join(" ", values.Skip(endsAt + 2)), "Unknown operator, expected +, -, *, or /");
+						right = new VariableValue(string.Join(" ", values.Skip(endsAt + 2)));
+					}
+					// Only this group, parse as is
+					else
+					{
+						if (leftValue.Count == 3)
+						{
+							RecursivelyResolveLeftRight(leftValue, out left, out leftRightOperator, out right);
+						}
+						else
+						{
+							left = new VariableValue(string.Join(" ", leftValue));
+							leftRightOperator = Operator.Undefined;
+							right = null;
+						}
+					}
+				}
+				else
+				{
+					left = new VariableValue(values[0]);
+					if (!TryParseOperator(values[1], out leftRightOperator))
+						throw new SectionException(values[0] + ' ', values[1], ' ' + string.Join(" ", values.Skip(2)), "Unknown operator, expected +, -, *, or /");
+					right = new VariableValue(string.Join(" ", values.Skip(2)));
+				}
 			}
+		}
+
+		static bool TryParseOperator(string raw, out Operator outOperator)
+		{
+			switch (raw)
+			{
+				case "+": outOperator = Operator.Add;      return true;
+				case "-": outOperator = Operator.Subtract; return true;
+				case "*": outOperator = Operator.Multiply; return true;
+				case "/": outOperator = Operator.Divide;   return true;
+				default: outOperator = Operator.Undefined; return false;
+			}
+		}
+
+		static List<string> GetParenthesesGroup(List<string> values, int startAt, out int endAt)
+		{
+			if (values[startAt] == "(")
+			{
+				var numberOfBrackets = 1;
+				for (endAt = startAt + 1; endAt < values.Count; endAt++)
+				{
+					if (values[endAt] == "(")
+						numberOfBrackets++;
+					else if (values[endAt] == ")")
+						numberOfBrackets--;
+
+					if (numberOfBrackets == 0)
+					{
+						return values.Skip(startAt + 1).Take(endAt - startAt - 1).ToList();
+					}
+				}
+			}
+
+			endAt = startAt;
+			return null;
 		}
 
 

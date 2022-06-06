@@ -139,5 +139,16 @@ namespace Variables
 			Assert.AreEqual("-----", new VariableValue("5 * \"-\"").Value);
 			Assert.AreEqual("abcabcabc", new VariableValue("3 * \"abc\"").Value);
 		}
+
+
+		[TestMethod]
+		public void CanDoMathWithParentheses()
+		{
+			Assert.AreEqual(VariableValueType.Integer, new VariableValue("1 + (10 / 2)").Type);
+			Assert.AreEqual(VariableValueType.Float, new VariableValue("(3 * 1.5) / 2").Type);
+
+			Assert.AreEqual(6, int.Parse(new VariableValue("1 + (10 / 2)").Value));
+			Assert.AreEqual(2.25m, decimal.Parse(new VariableValue("(3 * 1.5) / 2").Value));
+		}
 	}
 }
