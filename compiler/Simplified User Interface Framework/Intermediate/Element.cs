@@ -52,6 +52,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 		public Dictionary<string, string> ChildStyles { get; internal set; }
 		public ValueSection[] SeparatedValues { get; internal set; }
 		public Dictionary<string, string> Events { get; internal set; }
+		public Dictionary<string, Variable> Variables { get; internal set; }
 		public string Binding { get; internal set; }
 
 		public bool HasValue => !string.IsNullOrWhiteSpace(Value);
@@ -83,8 +84,31 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 			if (index > -1)
 			{
 				Value = Source.Text.Substring(index + 1).Trim();
+				// Is this a string?
 				if (Value.Length > 1 && Value[0] == '"' && Value[Value.Length - 1] == '"')
+				{
 					Value = Value.Substring(1, Value.Length - 2);
+				}
+				// Not a string, this should be a raw value or some math function
+				else
+				{
+					if(TryGetVariable(Value, out var variable))
+					{
+						if (variable.AccessType == VariableType.ReadOnly)
+						{
+							// TODO:: Check the value length
+							Value = variable.Value.ToString();
+						}
+						else
+						{
+							throw new NotImplementedException("Dynamic variables are not implemented yet");
+						}
+					}
+					else
+					{
+						throw new NotImplementedException("Formulas are not implemented yet");
+					}
+				}
 			}
 
 			// If not already done, extract the name
@@ -414,6 +438,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 
 
 		public Element AddChild(LineReader reader) => reader.ToElement(this, CompilerArguments);
+		public Element AddChild(string raw) => new LineReader(raw, Source).ToElement(this, CompilerArguments);
 
 
 
@@ -542,7 +567,6 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 
 		protected virtual bool WriteValueAutomatically => Type == ElementType.None;
 
-		
 		internal int ToStartHtmlStream(StreamWriter writer, Document document, int customIndent = -1)
 		{
 			var indentNumber = customIndent > -1 ? customIndent : Indent;
@@ -656,6 +680,33 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 				return $" class=\"{string.Join(" ", Classes)}\"";
 
 			return null;
+		}
+
+
+		public void AddVariable(Variable variable)
+		{
+			if (Variables == null)
+				Variables = new Dictionary<string, Variable>();
+
+			Variables[variable.Name] = variable;
+		}
+
+		public bool TryGetVariable(string key, out Variable variable)
+		{
+			if (Variables != null && Variables.TryGetValue(key, out variable))
+				return true;
+
+			if (Parent != null)
+				return Parent.TryGetVariable(key, out variable);
+
+			variable = null;
+			return false;
+		}
+
+		public void RemoveVariable(string key)
+		{
+			if (Variables != null)
+				Variables.Remove(key);
 		}
 	}
 }

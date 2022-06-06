@@ -85,5 +85,19 @@ namespace Preprocessor
 			public ForeachFilesTester(string rawDeclaration) : base(new LineReader(rawDeclaration), null, null) { }
 			protected override string[] GetFiles(string directory, string filter) => new[] { "test1.txt", "test2.txt", "test3.txt" };
 		}
+
+
+		[TestMethod]
+		public void RangeValueIsAppliedToChildren()
+		{
+			var line = new LineReader("foreach i in range:1-10");
+			line.Children.Add(new LineReader("\tp = i"));
+
+			var loop = new Foreach(line, null, null);
+			Assert.AreEqual(10, loop.Children.Count);
+
+			for(int i = 0; i < line.Children.Count; i++)
+				Assert.AreEqual((i + 1).ToString(), loop.Children[i].Value);
+		}
 	}
 }

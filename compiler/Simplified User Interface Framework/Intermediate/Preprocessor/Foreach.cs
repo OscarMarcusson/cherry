@@ -99,8 +99,19 @@ namespace SimplifiedUserInterfaceFramework.Intermediate.Preprocessor
 				default:
 					throw new SectionException(rawDeclaration.Substring(0, index), resourceType, rawDeclaration.Substring(indexOfValueStart), "No parser exists for this resource type", reader.LineNumber/*, fileName*/);
 			}
-		}
 
+
+			// Create children from values
+			foreach (var value in Values)
+			{
+				AddVariable(new Variable(VariableType.ReadOnly, VariableName, value));
+
+				foreach(var child in Source.Children)
+					AddChild(child);
+
+			}
+			RemoveVariable(VariableName);
+		}
 
 
 		protected virtual string[] GetFiles(string directory, string filter)
