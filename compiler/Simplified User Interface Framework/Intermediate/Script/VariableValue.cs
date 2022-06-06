@@ -4,9 +4,9 @@ using System.Text;
 
 namespace SimplifiedUserInterfaceFramework.Intermediate
 {
-	public enum ValueType
+	public enum VariableValueType
 	{
-		Null,
+		Empty,
 		String,
 		DynamicString,
 		Reference
@@ -14,7 +14,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 
 	public class VariableValue
 	{
-		public readonly ValueType Type;
+		public readonly VariableValueType Type;
 		public readonly Dictionary<string, Variable> ReferencedVariables;
 
 
@@ -23,14 +23,14 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 		{
 			if (string.IsNullOrWhiteSpace(raw))
 			{
-				Type = ValueType.Null;
+				Type = VariableValueType.Empty;
 				return;
 			}
 
 			raw = raw.Trim();
 			if (raw.StartsWith('"') && raw.EndsWith('"'))
 			{
-				Type = ValueType.String;
+				Type = VariableValueType.String;
 				raw = raw.Length > 2
 						? raw.Substring(1, raw.Length - 2)
 						: ""

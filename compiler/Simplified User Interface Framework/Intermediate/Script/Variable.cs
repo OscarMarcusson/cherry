@@ -29,7 +29,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 		{
 			AccessType = type;
 			Name = name;
-			Value = new WordReader(value, -1);
+			Value = new VariableValue(new WordReader(value, -1).ToString());
 		}
 
 		public Variable(string raw, int lineNumber = -1) : this(new WordReader(raw, lineNumber)) { }
@@ -61,8 +61,9 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 				Name = words.Second;
 				nameIndex = 1;
 
-				Value = words.GetWords(3);
-				if(Value.Any(x => x.StartsWith('"')))
+				var valueWords = words.GetWords(3); ;
+				Value = new VariableValue(valueWords.ToString());
+				if (valueWords.Any(x => x.StartsWith('"')))
 					Type = "string";
 			}
 
@@ -84,7 +85,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 				Name = words.Third;
 				nameIndex = 2;
 
-				Value = words.GetWords(4);
+				Value = new VariableValue(words.GetWords(4).ToString());
 			}
 			else
 			{
