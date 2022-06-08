@@ -62,5 +62,35 @@ namespace Variables
 			Assert.AreEqual(null, cache["a"]);
 			Assert.AreEqual(false, cache.Exists("a"));
 		}
+
+
+		[TestMethod]
+		public void GetRecursively()
+		{
+			var rootCache = new VariablesCache();
+			var a = new Variable(VariableType.ReadOnly, "a", "5");
+			rootCache["a"] = a;
+
+			var cache = new VariablesCache(rootCache);
+
+			Assert.AreEqual(null, cache["a"]);
+
+			Assert.AreEqual(true, cache.TryGetVariableRecursive("a", out var foundA));
+			Assert.AreEqual(a, foundA);
+		}
+
+
+		[TestMethod]
+		public void ExistsCheckRecursively()
+		{
+			var rootCache = new VariablesCache();
+			var a = new Variable(VariableType.ReadOnly, "a", "5");
+			rootCache["a"] = a;
+
+			var cache = new VariablesCache(rootCache);
+
+			Assert.AreEqual(false, cache.Exists("a"));
+			Assert.AreEqual(true, cache.ExistsRecursive("a"));
+		}
 	}
 }
