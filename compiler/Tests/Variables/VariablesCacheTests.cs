@@ -16,7 +16,10 @@ namespace Variables
 		{
 			var cache = new VariablesCache();
 			
-			var a = new Variable(VariableType.ReadOnly, "a", "5");
+			var a = new Variable(cache, VariableType.ReadOnly, "a", "5");
+			Assert.AreEqual(a, cache["a"]);
+
+			// And to ensure that we can also set it, even though it's done automatically internally
 			cache["a"] = a;
 			Assert.AreEqual(a, cache["a"]);
 		}
@@ -26,9 +29,7 @@ namespace Variables
 		public void CanUseTryGet()
 		{
 			var cache = new VariablesCache();
-
-			var a = new Variable(VariableType.ReadOnly, "a", "5");
-			cache["a"] = a;
+			var a = new Variable(cache, VariableType.ReadOnly, "a", "5");
 
 			Assert.AreEqual(true, cache.TryGetVariable("a", out var foundA));
 			Assert.AreEqual(a, foundA);
@@ -42,8 +43,7 @@ namespace Variables
 		public void CanUseExists()
 		{
 			var cache = new VariablesCache();
-
-			cache["a"] = new Variable(VariableType.ReadOnly, "a", "5");
+			new Variable(cache, VariableType.ReadOnly, "a", "5");
 
 			Assert.AreEqual(true, cache.Exists("a"));
 			Assert.AreEqual(false, cache.Exists("b"));
@@ -54,9 +54,8 @@ namespace Variables
 		public void CanRemove()
 		{
 			var cache = new VariablesCache();
+			new Variable(cache, VariableType.ReadOnly, "a", "5");
 
-			var a = new Variable(VariableType.ReadOnly, "a", "5");
-			cache["a"] = a;
 			cache["a"] = null;
 
 			Assert.AreEqual(null, cache["a"]);
@@ -68,8 +67,7 @@ namespace Variables
 		public void GetRecursively()
 		{
 			var rootCache = new VariablesCache();
-			var a = new Variable(VariableType.ReadOnly, "a", "5");
-			rootCache["a"] = a;
+			var a = new Variable(rootCache, VariableType.ReadOnly, "a", "5");
 
 			var cache = new VariablesCache(rootCache);
 
@@ -84,8 +82,7 @@ namespace Variables
 		public void ExistsCheckRecursively()
 		{
 			var rootCache = new VariablesCache();
-			var a = new Variable(VariableType.ReadOnly, "a", "5");
-			rootCache["a"] = a;
+			var a = new Variable(rootCache, VariableType.ReadOnly, "a", "5");
 
 			var cache = new VariablesCache(rootCache);
 

@@ -13,12 +13,13 @@ namespace Parser
 		[TestMethod]
 		public void CanInsertConstants()
 		{
-			var root = new LineReader("div").ToElement();
-			var variable = new Variable("let test = some-value");
-			root.AddVariable(variable);
+			var variables = new VariablesCache();
+			var variable = variables.Create("let test = \"some-value\"");
 
+			var root = new LineReader("div").ToElement(variables);
 			var child = root.AddChild("p = " + variable.Name);
-			Assert.AreEqual(variable.Value.ToString(), child.Value);
+
+			Assert.AreEqual(variable.Value.Value.ToString(), child.Value);
 		}
 	}
 }

@@ -13,7 +13,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 		public bool HasValue => Value != null && Value.Length > 0;
 
 
-		public Return(WordReader wordReader)
+		public Return(VariablesCache parentVariables, WordReader wordReader) : base(parentVariables)
 		{
 			if (wordReader.Length > 1)
 				Value = wordReader.GetWords(1);

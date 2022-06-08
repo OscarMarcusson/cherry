@@ -11,10 +11,12 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 	{
 		public string Name { get; set; }
 		public string JavascriptName => Name.Replace("-", "_");
-		public readonly Dictionary<string, Variable> Variables = new Dictionary<string, Variable>();
+		public int TotalNumberOfVariables => RootElement.TotalNumberOfVariables;
+
+		public VariablesCache Variables => RootElement.Variables;
 		public readonly Element RootElement;
 
-		public CustomElement(LineReader reader, CompilerArguments compilerArguments)
+		public CustomElement(VariablesCache globalVariables, LineReader reader, CompilerArguments compilerArguments)
 		{
 			var wordReader = new WordReader(reader);
 			Name = wordReader.Second;
@@ -33,8 +35,8 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 			{
 				if(remainingChildren[i].First == Variable.DynamicAccessType || remainingChildren[i].First == Variable.ReadOnlyAccessType)
 				{
-					var variable = new Variable(remainingChildren[i].Text, remainingChildren[i].LineNumber);
-					if (Variables.ContainsKey(variable.Name))
+					var variable = new Variable(Variables, remainingChildren[i].Text, remainingChildren[i].LineNumber);
+					if (Variables.Exists(variable.Name))
 						throw new SectionException(remainingChildren[i].First + ' ', (variable.Type + ' ' + variable.Name).Trim(), variable.Value != null ? $" = {variable.Value}" : "", "Already exists", remainingChildren[i].LineNumber);
 
 					Variables[variable.Name] = variable;
@@ -52,7 +54,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 					remainingChildren.RemoveAt(i--);
 				}
 			}
-			RootElement = new Element(rootReader, null, true, compilerArguments);
+			RootElement = new Element(globalVariables, rootReader, null, true, compilerArguments);
 			if (RootElement.Type != ElementType.None)
 				throw new SectionException("", Name, rootReader.Text.Substring(Name.Length), "Already exists as a keyword");
 
@@ -70,10 +72,11 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 			var className = JavascriptName;
 			var indentString = indent > 0 ? new string('\t', indent) : "";
 			writer.WriteLine($"{indentString}class {className} {{");
-			writer.WriteLine($"{indentString}\tconstructor(parent,isRoot{(Variables.Count > 0 ?  $", {string.Join(", ", Variables.Select(x => x.Key.Replace("-", "_")))}" : "")}) {{");
-			foreach(var argument in Variables)
+			writer.WriteLine($"{indentString}\tconstructor(parent,isRoot{(Variables.Count > 0 ?  $", {string.Join(", ", Variables.Names)}" : "")}) {{");
+			var variables = RootElement.Variables.ToArray();
+			foreach (var argument in variables)
 			{
-				var name = argument.Key.Replace("-", "_");
+				var name = argument.Name.Replace("-", "_");
 				if (argument.Value.Value != null)
 				{
 					writer.WriteLine($"{indentString}\t\tthis.{name} = {name} ? {name} : {argument.Value.Value};");
@@ -110,7 +113,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 
 			var arguments = "onload=\"document.getElementById('{id}'), true";
 			if (Variables.Count > 0)
-				arguments += ", " + string.Join(", ", Variables.Select(x => x.Value.Value));
+				arguments += ", " + string.Join(", ", Variables.ToArray().Select(x => x.Value.Value));
 
 			writer.WriteLine($"{indentString}<{Name}{RootElement.HtmlFormattedClasses()} id=\"{id}\" onload=\"new {className}({arguments});\"></{Name}>");
 			// RootElement.ToHtmlStream(writer, document, indent);

@@ -11,7 +11,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate.Elements
 		public string DisplayName { get; set; }
 
 
-		public LinkElement(LineReader reader, Element parent, CompilerArguments compilerArguments) : base(reader, parent, false, compilerArguments)
+		public LinkElement(VariablesCache parentVariables, LineReader reader, Element parent, CompilerArguments compilerArguments) : base(parentVariables, reader, parent, false, compilerArguments)
 		{
 		}
 

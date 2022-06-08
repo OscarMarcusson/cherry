@@ -104,13 +104,13 @@ namespace SimplifiedUserInterfaceFramework.Intermediate.Preprocessor
 			// Create children from values
 			foreach (var value in Values)
 			{
-				AddVariable(new Variable(VariableType.ReadOnly, VariableName, value));
+				Variables.Create(VariableType.ReadOnly, VariableName, ResourceType == ForeachResourceType.File ? $"file:\"{value}\"" : value);
 
 				foreach(var child in Source.Children)
 					AddChild(child);
 
+				Variables.Remove(VariableName);
 			}
-			RemoveVariable(VariableName);
 		}
 
 

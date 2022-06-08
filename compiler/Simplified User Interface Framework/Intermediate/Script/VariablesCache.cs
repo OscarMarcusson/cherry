@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace SimplifiedUserInterfaceFramework.Intermediate
@@ -13,10 +15,26 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 		const string NullGetWarning = "Can't get a variable using null as a key";
 		const string NullSetWarning = "Can't set a variable using null as a key";
 
+		// Helper getters
+		public int Count => GetThreadSafeData(() => Variables.Count);
+		public int RecursiveCount => Count + (Parent?.Count ?? 0);
+
+		public string[] Names => GetThreadSafeData(() => Variables.Select(x => x.Key).ToArray());
+		public Variable[] ToArray() => GetThreadSafeData(() => Variables.Select(x => x.Value).ToArray());
+
+
+		T GetThreadSafeData<T>(Func<T> loader)
+		{
+			lock (Locker)
+			{
+				return loader();
+			}
+		}
+
+
 
 
 		public VariablesCache(VariablesCache parent = null) => Parent = parent;
-
 
 
 		public Variable this[string key]
@@ -82,12 +100,20 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 				return true;
 
 			if (Parent != null)
-				return Parent.TryGetVariable(key, out variable);
+				return Parent.TryGetVariableRecursive(key, out variable);
 
 			variable = null;
 			return false;
 		}
 
 		public bool ExistsRecursive(string key) => Exists(key) || (Parent?.Exists(key) ?? false);
+
+
+
+
+		// Helper variable creation methods
+		public Variable Create(string raw, int lineNumber = -1) => new Variable(this, raw, lineNumber);
+		public Variable Create(VariableType type, string name, object value) => new Variable(this, type, name, value?.ToString() ?? "null");
+		public void Remove(string variableName) => this[variableName] = null;
 	}
 }

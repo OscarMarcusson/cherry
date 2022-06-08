@@ -8,7 +8,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate.Elements
 {
 	public class ButtonElement : InputElementBase
 	{
-		public ButtonElement(LineReader reader, Element parent, CompilerArguments compilerArguments) : base(reader, parent, compilerArguments)
+		public ButtonElement(VariablesCache parentVariables, LineReader reader, Element parent, CompilerArguments compilerArguments) : base(parentVariables, reader, parent, compilerArguments)
 		{
 		}
 

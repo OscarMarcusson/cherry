@@ -11,7 +11,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate.Elements
 	{
 		public string FullPath { get; set; }
 
-		public IncludeElement(LineReader reader, Element parent, CompilerArguments compilerArguments) : base(reader, parent, false, compilerArguments)
+		public IncludeElement(VariablesCache parentVariables, LineReader reader, Element parent, CompilerArguments compilerArguments) : base(parentVariables, reader, parent, false, compilerArguments)
 		{
 		}
 

@@ -92,9 +92,11 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 			return index;
 		}
 
-
 		/// <summary> Converts a <see cref="LineReader"/> to a UI <see cref="Element"/>. Depending on the values of the reader this may return a specific element implementation. </summary>
-		public static Element ToElement(this LineReader reader, Element parent = null, CompilerArguments compilerArguments = null)
+		public static Element ToElement(this LineReader reader, Element parent, CompilerArguments compilerArguments = null) => reader.ToElement(parent.Variables, parent, compilerArguments);
+
+		/// <summary> Converts a <see cref="LineReader"/> to a UI <see cref="Element"/> using a custom <see cref="VariablesCache"/>. Depending on the values of the reader this may return a specific element implementation. </summary>
+		public static Element ToElement(this LineReader reader, VariablesCache parentVariables, Element parent = null, CompilerArguments compilerArguments = null)
 		{
 			if (reader.First.StartsWith("#"))
 				new WordReader(reader).ThrowWordError(0, "Can't add inlined styles as a child element");
@@ -108,17 +110,17 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 
 			switch (name)
 			{
-				case "include": return new IncludeElement(reader, parent, compilerArguments).LoadContent();
-				case "tabs":    return new TabsElement(reader, parent, compilerArguments).LoadContent();
+				case "include": return new IncludeElement(parentVariables, reader, parent, compilerArguments).LoadContent();
+				case "tabs":    return new TabsElement(parentVariables, reader, parent, compilerArguments).LoadContent();
 				case "img":
-				case "image":   return new ImageElement(reader, parent, compilerArguments).LoadContent();
+				case "image":   return new ImageElement(parentVariables, reader, parent, compilerArguments).LoadContent();
 				case "btn":
 				case "a":
-				case "link":    return new LinkElement(reader, parent, compilerArguments).LoadContent();
-				case "button":  return new ButtonElement(reader, parent, compilerArguments).LoadContent();
-				case "textbox": return new TextboxElement(reader, parent, compilerArguments).LoadContent();
-				case "iframe":  return new IframeElement(reader, parent, compilerArguments).LoadContent();
-				default:        return new Element(reader, parent, false, compilerArguments) { Name = name }.LoadContent();
+				case "link":    return new LinkElement(parentVariables, reader, parent, compilerArguments).LoadContent();
+				case "button":  return new ButtonElement(parentVariables, reader, parent, compilerArguments).LoadContent();
+				case "textbox": return new TextboxElement(parentVariables, reader, parent, compilerArguments).LoadContent();
+				case "iframe":  return new IframeElement(parentVariables, reader, parent, compilerArguments).LoadContent();
+				default:        return new Element(parentVariables, reader, parent, false, compilerArguments) { Name = name }.LoadContent();
 			}
 		}
 	}

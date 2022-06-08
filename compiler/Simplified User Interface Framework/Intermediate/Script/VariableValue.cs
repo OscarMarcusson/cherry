@@ -28,13 +28,14 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 	public class VariableValue
 	{
 		public readonly VariableValueType Type;
-		public readonly Dictionary<string, Variable> ReferencedVariables;
+		public readonly Variable ReferencedVariable;
 		public readonly string Value;
 		public readonly VariableValue Left;
 		public readonly Operator Operator;
 		public readonly VariableValue Right;
 
-		public VariableValue(string raw)
+
+		public VariableValue(VariablesCache parentVariables, string raw)
 		{
 			if (string.IsNullOrWhiteSpace(raw))
 			{
@@ -107,7 +108,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 				if (previousIndex < raw.Length)
 					values.Add(raw.Substring(previousIndex));
 
-				RecursivelyResolveLeftRight(values, out Left, out Operator, out Right);
+				RecursivelyResolveLeftRight(parentVariables, values, out Left, out Operator, out Right);
 				// If we don't have a right for whatever reason we just use the lefts content as our own
 				if(Right == null)
 				{
@@ -221,13 +222,33 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 			}
 			else
 			{
-				Type = VariableValueType.Reference;
-				Value = raw;
+				if(parentVariables.TryGetVariableRecursive(raw, out var variable))
+				{
+					if(variable.AccessType == VariableType.ReadOnly)
+					{
+						Value    = variable.Value.Value;
+						Left     = variable.Value.Left;
+						Right    = variable.Value.Right;
+						Type     = variable.Value.Type;
+						Operator = variable.Value.Operator;
+					}
+					else
+					{
+						Type = VariableValueType.Reference;
+						ReferencedVariable = variable;
+						Value = null;
+					}
+				}
+				// else if ()     check for things like namespaces or member variables, like book.first_page, person.name, or math.pi
+				else
+				{
+					throw new SectionException("", raw, "", $"Could not find a variable called \"{raw}\"");
+				}
 			}
 		}
 
 
-		void RecursivelyResolveLeftRight(List<string> values, out VariableValue left, out Operator leftRightOperator, out VariableValue right)
+		void RecursivelyResolveLeftRight(VariablesCache parentVariables, List<string> values, out VariableValue left, out Operator leftRightOperator, out VariableValue right)
 		{
 			if (values.Count <= 1)
 			{
@@ -239,8 +260,8 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 			}
 			else if(values.Count == 3)
 			{
-				left = new VariableValue(values[0]);
-				right = new VariableValue(values[2]);
+				left = new VariableValue(parentVariables, values[0]);
+				right = new VariableValue(parentVariables, values[2]);
 				if(!TryParseOperator(values[1], out leftRightOperator))
 					throw new SectionException(values[0] + ' ', values[1], ' ' + values[2], "Unknown operator, expected +, -, *, or /");
 				else if (leftRightOperator == Operator.Divide && ((right.Type == VariableValueType.Integer && int.Parse(right.Value) == 0) || (right.Type == VariableValueType.Float && float.Parse(right.Value) == 0f)))
@@ -254,21 +275,21 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 					if(endsAt < values.Count - 1)
 					{
 						var leftValueString = string.Join(" ", leftValue);
-						left = new VariableValue(leftValueString);
+						left = new VariableValue(parentVariables, leftValueString);
 						if (!TryParseOperator(values[endsAt+1], out leftRightOperator))
 							throw new SectionException(leftValueString + ' ', values[endsAt + 1], ' ' + string.Join(" ", values.Skip(endsAt + 2)), "Unknown operator, expected +, -, *, or /");
-						right = new VariableValue(string.Join(" ", values.Skip(endsAt + 2)));
+						right = new VariableValue(parentVariables, string.Join(" ", values.Skip(endsAt + 2)));
 					}
 					// Only this group, parse as is
 					else
 					{
 						if (leftValue.Count == 3)
 						{
-							RecursivelyResolveLeftRight(leftValue, out left, out leftRightOperator, out right);
+							RecursivelyResolveLeftRight(parentVariables, leftValue, out left, out leftRightOperator, out right);
 						}
 						else
 						{
-							left = new VariableValue(string.Join(" ", leftValue));
+							left = new VariableValue(parentVariables, string.Join(" ", leftValue));
 							leftRightOperator = Operator.Undefined;
 							right = null;
 						}
@@ -276,10 +297,10 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 				}
 				else
 				{
-					left = new VariableValue(values[0]);
+					left = new VariableValue(parentVariables, values[0]);
 					if (!TryParseOperator(values[1], out leftRightOperator))
 						throw new SectionException(values[0] + ' ', values[1], ' ' + string.Join(" ", values.Skip(2)), "Unknown operator, expected +, -, *, or /");
-					right = new VariableValue(string.Join(" ", values.Skip(2)));
+					right = new VariableValue(parentVariables, string.Join(" ", values.Skip(2)));
 				}
 			}
 		}

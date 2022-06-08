@@ -70,6 +70,7 @@ namespace Preprocessor
 		[TestMethod]
 		public void CanGenerateFiles()
 		{
+			// TODO:: Implement the compiler level file reading 
 			var loop = new ForeachFilesTester("foreach i in file:*.txt");
 			Assert.AreEqual(ForeachResourceType.File, loop.ResourceType);
 			Assert.IsNotNull(loop.Values);

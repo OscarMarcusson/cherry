@@ -52,16 +52,22 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 		public Dictionary<string, string> ChildStyles { get; internal set; }
 		public ValueSection[] SeparatedValues { get; internal set; }
 		public Dictionary<string, string> Events { get; internal set; }
-		public Dictionary<string, Variable> Variables { get; internal set; }
+		public readonly VariablesCache Variables;
 		public string Binding { get; internal set; }
 
 		public bool HasValue => !string.IsNullOrWhiteSpace(Value);
 
 		public override string ToString() => Value != null ? $"{Name} = {Value}" : Name;
 
-		// A core constructor allows us to hide our content loading shenanigans
-		internal Element(LineReader reader, Element parent, bool loadContentAutomatically, CompilerArguments compilerArguments)
+		// An override to make calling easier, automatically resolves the variables from the parent
+		internal Element(LineReader reader, Element parent, bool loadContentAutomatically, CompilerArguments compilerArguments) : this(parent?.Variables ?? new VariablesCache(), reader, parent, loadContentAutomatically, compilerArguments) 
 		{
+		}
+
+		// A core constructor allows us to hide our content loading shenanigans
+		internal Element(VariablesCache parentVariables, LineReader reader, Element parent, bool loadContentAutomatically, CompilerArguments compilerArguments)
+		{
+			Variables = new VariablesCache(parentVariables);
 			Source = reader;
 			CompilerArguments = compilerArguments;
 
@@ -88,16 +94,57 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 				if (Value.Length > 1 && Value[0] == '"' && Value[Value.Length - 1] == '"')
 				{
 					Value = Value.Substring(1, Value.Length - 2);
+					// Code moved up from previous version, probably useful here soon
+					/*
+					if (!string.IsNullOrWhiteSpace(Value))
+					{
+						var values = new List<ValueSection>();
+						index = 0;
+						while (index > -1)
+						{
+							var nextIndex = Value.IndexOf('{', index);
+							while (nextIndex < Value.Length - 1 && Value[nextIndex + 1] == '{')
+								nextIndex = Value.IndexOf('{', nextIndex + 2);
+
+							if (nextIndex > -1)
+							{
+								values.Add(new ValueSection(Value.Substring(index, nextIndex - index)));
+								var endIndex = Value.IndexOf('}', nextIndex);
+								while (endIndex > -1 && endIndex < Value.Length - 1 && Value[endIndex + 1] == '}')
+									endIndex = Value.IndexOf('}', endIndex + 2);
+
+								if (endIndex > -1)
+								{
+									var section = Value.Substring(nextIndex + 1, endIndex - nextIndex - 1);
+									values.Add(ValueSection.ParseSection(section));
+									index = endIndex + 1;
+								}
+								else
+								{
+									values.Add(new ValueSection(Value.Substring(index)));
+									index = -1;
+								}
+							}
+							else
+							{
+								values.Add(new ValueSection(Value.Substring(index)));
+								index = -1;
+							}
+						}
+						SeparatedValues = values.ToArray();
+					}
+					*/
 				}
 				// Not a string, this should be a raw value or some math function
 				else
 				{
-					if(TryGetVariable(Value, out var variable))
+					if(Variables.TryGetVariableRecursive(Value, out var variable))
 					{
 						if (variable.AccessType == VariableType.ReadOnly)
 						{
 							// TODO:: Check the value length
-							Value = variable.Value.ToString();
+							// TODO:: Check that we actually have a value and not some ref or something
+							Value = variable.Value.Value.ToString();
 						}
 						else
 						{
@@ -298,45 +345,6 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 
 				if (Configurations.Count == 0)
 					Configurations = null;
-			}
-			
-
-			if (!string.IsNullOrWhiteSpace(Value))
-			{
-				var values = new List<ValueSection>();
-				index = 0;
-				while(index > -1)
-				{
-					var nextIndex = Value.IndexOf('{', index);
-					while (nextIndex < Value.Length - 1 && Value[nextIndex + 1] == '{')
-						nextIndex = Value.IndexOf('{', nextIndex + 2);
-
-					if (nextIndex > -1)
-					{
-						values.Add(new ValueSection(Value.Substring(index, nextIndex - index)));
-						var endIndex = Value.IndexOf('}', nextIndex);
-						while (endIndex > -1 && endIndex < Value.Length - 1 && Value[endIndex + 1] == '}')
-							endIndex = Value.IndexOf('}', endIndex+2);
-
-						if(endIndex > -1)
-						{
-							var section = Value.Substring(nextIndex + 1, endIndex - nextIndex - 1);
-							values.Add(ValueSection.ParseSection(section));
-							index = endIndex + 1;
-						}
-						else
-						{
-							values.Add(new ValueSection(Value.Substring(index)));
-							index = -1;
-						}
-					}
-					else
-					{
-						values.Add(new ValueSection(Value.Substring(index)));
-						index = -1;
-					}
-				}
-				SeparatedValues = values.ToArray();
 			}
 
 
@@ -567,6 +575,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 
 		protected virtual bool WriteValueAutomatically => Type == ElementType.None;
 
+
 		internal int ToStartHtmlStream(StreamWriter writer, Document document, int customIndent = -1)
 		{
 			var indentNumber = customIndent > -1 ? customIndent : Indent;
@@ -683,30 +692,22 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 		}
 
 
-		public void AddVariable(Variable variable)
+		public void AddVariable(Variable variable) => Variables[variable.Name] = variable;
+
+		public bool TryGetVariable(string key, out Variable variable) => Variables.TryGetVariableRecursive(key, out variable);
+
+		public void RemoveVariable(string key) => Variables[key] = null;
+
+		public int TotalNumberOfVariables
 		{
-			if (Variables == null)
-				Variables = new Dictionary<string, Variable>();
-
-			Variables[variable.Name] = variable;
-		}
-
-		public bool TryGetVariable(string key, out Variable variable)
-		{
-			if (Variables != null && Variables.TryGetValue(key, out variable))
-				return true;
-
-			if (Parent != null)
-				return Parent.TryGetVariable(key, out variable);
-
-			variable = null;
-			return false;
-		}
-
-		public void RemoveVariable(string key)
-		{
-			if (Variables != null)
-				Variables.Remove(key);
+			get
+			{
+				var count = Variables.Count;
+				foreach (var child in Children)
+					count += child.TotalNumberOfVariables;
+				
+				return count;
+			}
 		}
 	}
 }

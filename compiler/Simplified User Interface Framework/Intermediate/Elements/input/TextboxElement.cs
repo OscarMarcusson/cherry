@@ -8,7 +8,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate.Elements
 {
 	public class TextboxElement : InputElementBase
 	{
-		public TextboxElement(LineReader reader, Element parent, CompilerArguments compilerArguments) : base(reader, parent, compilerArguments)
+		public TextboxElement(VariablesCache parentVariables, LineReader reader, Element parent, CompilerArguments compilerArguments) : base(parentVariables, reader, parent, compilerArguments)
 		{
 		}
 

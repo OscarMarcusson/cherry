@@ -15,7 +15,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 		public readonly WordReader[] Arguments;
 
 
-		public FunctionCall(WordReader words)
+		public FunctionCall(VariablesCache parentVariables, WordReader words) : base(parentVariables)
 		{
 			if(words.Second != "(")
 				words.ThrowWordError(1, $"Expected (");

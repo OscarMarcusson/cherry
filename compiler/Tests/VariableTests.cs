@@ -18,31 +18,33 @@ namespace Parser
 		[TestMethod]
 		public void TestAccessabilityType()
 		{
-			Assert.ThrowsException<SectionException>(() => new Variable("this can't be parsed as a variable"));
+			var variables = new VariablesCache();
+			Assert.ThrowsException<SectionException>(() => new Variable(variables, "this can't be parsed as a variable"));
 
-			Assert.AreEqual(new Variable("var a").AccessType, VariableType.Dynamic);
-			Assert.AreEqual(new Variable("let a").AccessType, VariableType.ReadOnly);
-			Assert.AreEqual(new Variable("var a = 5").AccessType, VariableType.Dynamic);
-			Assert.AreEqual(new Variable("let a = 5").AccessType, VariableType.ReadOnly);
+			Assert.AreEqual(variables.Create("var a").AccessType, VariableType.Dynamic);
+			Assert.AreEqual(variables.Create("let b").AccessType, VariableType.ReadOnly);
+			Assert.AreEqual(variables.Create("var c = 5").AccessType, VariableType.Dynamic);
+			Assert.AreEqual(variables.Create("let d = 5").AccessType, VariableType.ReadOnly);
 
-			Assert.AreEqual(new Variable("var int a").AccessType, VariableType.Dynamic);
-			Assert.AreEqual(new Variable("let int a").AccessType, VariableType.ReadOnly);
-			Assert.AreEqual(new Variable("var int a = 5").AccessType, VariableType.Dynamic);
-			Assert.AreEqual(new Variable("let int a = 5").AccessType, VariableType.ReadOnly);
+			Assert.AreEqual(variables.Create("var int e").AccessType, VariableType.Dynamic);
+			Assert.AreEqual(variables.Create("let int f").AccessType, VariableType.ReadOnly);
+			Assert.AreEqual(variables.Create("var int g = 5").AccessType, VariableType.Dynamic);
+			Assert.AreEqual(variables.Create("let int h = 5").AccessType, VariableType.ReadOnly);
 		}
 
 		[TestMethod]
 		public void TestIncorrectTypes()
 		{
-			Assert.ThrowsException<SectionException>(() => new Variable("var void name"));
-			Assert.ThrowsException<SectionException>(() => new Variable("var if name"));
-			Assert.ThrowsException<SectionException>(() => new Variable("var else name"));
-			Assert.ThrowsException<SectionException>(() => new Variable("var for name"));
-			Assert.ThrowsException<SectionException>(() => new Variable("var while name"));
-			Assert.ThrowsException<SectionException>(() => new Variable("var var name"));
-			Assert.ThrowsException<SectionException>(() => new Variable("var let name"));
-			Assert.ThrowsException<SectionException>(() => new Variable("var data name"));
-			Assert.ThrowsException<SectionException>(() => new Variable("var def name"));
+			var variables = new VariablesCache();
+			Assert.ThrowsException<SectionException>(() => variables.Create("var void name1"));
+			Assert.ThrowsException<SectionException>(() => variables.Create("var if name2"));
+			Assert.ThrowsException<SectionException>(() => variables.Create("var else name3"));
+			Assert.ThrowsException<SectionException>(() => variables.Create("var for name4"));
+			Assert.ThrowsException<SectionException>(() => variables.Create("var while name5"));
+			Assert.ThrowsException<SectionException>(() => variables.Create("var var name6"));
+			Assert.ThrowsException<SectionException>(() => variables.Create("var let name7"));
+			Assert.ThrowsException<SectionException>(() => variables.Create("var data name8"));
+			Assert.ThrowsException<SectionException>(() => variables.Create("var def name9"));
 		}
 	}
 }
