@@ -1,10 +1,10 @@
 # Element declaration
-In its most simple way, elements are declared as `{element}={value}`, or just `{element}` for empty or hierarchical elements.
+In its most simple way, elements are declared as `{element}={value}`, or just `{element}` for empty or hierarchical elements. The value is typically text, but can also be things like links or paths to resources. The most common would be a string value for text, like the following:
 
 **Simplified**
 ```ini
 div
-p = Hello World
+p = "Hello World"
 ```
 **HTML**
 ```HTML
@@ -16,15 +16,55 @@ p = Hello World
 
 <br>
 
-## Value parsing
-In the example above the value is written directly, which means it will be parsed as "everything after =", trimmed. If you wish to include spaces or tabs at the start or end of the value you have to wrap it in quotation marks, like this: 
+## String literal & variables
+Implementation progress:
+- [x] String literals
+- [ ] Number literals
+- [ ] Literal formulas like `p = 1 + 2` or `p = "test " + 512 + b`
+- [x] Constant variable values 
+- [x] Constant variable for string interpolation
+- [ ] Dynamic variable values
+- [ ] Dynamic variable for string interpolation
+- [ ] Dynamic variable formulas
+
+In the example above we used a string literal, telling the compiler to insert any text between the quotation marks. While this works for some elements we often have need of a fully dynamic value or to insert a dynamic value into a specific section of static text. This can be done by referencing a variable directly or by using string interpolation.
+
 ```ini
-p = "  String with spaces  "
+// By creating a string literal constant the variable content will be inserted as is during compile time
+// If we use "var" instead we can update the variable in runtime and the text will change too
+let some_variable = "Hello World!"
+
+body
+	p = "I'm a string literal and will show up just like this!"
+	p = some_variable
+	p = "Here we print the content of some_variable: {some_variable}"
+	p = "   Example   with spaces   "
 ```
+
 **HTML**
 ```HTML
-<p>&nbsp;&nbsp;String with spaces&nbsp;&nbsp;</p>
+<!-- Boilerplate HTML until we reach the body -->
+<p>I'm a string literal and will show up just like this!</p>
+<p>Hello World!</p>
+<p>Here we print the content of some_variable: Hello World!</p>
+<p>&nbsp;&nbsp;&nbsp;Example&nbsp;&nbsp;&nbsp;with spaces&nbsp;&nbsp;&nbsp;</p>
 ```
+
+Note that string interpolation is always applied for {}, if you wish to skip this use a backslash for the opening bracket. `p = "test\{a}"` will for example produce `<p>test{a}</p>`.
+
+
+
+
+<br>
+
+## Variable Binding
+By adding a bind section it's possible to sync the UI value to a variable. This is similar to the examples above, but binding is used for two-way reading where changes in the UI will change the variable and vice versa. 
+#### Example
+```ini
+textarea bind(description_variable) = "This text can be edited"
+```
+For more details, see [Variable Binding](docs/syntax/VariableBinding.md)
+
 
 
 
@@ -63,17 +103,3 @@ A full example of a typical image would be:
 ```ini
 img.style alt("Some image") size(150,80) = "some_directory/some_image.png"
 ```
-
-
-<br>
-
-## Variable Binding
-By adding a bind section it's possible to sync the UI value to a variable. 
-This works for any element, it's for example possible to bind a paragraph (p), heading (h1, h2, etc) or even a div or button. 
-This will enable changing their text value on the fly by just changing the bound variable, which can be useful for displaying things like user names. 
-Binding is also very useful for reading data, like getting the value of some text input, or perhaps the value of a checkbox.
-#### Example
-```ini
-textarea bind(description_variable) = "This text can be edited"
-```
-For more details, see [Variable Binding](docs/syntax/VariableBinding.md)
