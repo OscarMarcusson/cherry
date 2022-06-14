@@ -21,13 +21,25 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 		public readonly VariableType AccessType;
 		public readonly string Name;
 		public readonly string Type;
-		public readonly WordReader Value;
+		public readonly VariableValue Value;
 
 		public override string ToString() => $"{(AccessType == VariableType.Dynamic ? DynamicAccessType : ReadOnlyAccessType)} {(Type != null ? $"{Type} " : "")}{Name}" + (Value != null ? $" = {Value}" : "");
 
-		public Variable(string raw, int lineNumber = -1) : this(new WordReader(raw, lineNumber)) { }
 
-		public Variable(WordReader words)
+		public Variable(VariablesCache parentVariables, VariableType type, string name, string value) : base(parentVariables)
+		{
+			if (parentVariables.Exists(name))
+				throw new ArgumentException($"A variable by the name {name} already exists in this scope");
+			parentVariables[name] = this;
+
+			AccessType = type;
+			Name = name;
+			Value = new VariableValue(parentVariables, new WordReader(value, -1).ToString());
+		}
+
+		public Variable(VariablesCache parentVariables, string raw, int lineNumber = -1) : this(parentVariables, new WordReader(raw, lineNumber)) { }
+
+		public Variable(VariablesCache parentVariables, WordReader words) : base(parentVariables)
 		{
 			switch (words.First)
 			{
@@ -54,8 +66,9 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 				Name = words.Second;
 				nameIndex = 1;
 
-				Value = words.GetWords(3);
-				if(Value.Any(x => x.StartsWith('"')))
+				var valueWords = words.GetWords(3); ;
+				Value = new VariableValue(Variables, valueWords.ToString());
+				if (valueWords.Any(x => x.StartsWith('"')))
 					Type = "string";
 			}
 
@@ -77,15 +90,20 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 				Name = words.Third;
 				nameIndex = 2;
 
-				Value = words.GetWords(4);
+				Value = new VariableValue(Variables, words.GetWords(4).ToString());
 			}
 			else
 			{
 				words.ThrowWordError(1, $"Could not parse name and type", words.Length-1);
 			}
 
+			
+			if (parentVariables.Exists(Name))
+				throw new ArgumentException($"A variable by the name {Name} already exists in this scope");
+			parentVariables[Name] = this;
 
-			if(Keywords.IsKeyword(Type))
+
+			if (Keywords.IsKeyword(Type))
 				words.ThrowWordError(typeIndex, $"Can't use reserved keywords as type");
 			else if (Type == "void")
 				words.ThrowWordError(typeIndex, $"A variable can't be void");

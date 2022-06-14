@@ -20,7 +20,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 		public readonly CodeLine[] Body;
 
 
-		public Function(WordReader words, params WordReader[] body)
+		public Function(VariablesCache parentVariables, WordReader words, params WordReader[] body) : base(parentVariables)
 		{
 			if(words.First != Declaration)
 				words.ThrowWordError(0, $"Invalid definition\nExpected first word to be \"def\"");
@@ -84,21 +84,21 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 			{
 				if(line.First == Variable.DynamicAccessType || line.First == Variable.ReadOnlyAccessType)
 				{
-					var variable = new Variable(line);
+					var variable = new Variable(parentVariables, line);
 					// TODO:: Add to some dictionary to validate other calls with
 					bodyBuilder.Add(variable);
 				}
 				else if (Keywords.IsOperator(line.Second))
 				{
-					bodyBuilder.Add(new VariableAssignment(line));
+					bodyBuilder.Add(new VariableAssignment(Variables, line));
 				}
 				else if(line.First == "return")
 				{
-					bodyBuilder.Add(new Return(line));
+					bodyBuilder.Add(new Return(Variables, line));
 				}
 				else if(line.Second == "(")
 				{
-					bodyBuilder.Add(new FunctionCall(line));
+					bodyBuilder.Add(new FunctionCall(Variables, line));
 				}
 				else
 					line.ThrowWordError(0, "Could not parse line", line.Length);

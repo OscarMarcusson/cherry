@@ -8,6 +8,8 @@ using SimplifiedUserInterfaceFramework.Internal.Reader;
 
 namespace SimplifiedUserInterfaceFramework.Internal.Intermediate
 {
+	// Disabling for now
+	/*
 	public class Macro
 	{
 		public readonly string Name;
@@ -40,4 +42,5 @@ namespace SimplifiedUserInterfaceFramework.Internal.Intermediate
 			}
 		}
 	}
+	*/
 }

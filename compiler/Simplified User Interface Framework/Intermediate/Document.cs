@@ -16,7 +16,8 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 		public readonly Dictionary<string, Style> Styles = new Dictionary<string, Style>();
 		public readonly Meta Meta = new Meta();
 		public readonly Element Body;
-		public readonly Dictionary<string, Macro> Macros = new Dictionary<string, Macro>();
+		// Disabling for now
+		// public readonly Dictionary<string, Macro> Macros = new Dictionary<string, Macro>();
 		public readonly CodeBlock Script = new CodeBlock();
 		public readonly Include[] Links;
 		public readonly Include[] IncludeStyles;
@@ -24,6 +25,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 		public readonly Dictionary<string, string> Bindings = new Dictionary<string, string>();
 		public readonly bool ContainsFrameworkCode = true; // TODO:: This should be replaced with a proper check for built-in code, like the tabs
 		public readonly Dictionary<string, CustomElement> CustomElements = new Dictionary<string, CustomElement>();
+		public readonly VariablesCache Variables = new VariablesCache();
 		public readonly string[] ReferencedPages;
 
 		public override string ToString() => Source.File;
@@ -39,12 +41,13 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 				// Start with macro and script parsing
 				foreach (var section in reader.Sections)
 				{
-					if (section.Text.StartsWith("#"))
-					{
-						var macro = new Macro(section, compilerArguments);
-						Macros.Add(macro.Name, macro);
-					}
-					else if(section.First == "script")
+					// Disabling for now
+					// if (section.Text.StartsWith("#"))
+					// {
+					// 	var macro = new Macro(section, compilerArguments);
+					// 	Macros.Add(macro.Name, macro);
+					// }
+					if(section.First == "script")
 					{
 						foreach(var subSection in section.Children)
 						{
@@ -55,7 +58,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 									{
 										var words = new WordReader(subSection);
 										var body = subSection.Children.Select(x => new WordReader(x)).ToArray();
-										var function = new Function(words, body);
+										var function = new Function(Variables, words, body);
 										if (Script.FunctionExists(function.Name))
 											words.ThrowWordError(1, "Already defined", words.Length - 1);
 
@@ -66,7 +69,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 								case Variable.DynamicAccessType:
 								case Variable.ReadOnlyAccessType:
 									{
-										var variable = new Variable(subSection.Text, subSection.LineNumber);
+										var variable = new Variable(Variables, subSection.Text, subSection.LineNumber);
 										if (Script.VariableExists(variable.Name))
 											throw new Exception($"A variable named {variable.Name} already exists.");
 
@@ -132,7 +135,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 						case "elm":
 						case "element":
 							{
-								var element = new CustomElement(section, compilerArguments);
+								var element = new CustomElement(Variables, section, compilerArguments);
 								CustomElements[element.Name] = element;
 							}
 							break;
@@ -171,7 +174,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 							break;
 
 						case "body":
-							Body = section.ToElement(compilerArguments: compilerArguments);
+							Body = section.ToElement(Variables, compilerArguments: compilerArguments);
 							break;
 
 						// Normal element parsing

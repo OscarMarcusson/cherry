@@ -3,7 +3,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SimplifiedUserInterfaceFramework;
 using SimplifiedUserInterfaceFramework.Internal;
 
-namespace Tests
+namespace Parser
 {
 	[TestClass]
 	public class ArgumentTests

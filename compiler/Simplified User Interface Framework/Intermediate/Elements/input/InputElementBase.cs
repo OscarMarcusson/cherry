@@ -8,7 +8,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate.Elements
 {
 	public class InputElementBase : Element
 	{
-		public InputElementBase(LineReader reader, Element parent, CompilerArguments compilerArguments) : base(reader, parent, false, compilerArguments)
+		public InputElementBase(VariablesCache parentVariables, LineReader reader, Element parent, CompilerArguments compilerArguments) : base(parentVariables, reader, parent, false, compilerArguments)
 		{
 		}
 

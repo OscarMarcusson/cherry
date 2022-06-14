@@ -64,7 +64,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate.Elements
 			}
 		}
 
-		public TabsElement(LineReader reader, Element parent, CompilerArguments compilerArguments) : base(reader, parent, false, compilerArguments) 
+		public TabsElement(VariablesCache parentVariables, LineReader reader, Element parent, CompilerArguments compilerArguments) : base(parentVariables, reader, parent, false, compilerArguments) 
 		{
 			Name = "tabs";
 			Type = ElementType.Tabs;

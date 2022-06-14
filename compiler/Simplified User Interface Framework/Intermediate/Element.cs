@@ -1,4 +1,5 @@
 ﻿using SimplifiedUserInterfaceFramework.Intermediate.Elements;
+using SimplifiedUserInterfaceFramework.Intermediate.Preprocessor;
 using SimplifiedUserInterfaceFramework.Internal.Reader;
 using System;
 using System.Collections.Generic;
@@ -51,15 +52,22 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 		public Dictionary<string, string> ChildStyles { get; internal set; }
 		public ValueSection[] SeparatedValues { get; internal set; }
 		public Dictionary<string, string> Events { get; internal set; }
+		public readonly VariablesCache Variables;
 		public string Binding { get; internal set; }
 
 		public bool HasValue => !string.IsNullOrWhiteSpace(Value);
 
 		public override string ToString() => Value != null ? $"{Name} = {Value}" : Name;
 
-		// A core constructor allows us to hide our content loading shenanigans
-		internal Element(LineReader reader, Element parent, bool loadContentAutomatically, CompilerArguments compilerArguments)
+		// An override to make calling easier, automatically resolves the variables from the parent
+		internal Element(LineReader reader, Element parent, bool loadContentAutomatically, CompilerArguments compilerArguments) : this(parent?.Variables ?? new VariablesCache(), reader, parent, loadContentAutomatically, compilerArguments) 
 		{
+		}
+
+		// A core constructor allows us to hide our content loading shenanigans
+		internal Element(VariablesCache parentVariables, LineReader reader, Element parent, bool loadContentAutomatically, CompilerArguments compilerArguments)
+		{
+			Variables = new VariablesCache(parentVariables);
 			Source = reader;
 			CompilerArguments = compilerArguments;
 
@@ -82,8 +90,82 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 			if (index > -1)
 			{
 				Value = Source.Text.Substring(index + 1).Trim();
+				// Is this a string?
 				if (Value.Length > 1 && Value[0] == '"' && Value[Value.Length - 1] == '"')
+				{
 					Value = Value.Substring(1, Value.Length - 2);
+
+					// String interpolation
+					if (!string.IsNullOrWhiteSpace(Value))
+					{
+						var values = new List<ValueSection>();
+						index = 0;
+						while (index > -1)
+						{
+							var nextIndex = Value.IndexOf('{', index);
+							while (nextIndex < Value.Length - 1 && Value[nextIndex + 1] == '{')
+								nextIndex = Value.IndexOf('{', nextIndex + 2);
+
+							if (nextIndex > -1)
+							{
+								values.Add(new ValueSection(Value.Substring(index, nextIndex - index)));
+								var endIndex = Value.IndexOf('}', nextIndex);
+								while (endIndex > -1 && endIndex < Value.Length - 1 && Value[endIndex + 1] == '}')
+									endIndex = Value.IndexOf('}', endIndex + 2);
+
+								if (endIndex > -1)
+								{
+									var section = Value.Substring(nextIndex + 1, endIndex - nextIndex - 1);
+									if(TryGetVariable(section, out var variable))
+									{
+										if(variable.AccessType == VariableType.ReadOnly)
+											values.Add(new ValueSection(variable.Value.Value));
+										else 
+											values.Add(ValueSection.ParseSection(section));
+									}
+									else
+									{
+										throw new SectionException(Value.Substring(0, index), section, Value.Substring(endIndex), "Could not find a variable named " + section);
+									}
+									index = endIndex + 1;
+								}
+								else
+								{
+									values.Add(new ValueSection(Value.Substring(index)));
+									index = -1;
+								}
+							}
+							else
+							{
+								values.Add(new ValueSection(Value.Substring(index)));
+								index = -1;
+							}
+						}
+						SeparatedValues = values.ToArray();
+						Value = string.Join("", SeparatedValues.Select(x => x.ToString()));
+					}
+				}
+				// Not a string, this should be a raw value or some math function
+				else
+				{
+					if(Variables.TryGetVariableRecursive(Value, out var variable))
+					{
+						if (variable.AccessType == VariableType.ReadOnly)
+						{
+							// TODO:: Check the value length
+							// TODO:: Check that we actually have a value and not some ref or something
+							Value = variable.Value.Value.ToString();
+						}
+						else
+						{
+							throw new NotImplementedException("Dynamic variables are not implemented yet");
+						}
+					}
+					else
+					{
+						throw new NotImplementedException("Formulas are not implemented yet");
+					}
+				}
 			}
 
 			// If not already done, extract the name
@@ -274,45 +356,6 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 				if (Configurations.Count == 0)
 					Configurations = null;
 			}
-			
-
-			if (!string.IsNullOrWhiteSpace(Value))
-			{
-				var values = new List<ValueSection>();
-				index = 0;
-				while(index > -1)
-				{
-					var nextIndex = Value.IndexOf('{', index);
-					while (nextIndex < Value.Length - 1 && Value[nextIndex + 1] == '{')
-						nextIndex = Value.IndexOf('{', nextIndex + 2);
-
-					if (nextIndex > -1)
-					{
-						values.Add(new ValueSection(Value.Substring(index, nextIndex - index)));
-						var endIndex = Value.IndexOf('}', nextIndex);
-						while (endIndex > -1 && endIndex < Value.Length - 1 && Value[endIndex + 1] == '}')
-							endIndex = Value.IndexOf('}', endIndex+2);
-
-						if(endIndex > -1)
-						{
-							var section = Value.Substring(nextIndex + 1, endIndex - nextIndex - 1);
-							values.Add(ValueSection.ParseSection(section));
-							index = endIndex + 1;
-						}
-						else
-						{
-							values.Add(new ValueSection(Value.Substring(index)));
-							index = -1;
-						}
-					}
-					else
-					{
-						values.Add(new ValueSection(Value.Substring(index)));
-						index = -1;
-					}
-				}
-				SeparatedValues = values.ToArray();
-			}
 
 
 			// Parse the child objects, either as element children or as inlined styles
@@ -352,6 +395,11 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 							// TODO:: Better error
 							throw new Exception("Could not parse inlined style, no equals sign found: " + child.Text);
 						}
+					}
+					else if(child.First == "foreach")
+					{
+						var foreachData = new Foreach(child, this, CompilerArguments);
+						// TODO:: foreach through the children
 					}
 					else
 					{
@@ -408,6 +456,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 
 
 		public Element AddChild(LineReader reader) => reader.ToElement(this, CompilerArguments);
+		public Element AddChild(string raw) => new LineReader(raw, Source).ToElement(this, CompilerArguments);
 
 
 
@@ -536,7 +585,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 
 		protected virtual bool WriteValueAutomatically => Type == ElementType.None;
 
-		
+
 		internal int ToStartHtmlStream(StreamWriter writer, Document document, int customIndent = -1)
 		{
 			var indentNumber = customIndent > -1 ? customIndent : Indent;
@@ -650,6 +699,25 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 				return $" class=\"{string.Join(" ", Classes)}\"";
 
 			return null;
+		}
+
+
+		public void AddVariable(Variable variable) => Variables[variable.Name] = variable;
+
+		public bool TryGetVariable(string key, out Variable variable) => Variables.TryGetVariableRecursive(key, out variable);
+
+		public void RemoveVariable(string key) => Variables[key] = null;
+
+		public int TotalNumberOfVariables
+		{
+			get
+			{
+				var count = Variables.Count;
+				foreach (var child in Children)
+					count += child.TotalNumberOfVariables;
+				
+				return count;
+			}
 		}
 	}
 }

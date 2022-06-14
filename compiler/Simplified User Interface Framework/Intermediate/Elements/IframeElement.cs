@@ -12,7 +12,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate.Elements
 		public string Height { get; private set; }
 		public string Default { get; private set; }
 
-		public IframeElement(LineReader reader, Element parent, CompilerArguments compilerArguments) : base(reader, parent, false, compilerArguments)
+		public IframeElement(VariablesCache parentVariables, LineReader reader, Element parent, CompilerArguments compilerArguments) : base(parentVariables, reader, parent, false, compilerArguments)
 		{
 		}
 

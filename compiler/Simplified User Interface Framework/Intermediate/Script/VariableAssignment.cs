@@ -15,7 +15,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 		public bool HasValue => Value != null && Value.Length > 0;
 
 
-		public VariableAssignment(WordReader wordReader)
+		public VariableAssignment(VariablesCache parentVariables, WordReader wordReader) : base(parentVariables)
 		{
 			Name = wordReader.First;
 			Operator = wordReader.Second;
