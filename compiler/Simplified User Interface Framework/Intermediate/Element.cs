@@ -94,8 +94,8 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 				if (Value.Length > 1 && Value[0] == '"' && Value[Value.Length - 1] == '"')
 				{
 					Value = Value.Substring(1, Value.Length - 2);
-					// Code moved up from previous version, probably useful here soon
-					/*
+
+					// String interpolation
 					if (!string.IsNullOrWhiteSpace(Value))
 					{
 						var values = new List<ValueSection>();
@@ -116,7 +116,17 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 								if (endIndex > -1)
 								{
 									var section = Value.Substring(nextIndex + 1, endIndex - nextIndex - 1);
-									values.Add(ValueSection.ParseSection(section));
+									if(TryGetVariable(section, out var variable))
+									{
+										if(variable.AccessType == VariableType.ReadOnly)
+											values.Add(new ValueSection(variable.Value.Value));
+										else 
+											values.Add(ValueSection.ParseSection(section));
+									}
+									else
+									{
+										throw new SectionException(Value.Substring(0, index), section, Value.Substring(endIndex), "Could not find a variable named " + section);
+									}
 									index = endIndex + 1;
 								}
 								else
@@ -132,8 +142,8 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 							}
 						}
 						SeparatedValues = values.ToArray();
+						Value = string.Join("", SeparatedValues.Select(x => x.ToString()));
 					}
-					*/
 				}
 				// Not a string, this should be a raw value or some math function
 				else
