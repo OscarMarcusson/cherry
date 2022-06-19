@@ -8,15 +8,22 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 {
 	public class Return : CodeLine
 	{
-		public readonly WordReader Value;
+		public readonly VariableValue Value;
+		public bool HasValue => Value != null;
 
-		public bool HasValue => Value != null && Value.Length > 0;
 
-
-		public Return(VariablesCache parentVariables, WordReader wordReader) : base(parentVariables)
+		public Return(VariablesCache parentVariables, LineReader reader) : base(parentVariables)
 		{
-			if (wordReader.Length > 1)
-				Value = wordReader.GetWords(1);
+			var index = 0;
+			var returnWord = reader.Text.GetNextWord(ref index);
+			if (returnWord != "return")
+				throw new SectionException("", returnWord, reader.Text.Substring(index - 1), "Expected \"return\"", reader.LineNumber);
+
+			if(index < reader.Text.Length)
+			{
+				var remainder = reader.Text.Substring(index);
+				Value = new VariableValue(parentVariables, remainder);
+			}
 		}
 
 
