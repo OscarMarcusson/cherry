@@ -118,6 +118,9 @@ namespace SimplifiedUserInterfaceFramework.Internal.Reader
 			LineReader parentReader = null;
 			foreach (var line in split)
 			{
+				if (string.IsNullOrWhiteSpace(line))
+					continue;
+
 				if(parentReader == null)
 				{
 					parentReader = new LineReader(line);
