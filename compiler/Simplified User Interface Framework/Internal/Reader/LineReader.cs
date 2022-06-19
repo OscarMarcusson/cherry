@@ -99,6 +99,14 @@ namespace SimplifiedUserInterfaceFramework.Internal.Reader
 
 
 
+		public static LineReader ParseLineWithChildren(string raw)
+		{
+			var lines = ParseLines(raw);
+			if (lines.Length == 1)
+				return lines[0];
+
+			throw new ArgumentException("Could not parse as single linereader, too many root lines. Expected the first line to have no indentation and the rest to have at least 1 indentation:\n" + raw);
+		}
 
 		public static LineReader[] ParseLines(string raw)
 		{
