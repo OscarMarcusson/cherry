@@ -28,5 +28,19 @@ namespace SimplifiedUserInterfaceFramework
 
 			return word;
 		}
+
+
+		public static string[] GetWords(this string s, int index = 0)
+		{
+			var output = new List<string>();
+			while(index < s.Length)
+			{
+				var word = s.GetNextWord(ref index);
+				if (word != null)
+					output.Add(word);
+			}
+
+			return output.ToArray();
+		}
 	}
 }

@@ -44,5 +44,28 @@ namespace Utils
 			var secondWord = s.GetNextWord(ref index);
 			Assert.AreEqual("World", secondWord);
 		}
+
+		[TestMethod]
+		public void GetWords()
+		{
+			var str = "Hello many words!";
+			var words = str.GetWords();
+
+			Assert.AreEqual(3, words.Length);
+			Assert.AreEqual("Hello", words[0]);
+			Assert.AreEqual("many", words[1]);
+			Assert.AreEqual("words!", words[2]);
+		}
+
+		[TestMethod]
+		public void GetWordsFromIndex()
+		{
+			var str = "Hello many words!";
+			var words = str.GetWords(6);
+
+			Assert.AreEqual(2, words.Length);
+			Assert.AreEqual("many", words[0]);
+			Assert.AreEqual("words!", words[1]);
+		}
 	}
 }
