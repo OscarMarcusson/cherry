@@ -19,13 +19,43 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 		public readonly FunctionArgument[] Arguments;
 		public readonly CodeLine[] Body;
 
+		readonly LineReader Source;
 
-		public Function(VariablesCache parentVariables, WordReader words, params WordReader[] body) : base(parentVariables)
+
+		public Function(VariablesCache parentVariables, LineReader reader) : base(parentVariables)
 		{
-			if(words.First != Declaration)
-				words.ThrowWordError(0, $"Invalid definition\nExpected first word to be \"def\"");
+			Source = reader;
+			IsPrivate = false;
 
-			var argumentIndex = words.IndexOf(":");
+			if (reader.First != Declaration)
+				throw new SectionException("", reader.First, reader.First == reader.Text ? "" : reader.Text.Substring(reader.First.Length), $"Expected first word to be \"def\"", reader.LineNumber);
+
+			var index = Declaration.Length;
+			var argumentStart = reader.Text.IndexOf(':');
+			var nameAndTypeString = argumentStart < 0
+										? reader.Text.Substring(index)
+										: reader.Text.Substring(index, argumentStart - index)
+										;
+
+			var nameAndTypeWords = nameAndTypeString.GetWords();
+			if(nameAndTypeWords.Length == 1)
+			{
+				Type = "void";
+				Name = nameAndTypeWords[0];
+			}
+			else if(nameAndTypeWords.Length == 2)
+			{
+				Type = nameAndTypeWords[0];
+				Name = nameAndTypeWords[1];
+			}
+			else
+			{
+				throw new SectionException($"{Declaration} {nameAndTypeWords[0]} {nameAndTypeWords[1]} ", string.Join(" ", nameAndTypeWords.Skip(2)), argumentStart < 0 ? "" : reader.Text.Substring(argumentStart), "Unexpected words\nExpected one of:\n  def [name]\n  def [type] [name]\n  def [name] : [args]\n  def [type] [name] : [args]", reader.LineNumber);
+			}
+
+			/*
+
+			var argumentIndex = reader.Text.IndexOf(":");
 
 			int i = 1;
 			if (words.Second == "private")
@@ -75,36 +105,52 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 				if (arguments.Count > 0)
 					Arguments = arguments.ToArray();
 			}
-
+			*/
 
 
 			// Parse body
-			var bodyBuilder = new List<CodeLine>();
-			foreach(var line in body)
-			{
-				if(line.First == Variable.DynamicAccessType || line.First == Variable.ReadOnlyAccessType)
-				{
-					var variable = new Variable(parentVariables, line);
-					// TODO:: Add to some dictionary to validate other calls with
-					bodyBuilder.Add(variable);
-				}
-				else if (Keywords.IsOperator(line.Second))
-				{
-					bodyBuilder.Add(new VariableAssignment(Variables, line));
-				}
-				else if(line.First == "return")
-				{
-					bodyBuilder.Add(new Return(Variables, line));
-				}
-				else if(line.Second == "(")
-				{
-					bodyBuilder.Add(new FunctionCall(Variables, line));
-				}
-				else
-					line.ThrowWordError(0, "Could not parse line", line.Length);
-			}
-			Body = bodyBuilder.ToArray();
+			// var bodyBuilder = new List<CodeLine>();
+			// foreach(var line in body)
+			// {
+			// 	if(line.First == Variable.DynamicAccessType || line.First == Variable.ReadOnlyAccessType)
+			// 	{
+			// 		var variable = new Variable(parentVariables, line);
+			// 		// TODO:: Add to some dictionary to validate other calls with
+			// 		bodyBuilder.Add(variable);
+			// 	}
+			// 	else if (Keywords.IsOperator(line.Second))
+			// 	{
+			// 		bodyBuilder.Add(new VariableAssignment(Variables, line));
+			// 	}
+			// 	else if(line.First == "return")
+			// 	{
+			// 		bodyBuilder.Add(new Return(Variables, line));
+			// 	}
+			// 	else if(line.Second == "(")
+			// 	{
+			// 		bodyBuilder.Add(new FunctionCall(Variables, line));
+			// 	}
+			// 	else
+			// 		line.ThrowWordError(0, "Could not parse line", line.Length);
+			// }
+			// Body = bodyBuilder.ToArray();
 		}
+
+
+		internal void ThrowNameException(string error)
+		{
+			var index = Source.Text.IndexOf(Name);
+			throw new SectionException(Source.Text.Substring(0, index), Name, Source.Text.Substring(index + Name.Length), error, Source.LineNumber);
+		}
+
+
+		/// <summary> Generates the body. This should be called after all variables have been resolved </summary>
+		public void GenerateBody()
+		{
+			throw new NotImplementedException();
+		}
+
+
 
 
 		public override void ToJavascriptStream(StreamWriter writer, int indentation = 0)
