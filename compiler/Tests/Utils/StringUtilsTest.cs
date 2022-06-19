@@ -67,5 +67,15 @@ namespace Utils
 			Assert.AreEqual("many", words[0]);
 			Assert.AreEqual("words!", words[1]);
 		}
+
+		[TestMethod]
+		public void SkipsStartingWhitespace()
+		{
+			var str = "      Hello   World!";
+			var words = str.GetWords();
+			Assert.AreEqual(2, words.Length);
+			Assert.AreEqual("Hello", words[0]);
+			Assert.AreEqual("World!", words[1]);
+		}
 	}
 }
