@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Runtime.CompilerServices;
+using System.Linq;
 
 [assembly:InternalsVisibleTo("UnitTests")]
 namespace SimplifiedUserInterfaceFramework
@@ -11,6 +12,14 @@ namespace SimplifiedUserInterfaceFramework
 		public static int GetIndexToNextNonWhitespace(this string s, int index)
 		{
 			while (index < s.Length && s[index] == ' ')
+				index++;
+
+			return index;
+		}
+
+		public static int GetIndexToNextNonWhitespace(this string s, int index, char[] customIgnores)
+		{
+			while (index < s.Length && s[index] == ' ' || customIgnores.Contains(s[index]))
 				index++;
 
 			return index;
@@ -49,6 +58,27 @@ namespace SimplifiedUserInterfaceFramework
 			}
 
 			return output.ToArray();
+		}
+
+		public static string GetNextWord(this string s, ref int index, char[] splitBy)
+		{
+			if (index >= s.Length)
+				return null;
+
+			index = s.GetIndexToNextNonWhitespace(index, splitBy);
+			var nextSpace = s.IndexOfAny(splitBy, index);
+			if (nextSpace < 0)
+			{
+				var remainingWord = s.Substring(index);
+				index = s.Length;
+				return remainingWord;
+			}
+
+			var word = s.Substring(index, nextSpace - index);
+			index = nextSpace;
+			index = s.GetIndexToNextNonWhitespace(index);
+
+			return word;
 		}
 	}
 }

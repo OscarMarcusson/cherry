@@ -61,9 +61,45 @@ namespace Functions
 		}
 
 		[TestMethod]
-		public void Arguments()
+		public void OneArgument()
 		{
+			var variables = new VariablesCache();
+			var function = new Function(variables, LineReader.ParseLineWithChildren("def test_function : string a\n\tlet a = 5"));
+			Assert.AreEqual(1, function.Arguments.Length);
+			Assert.AreEqual(VariableType.ReadOnly, function.Arguments[0].AccessType);
+			Assert.AreEqual("string", function.Arguments[0].Type);
+			Assert.AreEqual("a", function.Arguments[0].Name);
+			Assert.AreEqual(null, function.Arguments[0].Value);
+		}
 
+		[TestMethod]
+		public void MultipleArguments()
+		{
+			var variables = new VariablesCache();
+			var function = new Function(variables, LineReader.ParseLineWithChildren("def test_function : string a, i64 b, bool c\n\tlet a = 5"));
+			Assert.AreEqual(3, function.Arguments.Length);
+			Assert.AreEqual(VariableType.ReadOnly, function.Arguments[0].AccessType);
+			Assert.AreEqual(VariableType.ReadOnly, function.Arguments[1].AccessType);
+			Assert.AreEqual(VariableType.ReadOnly, function.Arguments[2].AccessType);
+			Assert.AreEqual("string", function.Arguments[0].Type);
+			Assert.AreEqual("i64", function.Arguments[1].Type);
+			Assert.AreEqual("bool", function.Arguments[2].Type);
+			Assert.AreEqual("a", function.Arguments[0].Name);
+			Assert.AreEqual("b", function.Arguments[1].Name);
+			Assert.AreEqual("c", function.Arguments[2].Name);
+			Assert.AreEqual(null, function.Arguments[0].Value);
+			Assert.AreEqual(null, function.Arguments[1].Value);
+			Assert.AreEqual(null, function.Arguments[2].Value);
+		}
+
+		[TestMethod]
+		public void ArgumentsCanBeWritable()
+		{
+			var variables = new VariablesCache();
+			var function = new Function(variables, LineReader.ParseLineWithChildren("def test_function : string a, var string b\n\tlet a = 5"));
+			Assert.AreEqual(2, function.Arguments.Length);
+			Assert.AreEqual(VariableType.ReadOnly, function.Arguments[0].AccessType);
+			Assert.AreEqual(VariableType.Dynamic, function.Arguments[1].AccessType);
 		}
 
 		[TestMethod]

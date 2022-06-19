@@ -77,5 +77,20 @@ namespace Utils
 			Assert.AreEqual("Hello", words[0]);
 			Assert.AreEqual("World!", words[1]);
 		}
+
+		[TestMethod]
+		public void GetWordWithCustomSplit()
+		{
+			var str = "read.to dot";
+			var index = 0;
+			var split = new[] { ' ', '.' };
+			var first = str.GetNextWord(ref index, split);
+			var second = str.GetNextWord(ref index, split);
+			var third = str.GetNextWord(ref index, split);
+
+			Assert.AreEqual("read", first);
+			Assert.AreEqual("to", second);
+			Assert.AreEqual("dot", third);
+		}
 	}
 }
