@@ -25,14 +25,43 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 		Divide
 	}
 
+	public static class OperatorExtensions
+	{
+		public static Operator Parse(string rawOperator)
+		{
+			switch (rawOperator)
+			{
+				case "+":
+				case "+=":
+					return Operator.Add;
+
+				case "-":
+				case "-=":
+					return Operator.Subtract;
+
+				case "*":
+				case "*=":
+					return Operator.Multiply;
+
+				case "/":
+				case "/=":
+					return Operator.Divide;
+
+				default:
+					return Operator.Undefined;
+			}
+		}
+	}
+
 	public class VariableValue
 	{
-		public readonly VariableValueType Type;
-		public readonly Variable ReferencedVariable;
-		public readonly string Value;
-		public readonly VariableValue Left;
-		public readonly Operator Operator;
-		public readonly VariableValue Right;
+		public VariableValueType Type { get; private set; }
+		public Variable ReferencedVariable { get; private set; }
+		public string Value { get; private set; }
+		public VariableValue Left { get; private set; }
+		public Operator Operator { get; private set; }
+		public VariableValue Right { get; private set; }
+		public bool IsLiteral { get; private set; }
 
 
 		public VariableValue(VariablesCache parentVariables, string raw)
@@ -52,16 +81,19 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 						: ""
 						;
 				Value = raw;
+				IsLiteral = true;
 			}
 			else if(raw == "true" || raw == "false")
 			{
 				Type = VariableValueType.Bool;
 				Value = raw;
+				IsLiteral = true;
 			}
 			else if(IsIntegerLiteral(raw))
 			{
 				Type = VariableValueType.Integer;
 				Value = raw;
+				IsLiteral = true;
 			}
 			else if (IsFloatLiteral(raw))
 			{
@@ -72,6 +104,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 								? raw.Trim('.')
 								: raw
 							;
+				IsLiteral = true;
 			}
 			else if(raw.Contains(' '))
 			{
@@ -79,9 +112,9 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 				var previousIndex = 0;
 				for (int i = 0; i < raw.Length; i++)
 				{
-					if(raw[i] == ' ' || raw[i] == '(' || raw[i] == ')')
+					if (raw[i] == ' ' || raw[i] == '(' || raw[i] == ')')
 					{
-						if(i != previousIndex)
+						if (i != previousIndex)
 						{
 							var value = raw.Substring(previousIndex, i - previousIndex);
 							values.Add(value);
@@ -99,7 +132,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 							while (i < raw.Length - 1 && raw[i] == ' ')
 								i++;
 						}
-						
+
 						previousIndex = i--;
 					}
 				}
@@ -108,117 +141,12 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 				if (previousIndex < raw.Length)
 					values.Add(raw.Substring(previousIndex));
 
-				RecursivelyResolveLeftRight(parentVariables, values, out Left, out Operator, out Right);
-				// If we don't have a right for whatever reason we just use the lefts content as our own
-				if(Right == null)
-				{
-					if(Left != null)
-					{
-						Value = Left.Value;
-						Type = Left.Type;
-						Operator = Left.Operator;
-						Right = Left.Right;
-						Left = Left.Left;
-					}
-				}
-				// If both the left and right are integer literals we do the math here at compiler level
-				else if(Left.Type == VariableValueType.Integer && Right.Type == VariableValueType.Integer)
-				{
-					var leftInteger = int.Parse(Left.Value);
-					var rightInteger = int.Parse(Right.Value);
-
-					switch (Operator)
-					{
-						case Operator.Add:      Value = (leftInteger + rightInteger).ToString(); break;
-						case Operator.Subtract: Value = (leftInteger - rightInteger).ToString(); break;
-						case Operator.Multiply: Value = (leftInteger * rightInteger).ToString(); break;
-						case Operator.Divide:   Value = (leftInteger / rightInteger).ToString(); break;
-					}
-
-					Left = null;
-					Right = null;
-					Operator = Operator.Undefined;
-					Type = VariableValueType.Integer;
-				}
-				// If both the left and right are numbers with at least one being a float literal we do the math here at compiler level
-				else if ((Left.Type == VariableValueType.Integer || Left.Type == VariableValueType.Float) && (Right.Type == VariableValueType.Integer || Right.Type == VariableValueType.Float))
-				{
-					// Do the math with the decimal type to ensure 100% precision. The minor performance hit is worth the accuracy
-					var leftFloat = decimal.Parse(Left.Value);
-					var rightFloat = decimal.Parse(Right.Value);
-
-					switch (Operator)
-					{
-						case Operator.Add:      Value = (leftFloat + rightFloat).ToString(); break;
-						case Operator.Subtract: Value = (leftFloat - rightFloat).ToString(); break;
-						case Operator.Multiply: Value = (leftFloat * rightFloat).ToString(); break;
-						case Operator.Divide:   Value = (leftFloat / rightFloat).ToString(); break;
-					}
-
-					Left = null;
-					Right = null;
-					Operator = Operator.Undefined;
-					Type = VariableValueType.Float;
-				}
-				else if(Left.Type == VariableValueType.String || Right.Type == VariableValueType.String)
-				{
-					// Multiplied string concatination, useful when generating indentations or other repeated sequences
-					if(Operator == Operator.Multiply)
-					{
-						if((Left.Type == VariableValueType.String && Right.Type == VariableValueType.Integer) || (Left.Type == VariableValueType.Integer && Right.Type == VariableValueType.String))
-						{
-							string valueToRepeat;
-							int integer;
-
-							if(Left.Type == VariableValueType.String)
-							{
-								valueToRepeat = Left.Value;
-								integer = int.Parse(Right.Value);
-								if (integer < 0)
-									throw new SectionException($"{valueToRepeat} * ", integer.ToString(), "", "Multiplied string concatination can't be done with a negative value");
-							}
-							else
-							{
-								valueToRepeat = Right.Value;
-								integer = int.Parse(Left.Value);
-								if (integer < 0)
-									throw new SectionException("", integer.ToString(), $" * {valueToRepeat}", "Multiplied string concatination can't be done with a negative value");
-							}
-
-							if(integer == 0)
-							{
-								Value = "";
-							}
-							else
-							{
-								Value = valueToRepeat;
-								for (int i = 1; i < integer; i++)
-									Value += valueToRepeat;
-							}
-						}
-						else
-						{
-							var error = Left.Type == VariableValueType.String && Right.Type == VariableValueType.String 
-											? "Can't multiply two strings, but a string and an integer can be multiplied" 
-											: "Multiplied string concatination requires one string and one integer"
-											;
-							throw new SectionException("", $"{Left.Value} * {Right.Value}", "", error);
-						}
-					}
-					// Normal string concatination
-					else if(Operator == Operator.Add)
-					{
-						Value = Left.Value + Right.Value;
-					}
-					// User error
-					else 
-						throw new SectionException(Left.Value + ' ', Operator.ToString(), ' ' + Right.Value, "Invalid operator for string, expected +");
-
-					Left = null;
-					Right = null;
-					Operator = Operator.Undefined;
-					Type = VariableValueType.String;
-				}
+				// TODO:: Move to using variables directly inside func?
+				RecursivelyResolveLeftRight(parentVariables, values, out var left, out var op, out var right);
+				Left = left;
+				Operator = op;
+				Right = right;
+				ResolveLeftRightLiterals();
 			}
 			else
 			{
@@ -226,11 +154,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 				{
 					if(variable.AccessType == VariableType.ReadOnly)
 					{
-						Value    = variable.Value.Value;
-						Left     = variable.Value.Left;
-						Right    = variable.Value.Right;
-						Type     = variable.Value.Type;
-						Operator = variable.Value.Operator;
+						CopyFrom(variable.Value);
 					}
 					else
 					{
@@ -247,6 +171,268 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 			}
 		}
 
+		public VariableValue(VariableValue left, VariableValue right, Operator operatorType)
+		{
+			Left = left;
+			Right = right;
+			Operator = operatorType;
+			if (Left.IsLiteral && Right.IsLiteral)
+			{
+				ResolveLeftRightLiterals();
+			}
+			else
+			{
+				if (left.Type == right.Type)
+				{
+					Type = left.Type;
+				}
+				else if (left.Type == VariableValueType.String || right.Type == VariableValueType.String)
+				{
+					Type = VariableValueType.String;
+				}
+				else if ((left.Type == VariableValueType.Integer && right.Type == VariableValueType.Float) || (left.Type == VariableValueType.Float && right.Type == VariableValueType.Integer))
+				{
+					Type = VariableValueType.Float;
+				}
+				else
+				{
+					throw new NotImplementedException($"No combination exists for {left.Type} and {right.Type}");
+				}
+			}
+		}
+
+		private void ResolveLeftRightLiterals()
+		{
+			// If we don't have a right for whatever reason we just use the lefts content as our own
+			if (Right == null)
+			{
+				if (Left != null)
+				{
+					CopyFrom(Left);
+				}
+			}
+			// If both the left and right are integer literals we do the math here at compiler level
+			else if (Left.Type == VariableValueType.Integer && Right.Type == VariableValueType.Integer)
+			{
+				CombineIntegerLiteral();
+			}
+			// If both the left and right are numbers with at least one being a float literal we do the math here at compiler level
+			else if ((Left.Type == VariableValueType.Integer || Left.Type == VariableValueType.Float) && (Right.Type == VariableValueType.Integer || Right.Type == VariableValueType.Float))
+			{
+				CombineFloatLiteral();
+			}
+			else if (Left.Type == VariableValueType.String || Right.Type == VariableValueType.String)
+			{
+				CombineAsStringLiteral();
+			}
+		}
+
+		private void CombineIntegerLiteral()
+		{
+			var leftInteger = int.Parse(Left.Value);
+			var rightInteger = int.Parse(Right.Value);
+
+			switch (Operator)
+			{
+				case Operator.Add: Value = (leftInteger + rightInteger).ToString(); break;
+				case Operator.Subtract: Value = (leftInteger - rightInteger).ToString(); break;
+				case Operator.Multiply: Value = (leftInteger * rightInteger).ToString(); break;
+				case Operator.Divide: Value = (leftInteger / rightInteger).ToString(); break;
+			}
+
+			Left = null;
+			Right = null;
+			Operator = Operator.Undefined;
+			Type = VariableValueType.Integer;
+			IsLiteral = true;
+		}
+
+		private void CombineFloatLiteral()
+		{
+			// Do the math with the decimal type to ensure 100% precision. The minor performance hit is worth the accuracy
+			var leftFloat = decimal.Parse(Left.Value);
+			var rightFloat = decimal.Parse(Right.Value);
+
+			switch (Operator)
+			{
+				case Operator.Add: Value = (leftFloat + rightFloat).ToString(); break;
+				case Operator.Subtract: Value = (leftFloat - rightFloat).ToString(); break;
+				case Operator.Multiply: Value = (leftFloat * rightFloat).ToString(); break;
+				case Operator.Divide: Value = (leftFloat / rightFloat).ToString(); break;
+			}
+
+			Left = null;
+			Right = null;
+			Operator = Operator.Undefined;
+			Type = VariableValueType.Float;
+			IsLiteral = true;
+		}
+
+		private void CombineAsStringLiteral()
+		{
+			// Multiplied string concatination, useful when generating indentations or other repeated sequences
+			if (Operator == Operator.Multiply)
+			{
+				if ((Left.Type == VariableValueType.String && Right.Type == VariableValueType.Integer) || (Left.Type == VariableValueType.Integer && Right.Type == VariableValueType.String))
+				{
+					string valueToRepeat;
+					int integer;
+
+					if (Left.Type == VariableValueType.String)
+					{
+						valueToRepeat = Left.Value;
+						integer = int.Parse(Right.Value);
+						if (integer < 0)
+							throw new SectionException($"{valueToRepeat} * ", integer.ToString(), "", "Multiplied string concatination can't be done with a negative value");
+					}
+					else
+					{
+						valueToRepeat = Right.Value;
+						integer = int.Parse(Left.Value);
+						if (integer < 0)
+							throw new SectionException("", integer.ToString(), $" * {valueToRepeat}", "Multiplied string concatination can't be done with a negative value");
+					}
+
+					if (integer == 0)
+					{
+						Value = "";
+					}
+					else
+					{
+						Value = valueToRepeat;
+						for (int i = 1; i < integer; i++)
+							Value += valueToRepeat;
+					}
+				}
+				else
+				{
+					var error = Left.Type == VariableValueType.String && Right.Type == VariableValueType.String
+									? "Can't multiply two strings, but a string and an integer can be multiplied"
+									: "Multiplied string concatination requires one string and one integer"
+									;
+					throw new SectionException("", $"{Left.Value} * {Right.Value}", "", error);
+				}
+			}
+			// Normal string concatination
+			else if (Operator == Operator.Add)
+			{
+				Value = Left.Value + Right.Value;
+			}
+			// User error
+			else
+				throw new SectionException(Left.Value + ' ', Operator.ToString(), ' ' + Right.Value, "Invalid operator for string, expected +");
+
+			Left = null;
+			Right = null;
+			Operator = Operator.Undefined;
+			Type = VariableValueType.String;
+			IsLiteral = true;
+		}
+
+		
+
+		#region Combining
+		internal void Combine(VariableValue value, Operator operatorType)
+		{
+			// if (operatorString == "=")
+			// 	CopyFrom(value);
+			// else
+			// {
+			// 	operatorString = operatorString.Trim('=');
+			// 	var newValue = new VariableValue(variables, $"{Value} {operatorString} {value.Value}");
+			// 	CopyFrom(newValue);
+			// }
+			switch (operatorType)
+			{
+				case Operator.Add: Add(value); break;
+				case Operator.Subtract:  Subtract(value);break;
+				case Operator.Multiply:  Multiply(value);break;
+				case Operator.Divide:  Divide(value);break;
+				default: throw new SectionException("", operatorType.ToString(), "", "Operator not found");
+			}
+		}
+
+		internal void Add(VariableValue value)
+		{
+			if (IsLiteral && value.IsLiteral)
+			{
+				switch (Type)
+				{
+					case VariableValueType.String: Value += value.Value; break;
+					case VariableValueType.Integer: Value = (long.Parse(Value) + long.Parse(value.Value)).ToString(); break;
+					case VariableValueType.Float: Value = (decimal.Parse(Value) + decimal.Parse(value.Value)).ToString(); break;
+
+					default: throw new SectionException("", $"({this}) + ({value})", "", "Not supported");
+				}
+			}
+			
+			throw new NotImplementedException($"({this}) + ({value})");
+		}
+
+		internal void Subtract(VariableValue value)
+		{
+			if (IsLiteral && value.IsLiteral)
+			{
+				switch (Type)
+				{
+					// case VariableValueType.String: Value += value.Value; break; TODO:: Implement string subtraction? Figure out what that would even be
+					case VariableValueType.Integer: Value = (long.Parse(Value) - long.Parse(value.Value)).ToString(); break;
+					case VariableValueType.Float: Value = (decimal.Parse(Value) - decimal.Parse(value.Value)).ToString(); break;
+
+					default: throw new SectionException("", $"({this}) - ({value})", "", "Not supported");
+				}
+			}
+
+
+			throw new NotImplementedException($"({this}) - ({value})");
+		}
+
+		internal void Multiply(VariableValue value)
+		{
+			if (IsLiteral && value.IsLiteral)
+			{
+				switch (Type)
+				{
+					// case VariableValueType.String: Value += value.Value; break; TODO:: Implement string multiplication, as long as its between a string and a number
+					case VariableValueType.Integer: Value = (long.Parse(Value) * long.Parse(value.Value)).ToString(); break;
+					case VariableValueType.Float: Value = (decimal.Parse(Value) * decimal.Parse(value.Value)).ToString(); break;
+
+					default: throw new SectionException("", $"({this}) * ({value})", "", "Not supported");
+				}
+			}
+
+
+			throw new NotImplementedException($"({this}) * ({value})");
+		}
+
+		internal void Divide(VariableValue value)
+		{
+			if (IsLiteral && value.IsLiteral)
+			{
+				switch (Type)
+				{
+					// case VariableValueType.String: Value += value.Value; break; TODO:: Implement string division, as long as its between a string and a number
+					case VariableValueType.Integer: Value = (long.Parse(Value) / long.Parse(value.Value)).ToString(); break;
+					case VariableValueType.Float: Value = (decimal.Parse(Value) / decimal.Parse(value.Value)).ToString(); break;
+
+					default: throw new SectionException("", $"({this}) / ({value})", "", "Not supported");
+				}
+			}
+
+
+			throw new NotImplementedException($"({this}) / ({value})");
+		}
+
+		internal void CopyFrom(VariableValue value)
+		{
+			Value = value.Value;
+			Left = value.Left;
+			Right = value.Right;
+			Type = value.Type;
+			Operator = value.Operator;
+			IsLiteral = value.IsLiteral;
+		}
+		#endregion
 
 		void RecursivelyResolveLeftRight(VariablesCache parentVariables, List<string> values, out VariableValue left, out Operator leftRightOperator, out VariableValue right)
 		{

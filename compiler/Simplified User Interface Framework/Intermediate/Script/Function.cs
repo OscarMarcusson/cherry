@@ -108,8 +108,6 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 		}
 
 
-		static readonly char[] OperatorWordSplit = new[] { ' ', '\t', '+', '-', '*', '/', '=', '!', '?', '|' };
-		static readonly char[] OperatorChars = new[] { '+', '-', '*', '/', '=', '!', '?', '|' };
 		/// <summary> Generates the body. This should be called after all variables have been resolved </summary>
 		public void GenerateBody()
 		{
@@ -132,11 +130,11 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 				else
 				{
 					var index = 0;
-					_ = line.Text.GetNextWord(ref index, OperatorWordSplit);
+					_ = line.Text.GetNextWord(ref index, StringUtils.OperatorWordSplit);
 					var second = line.Text.GetNextWord(ref index);
-					if(second != null && second.Length > 0 && OperatorChars.Contains(second[0]))
+					if(second != null && second.Length > 0 && StringUtils.OperatorChars.Contains(second[0]))
 					{
-						builder.Add(new VariableAssignment(Variables, new WordReader(line))); // TODO:: TESTS FOR THIS
+						builder.Add(new VariableAssignment(Variables, line)); // TODO:: TESTS FOR THIS
 					}
 					else
 					{

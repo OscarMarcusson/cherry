@@ -80,5 +80,11 @@ namespace SimplifiedUserInterfaceFramework
 
 			return word;
 		}
+
+
+
+
+		public static readonly char[] OperatorWordSplit = new[] { ' ', '\t', '+', '-', '*', '/', '=', '!', '?', '|' };
+		public static readonly char[] OperatorChars = new[] { '+', '-', '*', '/', '=', '!', '?', '|' };
 	}
 }

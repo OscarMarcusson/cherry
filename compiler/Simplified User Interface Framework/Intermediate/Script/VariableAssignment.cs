@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using SimplifiedUserInterfaceFramework.Internal.Reader;
 
@@ -8,20 +9,47 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 {
 	public class VariableAssignment : CodeLine
 	{
+		public readonly Variable Variable;
 		public readonly string Name;
 		public readonly string Operator;
-		public readonly WordReader Value;
+		public readonly VariableValue Value;
+		public readonly bool WasCompileTimeEvaluated;
 
-		public bool HasValue => Value != null && Value.Length > 0;
+		public bool HasValue => Value != null;
 
 
-		public VariableAssignment(VariablesCache parentVariables, WordReader wordReader) : base(parentVariables)
+		public VariableAssignment(VariablesCache parentVariables, string raw) : this(parentVariables, new LineReader(raw)) { }
+
+		public VariableAssignment(VariablesCache parentVariables, LineReader reader) : base(parentVariables)
 		{
-			Name = wordReader.First;
-			Operator = wordReader.Second;
+			var index = 0;
+			Name = reader.Text.GetNextWord(ref index, StringUtils.OperatorWordSplit);
+			if (!Variables.TryGetVariableRecursive(Name, out Variable))
+				throw new SectionException("", Name, " " + reader.Text.Substring(index), "Could not find a variable with that name", reader.LineNumber);
 
-			if (wordReader.Length > 2)
-				Value = wordReader.GetWords(2);
+			if(Variable.AccessType != VariableType.Dynamic)
+				throw new SectionException("", Name, " " + reader.Text.Substring(index), "Can't update a readonly variable", reader.LineNumber);
+
+			var operatorStart = index;
+			while (index < reader.Text.Length && StringUtils.OperatorChars.Contains(reader.Text[index]))
+				index++;
+
+			Operator = reader.Text.Substring(operatorStart, index - operatorStart);
+			Value = new VariableValue(Variables, reader.Text.Substring(index));
+			// If the variable is already a literal and the new value is also a literal we calculate it now to avoid runtime costs
+			// For example:
+			//   var a = 1
+			//   a += 1
+			// Is understood as "var a = 2", and the += 1 assignment will never be done at runtime
+			if (Value.IsLiteral && Variable.Value.IsLiteral)
+			{
+				WasCompileTimeEvaluated = true;
+				Variable.Value = new VariableValue(Variable.Value, Value, OperatorExtensions.Parse(Operator));
+			}
+			else if (Value.Type != Variable.ValueType && Variable.ValueType != VariableValueType.String)
+			{
+				throw new SectionException(reader.Text.Substring(0, index), reader.Text.Substring(index), "", "Type does not match variable type", reader.LineNumber);
+			}
 		}
 
 
