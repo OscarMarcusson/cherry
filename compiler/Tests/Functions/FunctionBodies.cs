@@ -61,7 +61,7 @@ namespace Functions
 		[TestMethod]
 		public void Recursive()
 		{
-
+			throw new NotImplementedException();
 		}
 
 		[TestMethod]
@@ -84,7 +84,7 @@ namespace Functions
 		[TestMethod]
 		public void VariableReturnValue()
 		{
-
+			throw new NotImplementedException();
 		}
 
 		[TestMethod]
@@ -108,7 +108,7 @@ namespace Functions
 		[TestMethod]
 		public void IncorrectReturnTypeThrowsError()
 		{
-
+			throw new NotImplementedException();
 		}
 	}
 }
