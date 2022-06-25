@@ -44,7 +44,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 			if (Value.IsLiteral && Variable.Value.IsLiteral)
 			{
 				WasCompileTimeEvaluated = true;
-				Variable.Value = new VariableValue(Variable.Value, Value, OperatorExtensions.Parse(Operator));
+				Variable.Value = new VariableValue(Variable.Value, Value, OperatorExtensions.Parse(Operator), true);
 			}
 			else if (Value.Type != Variable.ValueType && Variable.ValueType != VariableValueType.String)
 			{

@@ -51,6 +51,18 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 					return Operator.Undefined;
 			}
 		}
+
+		public static string Tostring(Operator operatorType)
+		{
+			switch (operatorType)
+			{
+				case Operator.Add: return "+";
+				case Operator.Subtract: return "-";
+				case Operator.Multiply: return "*";
+				case Operator.Divide: return "/";
+				default: throw new ArgumentException($"Could not translate \"{operatorType}\" to an operator");
+			}
+		}
 	}
 
 	public class VariableValue
@@ -171,14 +183,17 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 			}
 		}
 
-		public VariableValue(VariableValue left, VariableValue right, Operator operatorType)
+		public VariableValue(VariableValue left, VariableValue right, Operator operatorType, bool requireLeftTypeForOutput = false)
 		{
 			Left = left;
 			Right = right;
 			Operator = operatorType;
 			if (Left.IsLiteral && Right.IsLiteral)
 			{
+				var outputType = left.Type;
 				ResolveLeftRightLiterals();
+				if (requireLeftTypeForOutput && outputType != Type)
+					throw new SectionException("", $"{left} {OperatorExtensions.Tostring(operatorType)} {right}", "", $"Operation invalid, the output type should be {outputType}");
 			}
 			else
 			{
