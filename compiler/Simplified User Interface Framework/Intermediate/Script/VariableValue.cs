@@ -22,7 +22,15 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 		Add,
 		Subtract,
 		Multiply,
-		Divide
+		Divide,
+
+		Assign,
+		Equal,
+		NotEqual,
+		Larger,
+		EqualOrLarger,
+		Smaller,
+		EqualOrSmaller,
 	}
 
 	public static class OperatorExtensions
@@ -47,6 +55,14 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 				case "/=":
 					return Operator.Divide;
 
+				case "=":  return Operator.Assign;
+				case "==": return Operator.Equal;
+				case "!=": return Operator.NotEqual;
+				case ">":  return Operator.Larger;
+				case ">=": return Operator.EqualOrLarger;
+				case "<":  return Operator.Smaller;
+				case "<=": return Operator.EqualOrSmaller;
+
 				default:
 					return Operator.Undefined;
 			}
@@ -60,6 +76,15 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 				case Operator.Subtract: return "-";
 				case Operator.Multiply: return "*";
 				case Operator.Divide: return "/";
+
+				case Operator.Assign:         return "=";
+				case Operator.Equal:          return "==";
+				case Operator.NotEqual:       return "!=";
+				case Operator.Larger:         return ">";
+				case Operator.EqualOrLarger:  return ">=";
+				case Operator.Smaller:        return "<";
+				case Operator.EqualOrSmaller: return "<=";
+
 				default: throw new ArgumentException($"Could not translate \"{operatorType}\" to an operator");
 			}
 		}
@@ -75,6 +100,14 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 		public VariableValue Right { get; private set; }
 		public bool IsLiteral { get; private set; }
 
+
+		public override string ToString()
+			=> IsLiteral
+				? Value
+				: Left != null
+					? $"({Left} {OperatorExtensions.Tostring(Operator)} {Right})"
+					: Value
+				;
 
 		public VariableValue(VariablesCache parentVariables, string raw)
 		{
@@ -249,18 +282,23 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 
 			switch (Operator)
 			{
-				case Operator.Add: Value = (leftInteger + rightInteger).ToString(); break;
-				case Operator.Subtract: Value = (leftInteger - rightInteger).ToString(); break;
-				case Operator.Multiply: Value = (leftInteger * rightInteger).ToString(); break;
-				case Operator.Divide: Value = (leftInteger / rightInteger).ToString(); break;
-			}
+				case Operator.Add:      SetIntegerLiteral(leftInteger + rightInteger); break;
+				case Operator.Subtract: SetIntegerLiteral(leftInteger - rightInteger); break;
+				case Operator.Multiply: SetIntegerLiteral(leftInteger * rightInteger); break;
+				case Operator.Divide:   SetIntegerLiteral(leftInteger / rightInteger); break;
 
-			Left = null;
-			Right = null;
-			Operator = Operator.Undefined;
-			Type = VariableValueType.Integer;
-			IsLiteral = true;
+				case Operator.Assign:         SetIntegerLiteral(rightInteger);                break;
+				case Operator.Equal:          SetBooleanLiteral(leftInteger == rightInteger); break;
+				case Operator.NotEqual:       SetBooleanLiteral(leftInteger != rightInteger); break;
+				case Operator.Larger:         SetBooleanLiteral(leftInteger >  rightInteger); break;
+				case Operator.EqualOrLarger:  SetBooleanLiteral(leftInteger >= rightInteger); break;
+				case Operator.Smaller:        SetBooleanLiteral(leftInteger <  rightInteger); break;
+				case Operator.EqualOrSmaller: SetBooleanLiteral(leftInteger <= rightInteger); break;
+
+				default: throw new NotImplementedException($"CombineIntegerLiteral({Operator})");
+			}
 		}
+
 
 		private void CombineFloatLiteral()
 		{
@@ -270,18 +308,23 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 
 			switch (Operator)
 			{
-				case Operator.Add: Value = (leftFloat + rightFloat).ToString(); break;
-				case Operator.Subtract: Value = (leftFloat - rightFloat).ToString(); break;
-				case Operator.Multiply: Value = (leftFloat * rightFloat).ToString(); break;
-				case Operator.Divide: Value = (leftFloat / rightFloat).ToString(); break;
-			}
+				case Operator.Add:      SetFloatLiteral(leftFloat + rightFloat); break;
+				case Operator.Subtract: SetFloatLiteral(leftFloat - rightFloat); break;
+				case Operator.Multiply: SetFloatLiteral(leftFloat * rightFloat); break;
+				case Operator.Divide:   SetFloatLiteral(leftFloat / rightFloat); break;
 
-			Left = null;
-			Right = null;
-			Operator = Operator.Undefined;
-			Type = VariableValueType.Float;
-			IsLiteral = true;
+				case Operator.Assign:         SetFloatLiteral(rightFloat);                break;
+				case Operator.Equal:          SetBooleanLiteral(leftFloat == rightFloat); break;
+				case Operator.NotEqual:       SetBooleanLiteral(leftFloat != rightFloat); break;
+				case Operator.Larger:         SetBooleanLiteral(leftFloat >  rightFloat); break;
+				case Operator.EqualOrLarger:  SetBooleanLiteral(leftFloat >= rightFloat); break;
+				case Operator.Smaller:        SetBooleanLiteral(leftFloat <  rightFloat); break;
+				case Operator.EqualOrSmaller: SetBooleanLiteral(leftFloat <= rightFloat); break;
+
+				default: throw new NotImplementedException($"CombineFloatLiteral({Operator})");
+			}
 		}
+
 
 		private void CombineAsStringLiteral()
 		{
@@ -328,14 +371,19 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 					throw new SectionException("", $"{Left.Value} * {Right.Value}", "", error);
 				}
 			}
-			// Normal string concatination
-			else if (Operator == Operator.Add)
-			{
-				Value = Left.Value + Right.Value;
-			}
-			// User error
+			// Normal string concatination / bool checks
 			else
-				throw new SectionException(Left.Value + ' ', Operator.ToString(), ' ' + Right.Value, "Invalid operator for string, expected +");
+			{
+				switch (Operator)
+				{
+					case Operator.Add:      SetStringLiteral(Left.Value + Right.Value);   break;
+					case Operator.Assign:   SetStringLiteral(Right.Value);                break;
+					case Operator.Equal:    SetBooleanLiteral(Left.Value == Right.Value); break;
+					case Operator.NotEqual: SetBooleanLiteral(Left.Value != Right.Value); break;
+					default:
+						throw new SectionException(Left.Value + ' ', OperatorExtensions.Tostring(Operator), ' ' + Right.Value, "Invalid operator for strings");
+				}
+			}
 
 			Left = null;
 			Right = null;
@@ -345,6 +393,25 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 		}
 
 		
+
+		#region Setters
+		void SetBooleanLiteral(bool value)  => SetLiteral(value.ToString().ToLower(), VariableValueType.Bool);
+		void SetIntegerLiteral(int value)   => SetLiteral(value, VariableValueType.Integer);
+		void SetFloatLiteral(decimal value) => SetLiteral(value, VariableValueType.Float);
+		void SetStringLiteral(string value) => SetLiteral(value, VariableValueType.String);
+
+		void SetLiteral(object value, VariableValueType type)
+		{
+			Value = value.ToString();
+			Left = null;
+			Right = null;
+			Operator = Operator.Undefined;
+			Type = type;
+			IsLiteral = true;
+		}
+		#endregion
+
+
 
 		#region Combining
 		internal void Combine(VariableValue value, Operator operatorType)
@@ -508,14 +575,8 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 
 		static bool TryParseOperator(string raw, out Operator outOperator)
 		{
-			switch (raw)
-			{
-				case "+": outOperator = Operator.Add;      return true;
-				case "-": outOperator = Operator.Subtract; return true;
-				case "*": outOperator = Operator.Multiply; return true;
-				case "/": outOperator = Operator.Divide;   return true;
-				default: outOperator = Operator.Undefined; return false;
-			}
+			outOperator = OperatorExtensions.Parse(raw);
+			return outOperator != Operator.Undefined;
 		}
 
 		static List<string> GetParenthesesGroup(List<string> values, int startAt, out int endAt)

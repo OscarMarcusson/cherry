@@ -31,6 +31,11 @@ namespace Functions
 		[TestMethod]
 		public void ParsesCondition()
 		{
+			var variables = new VariablesCache();
+			var a = new Variable(variables, VariableType.Dynamic, "a", "5");
+
+			Assert.AreEqual("true", new IfStatment(variables, "if true").Condition.Value);
+			Assert.AreEqual(IfElseType.If, new IfStatment(variables, "if a > 5").Condition.Operator);
 			// if >>>everything_here<<<
 			// same for else if & else
 			throw new NotImplementedException();
@@ -54,12 +59,20 @@ namespace Functions
 		[TestMethod]
 		public void CompileTimeResolveLiterals()
 		{
-			// will never call print
-			// if 1 > 2; print("nope")
+			var variables = new VariablesCache();
+			var a = new Variable(variables, VariableType.ReadOnly, "a", "5");
 
-			// will be converted to just the print call
-			// if true; print("yes")
-			throw new NotImplementedException();
+			Assert.AreEqual("true", new IfStatment(variables, "if true").Condition.Value);
+			Assert.AreEqual("true", new IfStatment(variables, "if 1 == 1").Condition.Value);
+			Assert.AreEqual("true", new IfStatment(variables, "if a == 5").Condition.Value);
+			Assert.AreEqual("true", new IfStatment(variables, "if 1 > 0").Condition.Value);
+			Assert.AreEqual("true", new IfStatment(variables, "if a > 0").Condition.Value);
+			Assert.AreEqual("true", new IfStatment(variables, "if 1 >= 1").Condition.Value);
+			Assert.AreEqual("true", new IfStatment(variables, "if a >= 5").Condition.Value);
+			Assert.AreEqual("false", new IfStatment(variables, "if 1 < 0").Condition.Value);
+			Assert.AreEqual("false", new IfStatment(variables, "if a < 0").Condition.Value);
+			Assert.AreEqual("true", new IfStatment(variables, "if 1 <= 1").Condition.Value);
+			Assert.AreEqual("true", new IfStatment(variables, "if a <= 5").Condition.Value);
 		}
 
 		[TestMethod]
