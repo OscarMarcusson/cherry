@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using SimplifiedUserInterfaceFramework;
+using SimplifiedUserInterfaceFramework.Intermediate;
 
 namespace Functions
 {
@@ -13,13 +15,17 @@ namespace Functions
 		[TestMethod]
 		public void DetectsCorrectKey()
 		{
-			// TODO::
-			// "if"
-			// "else if"
-			// "else"
-			// "askdjasdjsakad" << error
-			// uppercase << error
-			throw new NotImplementedException();
+			var variables = new VariablesCache();
+
+			Assert.AreEqual(IfElseType.If,     new IfStatment(variables, "if true").Type);
+			Assert.AreEqual(IfElseType.ElseIf, new IfStatment(variables, "else if true").Type);
+			Assert.AreEqual(IfElseType.Else,   new IfStatment(variables, "else").Type);
+
+			Assert.ThrowsException<SectionException>(() => new IfStatment(variables, "IF true"));
+			Assert.ThrowsException<SectionException>(() => new IfStatment(variables, "ELSE IF true"));
+			Assert.ThrowsException<SectionException>(() => new IfStatment(variables, "ELSE"));
+			Assert.ThrowsException<SectionException>(() => new IfStatment(variables, "asdsada"));
+			Assert.ThrowsException<SectionException>(() => new IfStatment(variables, ""));
 		}
 
 		[TestMethod]
@@ -59,8 +65,19 @@ namespace Functions
 		[TestMethod]
 		public void ThrowsIfMissingCondition()
 		{
-			// "if" throws since there is no condition
-			throw new NotImplementedException();
+			var variables = new VariablesCache();
+			Assert.ThrowsException<SectionException>(() => new IfStatment(variables, "if"));
+			Assert.ThrowsException<SectionException>(() => new IfStatment(variables, "if "));
+			Assert.ThrowsException<SectionException>(() => new IfStatment(variables, "else if"));
+			Assert.ThrowsException<SectionException>(() => new IfStatment(variables, "else if "));
+		}
+
+		[TestMethod]
+		public void ThrowsIfElseHasCondition()
+		{
+			var variables = new VariablesCache();
+			Assert.ThrowsException<SectionException>(() => new IfStatment(variables, "else true"));
+			Assert.ThrowsException<SectionException>(() => new IfStatment(variables, "else 5 > 3"));
 		}
 
 		[TestMethod]
