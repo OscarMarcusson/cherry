@@ -83,8 +83,11 @@ namespace Functions
 		[TestMethod]
 		public void ThrowsIfConditionIsNotBooleanType()
 		{
-			// "if 3" throws, "if true" does not
-			throw new NotImplementedException();
+			var variables = new VariablesCache();
+			Assert.ThrowsException<SectionException>(() => new IfStatment(variables, "if 5"));
+			Assert.ThrowsException<SectionException>(() => new IfStatment(variables, "if \"yes\""));
+			Assert.ThrowsException<SectionException>(() => new IfStatment(variables, "else if 5"));
+			Assert.ThrowsException<SectionException>(() => new IfStatment(variables, "else if \"yes\""));
 		}
 	}
 }
