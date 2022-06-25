@@ -98,7 +98,12 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 				var resolvedType = ResolveTypeFromValueType(ValueType);
 				if(resolvedType != Type)
 				{
-					throw new SectionException(words.First + ' ', Type, ' ' + words.GetWords(2).ToString(), "Type does not match value type", words.LineNumber);
+					var valid = false;
+					if (ValueType == VariableValueType.Integer && (resolvedType == "i32" || resolvedType == "i64")) valid = true;
+					if (ValueType == VariableValueType.Float && (resolvedType == "f32" || resolvedType == "f64")) valid = true;
+
+					if (!valid)
+						throw new SectionException(words.First + ' ', Type, ' ' + words.GetWords(2).ToString(), $"Type does not match value type ({ValueType} vs {resolvedType})", words.LineNumber);
 				}
 			}
 			else
