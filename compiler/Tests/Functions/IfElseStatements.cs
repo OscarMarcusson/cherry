@@ -55,5 +55,19 @@ namespace Functions
 			// if true; print("yes")
 			throw new NotImplementedException();
 		}
+
+		[TestMethod]
+		public void ThrowsIfMissingCondition()
+		{
+			// "if" throws since there is no condition
+			throw new NotImplementedException();
+		}
+
+		[TestMethod]
+		public void ThrowsIfConditionIsNotBooleanType()
+		{
+			// "if 3" throws, "if true" does not
+			throw new NotImplementedException();
+		}
 	}
 }
