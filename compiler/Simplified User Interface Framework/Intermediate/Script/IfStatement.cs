@@ -51,6 +51,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 
 			if (index < reader.Text.Length)
 			{
+				// TODO:: Resolve one-liner break here
 				var remainder = reader.Text.Substring(index);
 				if(Type == IfElseType.Else)
 				{
@@ -61,6 +62,8 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 					Condition = new VariableValue(parentVariables, remainder);
 					if (Condition.Type != VariableValueType.Bool)
 						throw new SectionException(key + ' ', remainder, "", "Expected a boolean condition", reader.LineNumber);
+
+					Body = CodeLine.ConvertToCodeLines(Variables, reader.Children);
 				}
 			}
 			else if(Type != IfElseType.Else)

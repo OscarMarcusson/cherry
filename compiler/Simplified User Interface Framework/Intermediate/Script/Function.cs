@@ -111,38 +111,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 		/// <summary> Generates the body. This should be called after all variables have been resolved </summary>
 		public void GenerateBody()
 		{
-			if (Source.Children.Count == 0)
-				return; // TODO:: Throw for this? A "def int max : int a, int b => a > b ? a : b" should be legal and would not really have any children. Or perhaps it would if the ctor splits after => into a child line
-
-			var builder = new List<CodeLine>();
-			foreach(var line in Source.Children)
-			{
-				if (line.First == Variable.ReadOnlyAccessType || line.First == Variable.DynamicAccessType)
-				{
-					builder.Add(new Variable(Variables, new WordReader(line)));
-				}
-				else if (line.First == "return")
-				{
-					builder.Add(new Return(Variables, line));
-				}
-
-				// Function or operator call, figure out by word 2 (a = 1 + 2 would have = as our keyword for this check)
-				else
-				{
-					var index = 0;
-					_ = line.Text.GetNextWord(ref index, StringUtils.OperatorWordSplit);
-					var second = line.Text.GetNextWord(ref index);
-					if(second != null && second.Length > 0 && StringUtils.OperatorChars.Contains(second[0]))
-					{
-						builder.Add(new VariableAssignment(Variables, line)); // TODO:: TESTS FOR THIS
-					}
-					else
-					{
-						builder.Add(new FunctionCall(Variables, new WordReader(line)));
-					}
-				}
-			}
-			Body = builder.ToArray();
+			Body = CodeLine.ConvertToCodeLines(Variables, Source.Children);
 		}
 
 
