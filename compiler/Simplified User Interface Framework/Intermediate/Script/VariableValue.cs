@@ -187,10 +187,11 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 					values.Add(raw.Substring(previousIndex));
 
 				// TODO:: Move to using variables directly inside func?
-				RecursivelyResolveLeftRight(parentVariables, values, out var left, out var op, out var right);
+				RecursivelyResolveLeftRight(parentVariables, values, out var left, out var op, out var right, out var type);
 				Left = left;
 				Operator = op;
 				Right = right;
+				Type = type;
 				ResolveLeftRightLiterals();
 			}
 			else
@@ -516,7 +517,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 		}
 		#endregion
 
-		void RecursivelyResolveLeftRight(VariablesCache parentVariables, List<string> values, out VariableValue left, out Operator leftRightOperator, out VariableValue right)
+		void RecursivelyResolveLeftRight(VariablesCache parentVariables, List<string> values, out VariableValue left, out Operator leftRightOperator, out VariableValue right, out VariableValueType type)
 		{
 			if (values.Count <= 1)
 			{
@@ -553,7 +554,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 					{
 						if (leftValue.Count == 3)
 						{
-							RecursivelyResolveLeftRight(parentVariables, leftValue, out left, out leftRightOperator, out right);
+							RecursivelyResolveLeftRight(parentVariables, leftValue, out left, out leftRightOperator, out right, out type);
 						}
 						else
 						{
@@ -570,6 +571,22 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 						throw new SectionException(values[0] + ' ', values[1], ' ' + string.Join(" ", values.Skip(2)), "Unknown operator, expected +, -, *, or /");
 					right = new VariableValue(parentVariables, string.Join(" ", values.Skip(2)));
 				}
+			}
+
+			switch (leftRightOperator)
+			{
+				case Operator.Equal:
+				case Operator.NotEqual:
+				case Operator.Larger:
+				case Operator.EqualOrLarger:
+				case Operator.Smaller:
+				case Operator.EqualOrSmaller:
+					type = VariableValueType.Bool;
+					break;
+
+				default:
+					type = VariableValueType.Empty;
+					break;
 			}
 		}
 

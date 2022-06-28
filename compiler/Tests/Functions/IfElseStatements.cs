@@ -35,10 +35,7 @@ namespace Functions
 			var a = new Variable(variables, VariableType.Dynamic, "a", "5");
 
 			Assert.AreEqual("true", new IfStatment(variables, "if true").Condition.Value);
-			Assert.AreEqual(IfElseType.If, new IfStatment(variables, "if a > 5").Condition.Operator);
-			// if >>>everything_here<<<
-			// same for else if & else
-			throw new NotImplementedException();
+			Assert.AreEqual(Operator.Larger, new IfStatment(variables, "if a > 5").Condition.Operator);
 		}
 
 		[TestMethod]
