@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SimplifiedUserInterfaceFramework;
 using SimplifiedUserInterfaceFramework.Intermediate;
+using SimplifiedUserInterfaceFramework.Internal.Reader;
 
 namespace Functions
 {
@@ -41,16 +42,23 @@ namespace Functions
 		[TestMethod]
 		public void HasCorrectChildren()
 		{
-			// if a > 2
-			//     print("test")
-			throw new NotImplementedException();
+			var variables = new VariablesCache();
+			var code = LineReader.ParseLineWithChildren("if 1 > 2\n\tvar a = 1\n\tprint(a)");
+			var ifStatement = new IfStatment(variables, code);
+			Assert.IsNotNull(ifStatement.Body);
+			Assert.AreEqual(2, ifStatement.Body.Length);
+			Assert.IsInstanceOfType(ifStatement.Body[0], typeof(Variable));
+			Assert.IsInstanceOfType(ifStatement.Body[1], typeof(FunctionCall));
 		}
 
 		[TestMethod]
 		public void OneLiner()
 		{
-			// if a > 2; print("yes")
-			throw new NotImplementedException();
+			var variables = new VariablesCache();
+			var ifStatement = new IfStatment(variables, "if 1 > 2; print(\"Hello World\"))");
+			Assert.IsNotNull(ifStatement.Body);
+			Assert.AreEqual(1, ifStatement.Body.Length);
+			Assert.IsInstanceOfType(ifStatement.Body[0], typeof(FunctionCall));
 		}
 
 		[TestMethod]

@@ -16,6 +16,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 	{
 		public readonly VariableValue Condition;
 		public readonly IfElseType Type;
+		public readonly CodeLine[] Body;
 
 
 		public IfStatment(VariablesCache parentVariables, string raw) : this(parentVariables, new LineReader(raw)) { }
