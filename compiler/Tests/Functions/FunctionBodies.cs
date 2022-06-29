@@ -21,7 +21,7 @@ namespace Functions
 						def test
 							var a = 5
 							a += 5
-							print ( a )
+							print(a)
 							return 5
 						";
 			var reader = LineReader.ParseLineWithChildren(code);
