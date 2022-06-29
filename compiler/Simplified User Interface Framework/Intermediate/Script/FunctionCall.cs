@@ -23,12 +23,15 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 			var closing = reader.Text.LastIndexOf(')');
 
 			if(opening < 0)
-				throw new SectionException("", reader.Text, "", "Could not find the start parentheses\nExpected \"name()\" or \"name(arguments)\"");
+				throw new SectionException("", reader.Text, "", "Could not find the start parentheses\nExpected \"name()\" or \"name(arguments)\"", reader.LineNumber);
 			if(closing < 0)
-				throw new SectionException(reader.Text, "", "", $"Expected a closing parentheses, like {Name}()");
+				throw new SectionException(reader.Text, "", "", $"Expected a closing parentheses, like {Name}()", reader.LineNumber);
 
 			if(closing < opening)
-				throw new SectionException(reader.Text.Substring(0, closing), ")", reader.Text.Substring(closing+1), $"Expected a closing parentheses, like {Name}()");
+				throw new SectionException(reader.Text.Substring(0, closing), ")", reader.Text.Substring(closing+1), $"Expected a closing parentheses, like {Name}()", reader.LineNumber);
+
+			if (opening == 0)
+				throw new SectionException("", "(", reader.Text.Substring(1), "Unexpected parentheses, expected the function name first", reader.LineNumber);
 
 			Name = reader.Text.Substring(0, opening).TrimEnd();
 
