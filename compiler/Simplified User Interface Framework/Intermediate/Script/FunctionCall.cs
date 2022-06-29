@@ -12,19 +12,30 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 	{
 		public readonly string Name;
 
-		public readonly WordReader[] Arguments;
+		public readonly Variable[] Arguments;
 
 
-		public FunctionCall(VariablesCache parentVariables, WordReader words) : base(parentVariables)
+		public FunctionCall(VariablesCache parentVariables, string raw) : this(parentVariables, new LineReader(raw)) { }
+
+		public FunctionCall(VariablesCache parentVariables, LineReader reader) : base(parentVariables)
 		{
-			if(words.Second != "(")
-				words.ThrowWordError(1, $"Expected (");
+			var opening = reader.Text.IndexOf('(');
+			var closing = reader.Text.LastIndexOf(')');
 
-			if(words[words.Length-1] != ")")
-				words.ThrowWordError(words.Length - 1, $"Expected )");
+			if(opening < 0)
+				throw new SectionException("", reader.Text, "", "Could not find the start parentheses\nExpected \"name()\" or \"name(arguments)\"");
+			if(closing < 0)
+				throw new SectionException(reader.Text, "", "", $"Expected a closing parentheses, like {Name}()");
 
-			Name = words.First;
-			Arguments = words.GetWords(2, words.Length - 3).Split(",");
+			if(closing < opening)
+				throw new SectionException(reader.Text.Substring(0, closing), ")", reader.Text.Substring(closing+1), $"Expected a closing parentheses, like {Name}()");
+
+			Name = reader.Text.Substring(0, opening).TrimEnd();
+
+			if(closing > opening + 1)
+			{
+				var arguments = reader.Text.Substring(opening, closing - opening - 1);
+			}
 		}
 
 
@@ -40,7 +51,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 				default: writer.Write(Name); break;
 			}
 			writer.Write('(');
-			writer.Write(string.Join(", ", Arguments.Select(x => x.ToString())));
+			writer.Write(string.Join(", ", Arguments.Select(x => x.Name.ToString())));
 			writer.Write(')');
 			writer.WriteLine(';');
 		}

@@ -49,7 +49,7 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 					}
 					else
 					{
-						builder.Add(new FunctionCall(variables, new WordReader(line)));
+						builder.Add(new FunctionCall(variables, line));
 					}
 				}
 			}
