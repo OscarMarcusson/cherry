@@ -12,19 +12,77 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 	{
 		public readonly string Name;
 
-		public readonly WordReader[] Arguments;
+		public readonly VariableValue[] Arguments;
 
 
-		public FunctionCall(VariablesCache parentVariables, WordReader words) : base(parentVariables)
+		public FunctionCall(VariablesCache parentVariables, string raw) : this(parentVariables, new LineReader(raw)) { }
+
+		public FunctionCall(VariablesCache parentVariables, LineReader reader) : base(parentVariables)
 		{
-			if(words.Second != "(")
-				words.ThrowWordError(1, $"Expected (");
+			var opening = reader.Text.IndexOf('(');
+			var closing = reader.Text.LastIndexOf(')');
 
-			if(words[words.Length-1] != ")")
-				words.ThrowWordError(words.Length - 1, $"Expected )");
+			if(opening < 0)
+				throw new SectionException("", reader.Text, "", "Could not find the start parentheses\nExpected \"name()\" or \"name(arguments)\"", reader.LineNumber);
+			if(closing < 0)
+				throw new SectionException(reader.Text, "", "", $"Expected a closing parentheses, like {Name}()", reader.LineNumber);
 
-			Name = words.First;
-			Arguments = words.GetWords(2, words.Length - 3).Split(",");
+			if(closing < opening)
+				throw new SectionException(reader.Text.Substring(0, closing), ")", reader.Text.Substring(closing+1), $"Expected a closing parentheses, like {Name}()", reader.LineNumber);
+
+			if (opening == 0)
+				throw new SectionException("", "(", reader.Text.Substring(1), "Unexpected parentheses, expected the function name first", reader.LineNumber);
+
+			Name = reader.Text.Substring(0, opening).TrimEnd();
+
+			if(closing > opening + 1)
+			{
+				var arguments = reader.Text.Substring(opening+1, closing-opening-1);
+				var index = 0;
+				var argumentBuilder = new List<VariableValue>();
+				while(index < arguments.Length)
+				{
+					var numberOfParentheses = 0;
+					var numberOfBrackets = 0;
+					for (int i = index; i < arguments.Length; i++)
+					{
+						switch (arguments[i])
+						{
+							case '(': numberOfParentheses++; break;
+							case ')': numberOfParentheses--; break;
+							case '"': i = arguments.FindEndOfString(i); break;
+							case '[': numberOfBrackets++; break;
+							case ']': numberOfBrackets++; break;
+
+							case ',':
+								if(numberOfParentheses <= 0 && numberOfBrackets <= 0)
+								{
+									var argument = arguments.Substring(index, i - index);
+									if(argument.StartsWith("ref ") || argument.StartsWith("ref\t"))
+									{
+										// TODO:: substring everything after ref, trimmed, and ensure no spaces. Only an actual variable should be allowed here
+										// IDEA:: perhaps something like "ref let a" should be alled to create the reffed variable?
+										throw new SectionException(reader.Text.Substring(0, opening + index), "ref", reader.Text.Substring(opening + index + 3), "References are not implemented yet", reader.LineNumber);
+									}
+
+									index = i+1;
+									argumentBuilder.Add(new VariableValue(Variables, argument));
+								}
+								break;
+						}
+					}
+
+					if(index < arguments.Length)
+					{
+						var lastArgument = arguments.Substring(index);
+						index = arguments.Length;
+						argumentBuilder.Add(new VariableValue(Variables, lastArgument));
+					}
+				}
+
+				Arguments = argumentBuilder.ToArray();
+				// TODO:: Validate types compared to the function def
+			}
 		}
 
 

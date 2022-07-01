@@ -82,9 +82,21 @@ namespace SimplifiedUserInterfaceFramework
 		}
 
 
+		public static int FindEndOfString(this string s, int startIndex)
+		{
+			for(int i = startIndex+1; i < s.Length; i++)
+			{
+				if (s[i] == '"' && (i <= 0 || s[i-1] != '\\'))
+					return i;
+			}
+			return s.Length-1;
+		}
+
+
 
 
 		public static readonly char[] OperatorWordSplit = new[] { ' ', '\t', '+', '-', '*', '/', '=', '!', '?', '|' };
 		public static readonly char[] OperatorChars = new[] { '+', '-', '*', '/', '=', '!', '?', '|' };
+		public static readonly char[] ArgumentChars = new[] { ',' };
 	}
 }

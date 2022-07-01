@@ -43,7 +43,7 @@ namespace Functions
 		public void HasCorrectChildren()
 		{
 			var variables = new VariablesCache();
-			var code = LineReader.ParseLineWithChildren("if 1 > 2\n\tvar a = 1\n\tprint(a)");	// TODO:: Rewrite the function call logic to parse this, it currently expects spaces between the name and ( )
+			var code = LineReader.ParseLineWithChildren("if 1 > 2\n\tvar a = 1\n\tprint(a)");
 			var ifStatement = new IfStatment(variables, code);
 			Assert.IsNotNull(ifStatement.Body);
 			Assert.AreEqual(2, ifStatement.Body.Length);
