@@ -55,7 +55,7 @@ namespace Functions
 		public void OneLiner()
 		{
 			var variables = new VariablesCache();
-			var ifStatement = new IfStatment(variables, "if 1 > 2; print(\"Hello World\"))");
+			var ifStatement = new IfStatment(variables, "if 1 > 2; print(\"Hello World\")");
 			Assert.IsNotNull(ifStatement.Body);
 			Assert.AreEqual(1, ifStatement.Body.Length);
 			Assert.IsInstanceOfType(ifStatement.Body[0], typeof(FunctionCall));

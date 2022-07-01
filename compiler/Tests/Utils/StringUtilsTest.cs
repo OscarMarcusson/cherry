@@ -92,5 +92,14 @@ namespace Utils
 			Assert.AreEqual("to", second);
 			Assert.AreEqual("dot", third);
 		}
+
+		[TestMethod]
+		public void CanSplitCodeSection()
+		{
+			var str = "test (bla; (bla bla)); bla";
+			var indexOfBreak = str.SplitCodeSection(0, ";", out var code);
+			Assert.AreEqual(21, indexOfBreak);
+			Assert.AreEqual("test (bla; (bla bla))", code);
+		}
 	}
 }

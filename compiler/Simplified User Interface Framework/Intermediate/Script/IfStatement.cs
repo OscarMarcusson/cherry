@@ -51,19 +51,31 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 
 			if (index < reader.Text.Length)
 			{
-				// TODO:: Resolve one-liner break here
-				var remainder = reader.Text.Substring(index);
 				if(Type == IfElseType.Else)
 				{
-					throw new SectionException(key, ' ' + remainder, "", "Can't use a condition on the else statement", reader.LineNumber);
+					throw new SectionException(key, ' ' + reader.Text.Substring(index), "", "Can't use a condition for else statements\nConsider using \"else if\"", reader.LineNumber);
 				}
 				else
 				{
-					Condition = new VariableValue(parentVariables, remainder);
-					if (Condition.Type != VariableValueType.Bool)
-						throw new SectionException(key + ' ', remainder, "", "Expected a boolean condition", reader.LineNumber);
+					var oneLinerIndex = reader.Text.SplitCodeSection(index, ";", out var condition);
 
-					Body = CodeLine.ConvertToCodeLines(Variables, reader.Children);
+					Condition = new VariableValue(parentVariables, condition);
+					if (Condition.Type != VariableValueType.Bool)
+						throw new SectionException(key + ' ', condition, oneLinerIndex > 0 ? reader.Text.Substring(oneLinerIndex) : "", "Expected a boolean condition", reader.LineNumber);
+
+					if (oneLinerIndex > 0)
+					{
+						if (reader.Children.Count != 0)
+							throw new SectionException(reader.Text, oneLinerIndex, 1, "Can't create a one-line if statement when it has child rows", reader.LineNumber);
+
+						index = reader.Text.GetIndexToNextNonWhitespace(oneLinerIndex + 1);
+						var remainingRow = reader.Text.Substring(index);
+						Body = ConvertToCodeLines(Variables, new[] { new LineReader(remainingRow, reader) });
+					}
+					else
+					{
+						Body = CodeLine.ConvertToCodeLines(Variables, reader.Children);
+					}
 				}
 			}
 			else if(Type != IfElseType.Else)

@@ -94,6 +94,39 @@ namespace SimplifiedUserInterfaceFramework
 
 
 
+		public static int SplitCodeSection(this string s, int startIndex, string lookFor, out string codeSection)
+		{
+			var numberOfParentheses = 0;
+			var numberOfBrackets = 0;
+			var lookingForChar = lookFor[0];
+			for (int i = startIndex; i < s.Length; i++)
+			{
+				switch (s[i])
+				{
+					case '(': numberOfParentheses++; break;
+					case ')': numberOfParentheses--; break;
+					case '"': i = s.FindEndOfString(i); break;
+					case '[': numberOfBrackets++; break;
+					case ']': numberOfBrackets++; break;
+
+					default:
+						if(numberOfParentheses <= 0 && numberOfBrackets <= 0 && s[i] == lookingForChar)
+						{
+							if(s.IndexOf(lookFor, i) == i)
+							{
+								codeSection = s.Substring(startIndex, i - startIndex);
+								return i;
+							}
+						}
+						break;
+				}
+			}
+
+			codeSection = s.Substring(startIndex);
+			return -1;
+		}
+
+
 
 		public static readonly char[] OperatorWordSplit = new[] { ' ', '\t', '+', '-', '*', '/', '=', '!', '?', '|' };
 		public static readonly char[] OperatorChars = new[] { '+', '-', '*', '/', '=', '!', '?', '|' };

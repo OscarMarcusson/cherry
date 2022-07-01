@@ -42,42 +42,19 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 				var argumentBuilder = new List<VariableValue>();
 				while(index < arguments.Length)
 				{
-					var numberOfParentheses = 0;
-					var numberOfBrackets = 0;
-					for (int i = index; i < arguments.Length; i++)
-					{
-						switch (arguments[i])
+						var splitIndex = arguments.SplitCodeSection(index, ",", out var argument);
+						if(!string.IsNullOrWhiteSpace(argument))
+							argumentBuilder.Add(new VariableValue(Variables, argument));
+
+						if (splitIndex > 0)
 						{
-							case '(': numberOfParentheses++; break;
-							case ')': numberOfParentheses--; break;
-							case '"': i = arguments.FindEndOfString(i); break;
-							case '[': numberOfBrackets++; break;
-							case ']': numberOfBrackets++; break;
-
-							case ',':
-								if(numberOfParentheses <= 0 && numberOfBrackets <= 0)
-								{
-									var argument = arguments.Substring(index, i - index);
-									if(argument.StartsWith("ref ") || argument.StartsWith("ref\t"))
-									{
-										// TODO:: substring everything after ref, trimmed, and ensure no spaces. Only an actual variable should be allowed here
-										// IDEA:: perhaps something like "ref let a" should be alled to create the reffed variable?
-										throw new SectionException(reader.Text.Substring(0, opening + index), "ref", reader.Text.Substring(opening + index + 3), "References are not implemented yet", reader.LineNumber);
-									}
-
-									index = i+1;
-									argumentBuilder.Add(new VariableValue(Variables, argument));
-								}
-								break;
+							index = splitIndex + 1;
+							continue;
 						}
-					}
-
-					if(index < arguments.Length)
-					{
-						var lastArgument = arguments.Substring(index);
-						index = arguments.Length;
-						argumentBuilder.Add(new VariableValue(Variables, lastArgument));
-					}
+						else
+						{
+							break;
+						}
 				}
 
 				Arguments = argumentBuilder.ToArray();
