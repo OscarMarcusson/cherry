@@ -55,11 +55,17 @@ namespace Functions
 			var variables = new VariablesCache();
 			var f = new FunctionCall(variables, "print(\"Hello\")");
 			Assert.IsNotNull(f.Arguments);
-			Assert.AreEqual(1, f.Arguments);
+			Assert.AreEqual(1, f.Arguments.Length);
+			Assert.AreEqual(VariableValueType.String, f.Arguments[0].Type);
+			Assert.AreEqual("Hello", f.Arguments[0].Value);
 
 			f = new FunctionCall(variables, "max(1, 5)");
 			Assert.IsNotNull(f.Arguments);
-			Assert.AreEqual(2, f.Arguments);
+			Assert.AreEqual(2, f.Arguments.Length);
+			Assert.AreEqual(VariableValueType.Integer, f.Arguments[0].Type);
+			Assert.AreEqual("1", f.Arguments[0].Value);   
+			Assert.AreEqual(VariableValueType.Integer, f.Arguments[1].Type);
+			Assert.AreEqual("5", f.Arguments[1].Value);
 		}
 	}
 }
