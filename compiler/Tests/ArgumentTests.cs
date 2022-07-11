@@ -1,7 +1,7 @@
 using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using SimplifiedUserInterfaceFramework;
-using SimplifiedUserInterfaceFramework.Internal;
+using Cherry;
+using Cherry.Internal;
 
 namespace Parser
 {

@@ -1,0 +1,8 @@
+{
+    "profiles": {
+        "Simplified User Interface Framework Compiler": {
+            "commandName": "Project",
+            "commandLineArgs": "--log trace --real-time"
+        }
+    }
+}

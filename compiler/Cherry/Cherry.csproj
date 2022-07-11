@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
-    <RootNamespace>SimplifiedUserInterfaceFramework</RootNamespace>
+    <RootNamespace>Cherry</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

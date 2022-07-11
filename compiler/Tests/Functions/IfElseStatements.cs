@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using SimplifiedUserInterfaceFramework;
-using SimplifiedUserInterfaceFramework.Intermediate;
-using SimplifiedUserInterfaceFramework.Internal.Reader;
+using Cherry;
+using Cherry.Intermediate;
+using Cherry.Internal.Reader;
 
 namespace Functions
 {
