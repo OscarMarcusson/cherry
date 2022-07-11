@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Simplified User Interface Framework Compiler\Simplified User Interface Framework Compiler.csproj" />
+    <ProjectReference Include="..\Simplified User Interface Framework Compiler\Cherry Compiler.csproj" />
   </ItemGroup>
 
 </Project>
