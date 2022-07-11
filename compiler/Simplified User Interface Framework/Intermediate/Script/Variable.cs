@@ -21,7 +21,8 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 		public readonly VariableType AccessType;
 		public readonly string Name;
 		public readonly string Type;
-		public readonly VariableValue Value;
+		public readonly VariableValueType ValueType;
+		public VariableValue Value { get; set; }
 
 		public override string ToString() => $"{(AccessType == VariableType.Dynamic ? DynamicAccessType : ReadOnlyAccessType)} {(Type != null ? $"{Type} " : "")}{Name}" + (Value != null ? $" = {Value}" : "");
 
@@ -35,6 +36,8 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 			AccessType = type;
 			Name = name;
 			Value = new VariableValue(parentVariables, new WordReader(value, -1).ToString());
+			ValueType = Value.Type;
+			Type = ResolveTypeFromValueType(ValueType);
 		}
 
 		public Variable(VariablesCache parentVariables, string raw, int lineNumber = -1) : this(parentVariables, new WordReader(raw, lineNumber)) { }
@@ -68,8 +71,8 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 
 				var valueWords = words.GetWords(3); ;
 				Value = new VariableValue(Variables, valueWords.ToString());
-				if (valueWords.Any(x => x.StartsWith('"')))
-					Type = "string";
+				ValueType = Value.Type;
+				Type = ResolveTypeFromValueType(ValueType);
 			}
 
 			// var int a
@@ -91,6 +94,17 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 				nameIndex = 2;
 
 				Value = new VariableValue(Variables, words.GetWords(4).ToString());
+				ValueType = Value.Type;
+				var resolvedType = ResolveTypeFromValueType(ValueType);
+				if(resolvedType != Type)
+				{
+					var valid = false;
+					if (ValueType == VariableValueType.Integer && (resolvedType == "i32" || resolvedType == "i64")) valid = true;
+					if (ValueType == VariableValueType.Float && (resolvedType == "f32" || resolvedType == "f64")) valid = true;
+
+					if (!valid)
+						throw new SectionException(words.First + ' ', Type, ' ' + words.GetWords(2).ToString(), $"Type does not match value type ({ValueType} vs {resolvedType})", words.LineNumber);
+				}
 			}
 			else
 			{
@@ -111,6 +125,25 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 			if (Keywords.IsKeyword(Name))
 				words.ThrowWordError(nameIndex, $"Invalid name, can't use reserved keywords");
 		}
+
+
+
+
+		private string ResolveTypeFromValueType(VariableValueType valueType)
+		{
+			switch (ValueType)
+			{
+				case VariableValueType.DynamicString:
+				case VariableValueType.String:         return "string";
+				case VariableValueType.Bool:           return "bool";
+				case VariableValueType.Integer:        return "i64";
+				case VariableValueType.Float:          return "f64";
+				case VariableValueType.Reference:      throw new NotImplementedException("Automatic reference type resolving is not yet implemented");
+			}
+			return null;
+		}
+
+
 
 
 

@@ -169,5 +169,47 @@ namespace Variables
 			Assert.AreEqual(6, int.Parse(new VariableValue(cache, "1 + (10 / 2)").Value));
 			Assert.AreEqual(2.25m, decimal.Parse(new VariableValue(cache, "(3 * 1.5) / 2").Value));
 		}
+
+		[TestMethod]
+		public void CanCombineLiteralValues()
+		{
+			var cache = new VariablesCache();
+			var a = new VariableValue(cache, "1");
+			var b = new VariableValue(cache, "2");
+
+			var c = new VariableValue(a, b, Operator.Add);
+			Assert.AreEqual("3", c.Value);
+
+			a = new VariableValue(cache, "\"Hello \"");
+			b = new VariableValue(cache, "\"World\"");
+			c = new VariableValue(a, b, Operator.Add);
+			Assert.AreEqual("Hello World", c.Value);
+		}
+
+		[TestMethod]
+		public void CanCombineLiteralAndConst()
+		{
+			var cache = new VariablesCache();
+			var variable = new Variable(cache, "let a = 5");
+
+			var a = new VariableValue(cache, "1");
+			var b = new VariableValue(cache, "a");
+			var c = new VariableValue(a, b, Operator.Add);
+			Assert.IsTrue(c.IsLiteral);
+			Assert.AreEqual("6", c.Value);
+		}
+
+		[TestMethod]
+		public void CanCombineLiteralAndVar()
+		{
+			var cache = new VariablesCache();
+			var variable = new Variable(cache, "var a = 5");
+
+			var a = new VariableValue(cache, "1");
+			var b = new VariableValue(cache, "a");
+			var c = new VariableValue(a, b, Operator.Add);
+			Assert.IsFalse(c.IsLiteral);
+			Assert.AreEqual(VariableValueType.Integer, c.Type);
+		}
 	}
 }

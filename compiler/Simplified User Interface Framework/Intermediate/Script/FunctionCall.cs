@@ -12,19 +12,54 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 	{
 		public readonly string Name;
 
-		public readonly WordReader[] Arguments;
+		public readonly VariableValue[] Arguments;
 
 
-		public FunctionCall(VariablesCache parentVariables, WordReader words) : base(parentVariables)
+		public FunctionCall(VariablesCache parentVariables, string raw) : this(parentVariables, new LineReader(raw)) { }
+
+		public FunctionCall(VariablesCache parentVariables, LineReader reader) : base(parentVariables)
 		{
-			if(words.Second != "(")
-				words.ThrowWordError(1, $"Expected (");
+			var opening = reader.Text.IndexOf('(');
+			var closing = reader.Text.LastIndexOf(')');
 
-			if(words[words.Length-1] != ")")
-				words.ThrowWordError(words.Length - 1, $"Expected )");
+			if(opening < 0)
+				throw new SectionException("", reader.Text, "", "Could not find the start parentheses\nExpected \"name()\" or \"name(arguments)\"", reader.LineNumber);
+			if(closing < 0)
+				throw new SectionException(reader.Text, "", "", $"Expected a closing parentheses, like {Name}()", reader.LineNumber);
 
-			Name = words.First;
-			Arguments = words.GetWords(2, words.Length - 3).Split(",");
+			if(closing < opening)
+				throw new SectionException(reader.Text.Substring(0, closing), ")", reader.Text.Substring(closing+1), $"Expected a closing parentheses, like {Name}()", reader.LineNumber);
+
+			if (opening == 0)
+				throw new SectionException("", "(", reader.Text.Substring(1), "Unexpected parentheses, expected the function name first", reader.LineNumber);
+
+			Name = reader.Text.Substring(0, opening).TrimEnd();
+
+			if(closing > opening + 1)
+			{
+				var arguments = reader.Text.Substring(opening+1, closing-opening-1);
+				var index = 0;
+				var argumentBuilder = new List<VariableValue>();
+				while(index < arguments.Length)
+				{
+						var splitIndex = arguments.SplitCodeSection(index, ",", out var argument);
+						if(!string.IsNullOrWhiteSpace(argument))
+							argumentBuilder.Add(new VariableValue(Variables, argument));
+
+						if (splitIndex > 0)
+						{
+							index = splitIndex + 1;
+							continue;
+						}
+						else
+						{
+							break;
+						}
+				}
+
+				Arguments = argumentBuilder.ToArray();
+				// TODO:: Validate types compared to the function def
+			}
 		}
 
 

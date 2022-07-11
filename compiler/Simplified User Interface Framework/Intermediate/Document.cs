@@ -56,11 +56,9 @@ namespace SimplifiedUserInterfaceFramework.Intermediate
 								// Script function
 								case Function.Declaration:
 									{
-										var words = new WordReader(subSection);
-										var body = subSection.Children.Select(x => new WordReader(x)).ToArray();
-										var function = new Function(Variables, words, body);
+										var function = new Function(Variables, subSection);
 										if (Script.FunctionExists(function.Name))
-											words.ThrowWordError(1, "Already defined", words.Length - 1);
+											function.ThrowNameException("A function with this name already exists");
 
 										Script.Add(function);
 									}

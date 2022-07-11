@@ -96,5 +96,64 @@ namespace SimplifiedUserInterfaceFramework.Internal.Reader
 
 
 		public override string ToString() => Text;
+
+
+
+		public static LineReader ParseLineWithChildren(string raw)
+		{
+			var lines = ParseLines(raw);
+			if (lines.Length == 1)
+				return lines[0];
+
+			throw new ArgumentException("Could not parse as single linereader, too many root lines. Expected the first line to have no indentation and the rest to have at least 1 indentation:\n" + raw);
+		}
+
+		public static LineReader[] ParseLines(string raw)
+		{
+			if (string.IsNullOrWhiteSpace(raw))
+				return new[] { new LineReader("") };
+
+			var split = raw.Replace("\r", "").Split('\n');
+			var output = new List<LineReader>();
+			LineReader parentReader = null;
+			foreach (var line in split)
+			{
+				if (string.IsNullOrWhiteSpace(line))
+					continue;
+
+				if(parentReader == null)
+				{
+					parentReader = new LineReader(line);
+					output.Add(parentReader);
+				}
+				else
+				{
+					var newReader = new LineReader(line);
+					if(newReader.Indentation == 0)
+					{
+						output.Add(newReader);
+						parentReader = newReader;
+					}
+					else
+					{
+						while (parentReader != null && parentReader.Indentation >= newReader.Indentation)
+							parentReader = parentReader.Parent;
+
+						if (parentReader != null)
+						{
+							parentReader.Children.Add(newReader);
+							newReader.Parent = parentReader;
+							parentReader = newReader;
+						}
+						else
+						{
+							output.Add(newReader);
+							parentReader = newReader;
+						}
+					}
+				}
+			}
+			return output.ToArray();
+		}
 	}
 }
