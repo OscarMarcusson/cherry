@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.32106.194
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cherry Compiler", "Simplified User Interface Framework Compiler\Cherry Compiler.csproj", "{92E64428-9F92-4FF2-917D-C38E1D90A879}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cherry Compiler", "Cherry Compiler\Cherry Compiler.csproj", "{92E64428-9F92-4FF2-917D-C38E1D90A879}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cherry", "Simplified User Interface Framework\Cherry.csproj", "{487230E1-1F16-42C2-8CFF-73525F27BE4A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cherry", "Cherry\Cherry.csproj", "{487230E1-1F16-42C2-8CFF-73525F27BE4A}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UnitTests", "Tests\UnitTests.csproj", "{12B81440-BE6B-4150-8934-9D613C520D7A}"
 EndProject
