@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Web;
-using SimplifiedUserInterfaceFramework.Internal.Reader;
+using Cherry.Internal.Reader;
 
-namespace SimplifiedUserInterfaceFramework.Intermediate.Elements
+namespace Cherry.Intermediate.Elements
 {
 	public class IncludeElement : Element
 	{

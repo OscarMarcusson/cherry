@@ -1,5 +1,5 @@
-﻿using SimplifiedUserInterfaceFramework.Internal.Intermediate;
-using SimplifiedUserInterfaceFramework.Internal.Reader;
+﻿using Cherry.Internal.Intermediate;
+using Cherry.Internal.Reader;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SimplifiedUserInterfaceFramework.Intermediate
+namespace Cherry.Intermediate
 {
 	public class Document
 	{

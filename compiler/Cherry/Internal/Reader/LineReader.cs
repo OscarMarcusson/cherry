@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SimplifiedUserInterfaceFramework.Internal.Reader
+namespace Cherry.Internal.Reader
 {
 	public class LineReader
 	{

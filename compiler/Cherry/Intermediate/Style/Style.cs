@@ -1,4 +1,4 @@
-﻿using SimplifiedUserInterfaceFramework.Internal.Reader;
+﻿using Cherry.Internal.Reader;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -7,7 +7,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SimplifiedUserInterfaceFramework.Intermediate
+namespace Cherry.Intermediate
 {
 	public class Style
 	{

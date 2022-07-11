@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using SimplifiedUserInterfaceFramework.Intermediate.Elements;
-using SimplifiedUserInterfaceFramework.Internal.Reader;
+using Cherry.Intermediate.Elements;
+using Cherry.Internal.Reader;
 
-namespace SimplifiedUserInterfaceFramework.Intermediate
+namespace Cherry.Intermediate
 {
 	public static class ElementParser
 	{

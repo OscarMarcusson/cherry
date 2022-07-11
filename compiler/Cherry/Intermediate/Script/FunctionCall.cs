@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using SimplifiedUserInterfaceFramework.Internal.Reader;
-using SimplifiedUserInterfaceFramework.Utilities;
+using Cherry.Internal.Reader;
+using Cherry.Utilities;
 
-namespace SimplifiedUserInterfaceFramework.Intermediate
+namespace Cherry.Intermediate
 {
 	public class FunctionCall : CodeLine
 	{

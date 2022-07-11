@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 using System.Linq;
 
 [assembly:InternalsVisibleTo("UnitTests")]
-namespace SimplifiedUserInterfaceFramework
+namespace Cherry
 {
 	internal static class StringUtils
 	{

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-namespace SimplifiedUserInterfaceFramework.Intermediate
+namespace Cherry.Intermediate
 {
 	public class Meta
 	{

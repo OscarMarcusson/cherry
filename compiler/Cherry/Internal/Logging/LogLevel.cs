@@ -1,4 +1,4 @@
-namespace SimplifiedUserInterfaceFramework
+namespace Cherry
 {
     public enum LogLevel
     {

@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("UnitTests")]
-namespace SimplifiedUserInterfaceFramework.Internal
+namespace Cherry.Internal
 {
 	internal class ArgumentReader
 	{

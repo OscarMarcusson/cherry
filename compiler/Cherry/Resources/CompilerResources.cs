@@ -4,12 +4,12 @@ using System.IO;
 using System.Reflection;
 using System.Text;
 
-namespace SimplifiedUserInterfaceFramework
+namespace Cherry
 {
 	static class CompilerResources
 	{
 		static readonly Assembly Assembly = typeof(CompilerResources).Assembly;
-		const string Prefix = "SimplifiedUserInterfaceFramework.Resources";
+		const string Prefix = "Cherry.Resources";
 
 		public static string GetJavascript(string name) => Get("Javascript", name, ".js");
 

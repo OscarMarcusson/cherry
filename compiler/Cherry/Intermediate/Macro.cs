@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using SimplifiedUserInterfaceFramework.Intermediate;
-using SimplifiedUserInterfaceFramework.Internal.Reader;
+using Cherry.Intermediate;
+using Cherry.Internal.Reader;
 
-namespace SimplifiedUserInterfaceFramework.Internal.Intermediate
+namespace Cherry.Internal.Intermediate
 {
 	// Disabling for now
 	/*

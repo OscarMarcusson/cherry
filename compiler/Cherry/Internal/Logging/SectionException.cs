@@ -1,6 +1,6 @@
 using System;
 
-namespace SimplifiedUserInterfaceFramework
+namespace Cherry
 {
 	public class SectionException : Exception
 	{

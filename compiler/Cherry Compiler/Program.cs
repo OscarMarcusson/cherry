@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
-using SimplifiedUserInterfaceFramework.Internal;
+using Cherry.Internal;
 
-namespace SimplifiedUserInterfaceFramework
+namespace Cherry
 {
 	class Program
 	{

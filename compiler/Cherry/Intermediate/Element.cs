@@ -1,6 +1,6 @@
-﻿using SimplifiedUserInterfaceFramework.Intermediate.Elements;
-using SimplifiedUserInterfaceFramework.Intermediate.Preprocessor;
-using SimplifiedUserInterfaceFramework.Internal.Reader;
+﻿using Cherry.Intermediate.Elements;
+using Cherry.Intermediate.Preprocessor;
+using Cherry.Internal.Reader;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -9,9 +9,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
-using static SimplifiedUserInterfaceFramework.Intermediate.Style;
+using static Cherry.Intermediate.Style;
 
-namespace SimplifiedUserInterfaceFramework.Intermediate
+namespace Cherry.Intermediate
 {
 	public enum ElementType
 	{

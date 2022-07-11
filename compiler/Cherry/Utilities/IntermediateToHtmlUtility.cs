@@ -4,9 +4,9 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using SimplifiedUserInterfaceFramework.Intermediate;
+using Cherry.Intermediate;
 
-namespace SimplifiedUserInterfaceFramework.Intermediate
+namespace Cherry.Intermediate
 {
 	public static class IntermediateToHtmlUtility
 	{

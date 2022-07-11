@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using SimplifiedUserInterfaceFramework.Intermediate;
-using SimplifiedUserInterfaceFramework.Internal;
-using SimplifiedUserInterfaceFramework.Internal.Reader;
+using Cherry.Intermediate;
+using Cherry.Internal;
+using Cherry.Internal.Reader;
 
-namespace SimplifiedUserInterfaceFramework
+namespace Cherry
 {
 	public sealed class Compiler
 	{

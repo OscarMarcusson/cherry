@@ -1,6 +1,6 @@
 using System;
 
-namespace SimplifiedUserInterfaceFramework.Internal
+namespace Cherry.Internal
 {
     public class Log
     {

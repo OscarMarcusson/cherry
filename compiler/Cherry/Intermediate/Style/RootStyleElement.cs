@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using SimplifiedUserInterfaceFramework.Internal.Reader;
+using Cherry.Internal.Reader;
 
-namespace SimplifiedUserInterfaceFramework.Intermediate
+namespace Cherry.Intermediate
 {
 	public class RootStyleElement : StyleElement
 	{

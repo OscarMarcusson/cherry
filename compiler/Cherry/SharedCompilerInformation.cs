@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using SimplifiedUserInterfaceFramework.Intermediate;
+using Cherry.Intermediate;
 
-namespace SimplifiedUserInterfaceFramework
+namespace Cherry
 {
 	class SharedCompilerInformation
 	{

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace SimplifiedUserInterfaceFramework.Internal.Reader
+namespace Cherry.Internal.Reader
 {
 	public class WordReader
 	{

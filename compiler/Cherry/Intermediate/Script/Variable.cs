@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using SimplifiedUserInterfaceFramework.Internal.Reader;
-using SimplifiedUserInterfaceFramework.Utilities;
+using Cherry.Internal.Reader;
+using Cherry.Utilities;
 
-namespace SimplifiedUserInterfaceFramework.Intermediate
+namespace Cherry.Intermediate
 {
 	public enum VariableType
 	{
