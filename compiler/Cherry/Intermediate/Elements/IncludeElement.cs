@@ -10,9 +10,11 @@ namespace Cherry.Intermediate.Elements
 	public class IncludeElement : Element
 	{
 		public string FullPath { get; set; }
+		readonly CompilerArguments CompilerArguments;
 
 		public IncludeElement(VariablesCache parentVariables, LineReader reader, Element parent, CompilerArguments compilerArguments) : base(parentVariables, reader, parent, false, compilerArguments)
 		{
+			CompilerArguments = compilerArguments;
 		}
 
 
@@ -35,6 +37,9 @@ namespace Cherry.Intermediate.Elements
 				default:
 					throw new SectionException(Source.Text.Substring(0, Source.Text.Length - extension.Length + 1), extension?.Substring(1) ?? " ", "", "Expected .md or .markdown", Source.LineNumber);
 			}
+
+			if (CompilerArguments.IsTest)
+				return;
 
 			FullPath = Path.Combine(CompilerArguments.RootDirectory, Value);
 			if (!File.Exists(FullPath))
