@@ -15,7 +15,7 @@ namespace Cherry.Intermediate
 		public readonly Style Style;
 		public readonly Dictionary<string, Style> Styles = new Dictionary<string, Style>();
 		public readonly Meta Meta = new Meta();
-		public readonly Element Body;
+		public readonly Element MainWindow;
 		// Disabling for now
 		// public readonly Dictionary<string, Macro> Macros = new Dictionary<string, Macro>();
 		public readonly CodeBlock Script = new CodeBlock();
@@ -171,8 +171,8 @@ namespace Cherry.Intermediate
 							}
 							break;
 
-						case "body":
-							Body = section.ToElement(Variables, compilerArguments: compilerArguments);
+						case "window":
+							MainWindow = section.ToElement(Variables, compilerArguments: compilerArguments);
 							break;
 
 						// Normal element parsing
@@ -203,10 +203,10 @@ namespace Cherry.Intermediate
 			Links = links.ToArray();
 
 			// Post processing
-			Body?.ResolveBindings(this);
+			MainWindow?.ResolveBindings(this);
 
 			var pages = new List<string>();
-			Body?.ResolveReferencedPages(pages);
+			MainWindow?.ResolveReferencedPages(pages);
 			ReferencedPages = pages.ToArray();
 		}
 

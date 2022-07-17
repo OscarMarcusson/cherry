@@ -208,8 +208,8 @@ namespace Cherry
 
 					Log.Trace("Writing body...");
 					writer.WriteLine();
-					document.Body.ToStartHtmlStream(writer, document, 0);
-					document.Body.WriteContentToHtml(writer, document, 1);
+					document.MainWindow.ToStartHtmlStream(writer, document, 0);
+					document.MainWindow.WriteContentToHtml(writer, document, 1);
 
 					if (document.Script.HasContent || document.ContainsFrameworkCode || document.Bindings.Count > 0 || document.IncludesScripts.Length > 0 || document.CustomElements.Count > 0)
 					{
@@ -268,7 +268,7 @@ namespace Cherry
 
 						writer.WriteLine("\t</script>");
 					}
-					document.Body.ToEndHtmlStream(writer, 0);
+					document.MainWindow.ToEndHtmlStream(writer, 0);
 				}
 
 				Log.Trace("Done");
