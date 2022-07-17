@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "Simplified User Interface Framework Compiler": {
-      "commandName": "Project",
-      "commandLineArgs": "--log trace --real-time --output \"D:\\0_GIT_public\\simplified-user-interface-framework\\test-files\\output.html\" \"D:\\0_GIT_public\\simplified-user-interface-framework\\test-files\\hello_world.txt\""
-    }
-  }
-}

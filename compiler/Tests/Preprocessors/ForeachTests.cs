@@ -1,9 +1,9 @@
 using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using SimplifiedUserInterfaceFramework;
-using SimplifiedUserInterfaceFramework.Intermediate.Preprocessor;
-using SimplifiedUserInterfaceFramework.Internal;
-using SimplifiedUserInterfaceFramework.Internal.Reader;
+using Cherry;
+using Cherry.Intermediate.Preprocessor;
+using Cherry.Internal;
+using Cherry.Internal.Reader;
 
 namespace Preprocessor
 {
