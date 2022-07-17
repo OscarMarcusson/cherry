@@ -7,13 +7,13 @@ using Cherry.Intermediate;
 using Cherry.Internal.Reader;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace RootKeywords
+namespace Window
 {
 	[TestClass]
-	public class WindowTests
+	public class CreateWindow
 	{
 		[TestMethod]
-		public void CanCreateWindow()
+		public void MainWindow()
 		{
 			var documentReader = DocumentReader.Raw
 				(
