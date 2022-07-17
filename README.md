@@ -1,4 +1,4 @@
-# Simplified User Interface Framework
+<h1><img src="resources/special/cherry_title.svg" height=64 alt="Cherry"></img></h1>
 This is a simple UI language based on HTML, but built with the intention of simplifying and reducing boilerplate syntax.
 
 #### Table of Contents
