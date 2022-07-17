@@ -25,7 +25,7 @@
        inkscape:collect="always"
        id="linearGradient1044">
       <stop
-         style="stop-color:#91686b;stop-opacity:1"
+         style="stop-color:#82a077;stop-opacity:1"
          offset="0"
          id="stop1040" />
       <stop
@@ -492,7 +492,7 @@
        x2="74.153107"
        y2="1106.6182"
        gradientUnits="userSpaceOnUse"
-       gradientTransform="translate(-8.7808008,-3.9030303)" />
+       gradientTransform="translate(-8.7808008,-0.72104978)" />
   </defs>
   <sodipodi:namedview
      id="base"
@@ -502,8 +502,8 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="4"
-     inkscape:cx="56.366139"
-     inkscape:cy="33.990911"
+     inkscape:cx="-17.782374"
+     inkscape:cy="6.4810328"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -538,7 +538,7 @@
      transform="translate(0,-1090.5197)">
     <g
        id="g1026"
-       transform="matrix(1.0564936,0,0,1.0564928,-0.61386684,1086.9004)">
+       transform="matrix(1.0564936,0,0,1.0564928,-0.61386684,1090.0824)">
       <g
          style="display:none"
          transform="translate(0,-288.53332)"
@@ -683,16 +683,34 @@
            style="fill:#82be82;fill-opacity:0;stroke:url(#linearGradient1088);stroke-width:0.30000001;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
       </g>
     </g>
-    <text
-       xml:space="preserve"
+    <g
+       aria-label="  Cherry"
        style="font-style:normal;font-weight:normal;font-size:23.53688622px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:url(#linearGradient1046);fill-opacity:1;stroke:none;stroke-width:0.58842218"
-       x="32.502335"
-       y="1115.8766"
-       id="text1030"><tspan
-         sodipodi:role="line"
-         id="tspan1028"
-         x="32.502335"
-         y="1115.8766"
-         style="font-style:normal;font-variant:normal;font-weight:300;font-stretch:normal;font-size:16px;font-family:Roboto;-inkscape-font-specification:'Roboto Light';fill:url(#linearGradient1046);fill-opacity:1;stroke-width:0.58842218">  Cherry</tspan></text>
+       id="text1030">
+      <path
+         d="m 49.807022,1115.5117 q -0.195312,1.7969 -1.289062,2.75 -1.085938,0.9531 -2.898438,0.9531 -1.265625,0 -2.242187,-0.6328 -0.96875,-0.6328 -1.5,-1.789 -0.53125,-1.1641 -0.539063,-2.6563 v -1.4765 q 0,-1.5157 0.53125,-2.6875 0.53125,-1.1719 1.523438,-1.8047 1,-0.6407 2.296875,-0.6407 1.828125,0 2.882812,0.9922 1.0625,0.9844 1.234375,2.7266 h -0.96875 q -0.359375,-2.8984 -3.148437,-2.8984 -1.546875,0 -2.46875,1.1562 -0.914063,1.1563 -0.914063,3.1953 v 1.3906 q 0,1.9688 0.890625,3.1407 0.898438,1.1718 2.421875,1.1718 1.507813,0 2.273438,-0.7187 0.765625,-0.7266 0.945312,-2.1719 z"
+         style="font-style:normal;font-variant:normal;font-weight:300;font-stretch:normal;font-size:16px;font-family:Roboto;-inkscape-font-specification:'Roboto Light';fill:url(#linearGradient1046);fill-opacity:1;stroke-width:0.58842218"
+         id="path921" />
+      <path
+         d="m 52.869522,1112.0352 q 0.460938,-0.7579 1.179688,-1.1719 0.71875,-0.4141 1.570312,-0.4141 1.359375,0 2.023438,0.7656 0.664062,0.7657 0.671875,2.2969 v 5.5469 h -0.929688 v -5.5547 q -0.0078,-1.1328 -0.484375,-1.6875 -0.46875,-0.5547 -1.507812,-0.5547 -0.867188,0 -1.539063,0.5469 -0.664062,0.5391 -0.984375,1.4609 v 5.7891 h -0.929687 v -12 h 0.929687 z"
+         style="font-style:normal;font-variant:normal;font-weight:300;font-stretch:normal;font-size:16px;font-family:Roboto;-inkscape-font-specification:'Roboto Light';fill:url(#linearGradient1046);fill-opacity:1;stroke-width:0.58842218"
+         id="path923" />
+      <path
+         d="m 63.994522,1119.2148 q -1.078125,0 -1.953125,-0.5312 -0.867187,-0.5313 -1.351562,-1.4766 -0.484375,-0.9531 -0.484375,-2.1328 v -0.3359 q 0,-1.2188 0.46875,-2.1953 0.476562,-0.9766 1.320312,-1.5313 0.84375,-0.5625 1.828125,-0.5625 1.539063,0 2.4375,1.0547 0.90625,1.0469 0.90625,2.8672 v 0.5234 h -6.03125 v 0.1797 q 0,1.4375 0.820313,2.3985 0.828125,0.9531 2.078125,0.9531 0.75,0 1.320312,-0.2735 0.578125,-0.2734 1.046875,-0.875 l 0.585938,0.4454 q -1.03125,1.4921 -2.992188,1.4921 z m -0.171875,-7.9687 q -1.054687,0 -1.78125,0.7734 -0.71875,0.7735 -0.875,2.0782 h 5.070313 v -0.1016 q -0.03906,-1.2188 -0.695313,-1.9844 -0.65625,-0.7656 -1.71875,-0.7656 z"
+         style="font-style:normal;font-variant:normal;font-weight:300;font-stretch:normal;font-size:16px;font-family:Roboto;-inkscape-font-specification:'Roboto Light';fill:url(#linearGradient1046);fill-opacity:1;stroke-width:0.58842218"
+         id="path925" />
+      <path
+         d="m 72.908585,1111.4023 q -0.296875,-0.055 -0.632813,-0.055 -0.875,0 -1.484375,0.4921 -0.601562,0.4844 -0.859375,1.4141 v 5.8047 h -0.929687 v -8.4531 h 0.914062 l 0.01563,1.3437 q 0.742188,-1.5 2.382813,-1.5 0.390625,0 0.617187,0.1016 z"
+         style="font-style:normal;font-variant:normal;font-weight:300;font-stretch:normal;font-size:16px;font-family:Roboto;-inkscape-font-specification:'Roboto Light';fill:url(#linearGradient1046);fill-opacity:1;stroke-width:0.58842218"
+         id="path927" />
+      <path
+         d="m 78.283585,1111.4023 q -0.296875,-0.055 -0.632813,-0.055 -0.875,0 -1.484375,0.4921 -0.601562,0.4844 -0.859375,1.4141 v 5.8047 h -0.929687 v -8.4531 h 0.914062 l 0.01563,1.3437 q 0.742188,-1.5 2.382813,-1.5 0.390625,0 0.617187,0.1016 z"
+         style="font-style:normal;font-variant:normal;font-weight:300;font-stretch:normal;font-size:16px;font-family:Roboto;-inkscape-font-specification:'Roboto Light';fill:url(#linearGradient1046);fill-opacity:1;stroke-width:0.58842218"
+         id="path929" />
+      <path
+         d="m 82.588272,1117.7148 2.46875,-7.1093 h 1.007813 l -3.609375,9.8906 -0.1875,0.4375 q -0.695313,1.5391 -2.148438,1.5391 -0.335937,0 -0.71875,-0.1094 l -0.0078,-0.7735 0.484375,0.047 q 0.6875,0 1.109375,-0.3437 0.429687,-0.336 0.726562,-1.1641 l 0.414063,-1.1406 -3.1875,-8.3828 h 1.023437 z"
+         style="font-style:normal;font-variant:normal;font-weight:300;font-stretch:normal;font-size:16px;font-family:Roboto;-inkscape-font-specification:'Roboto Light';fill:url(#linearGradient1046);fill-opacity:1;stroke-width:0.58842218"
+         id="path931" />
+    </g>
   </g>
 </svg>
