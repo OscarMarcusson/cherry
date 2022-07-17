@@ -31,5 +31,20 @@ namespace Style
 			Assert.IsTrue(document.Style.Elements["text"].Values.ContainsKey("color"));
 			Assert.AreEqual("red", document.Style.Elements["text"].Values["color"]);
 		}
+
+		[TestMethod]
+		public void Global()
+		{
+			var style = new Cherry.Intermediate.Style(LineReader.ParseLineWithChildren("style"));
+			Assert.IsTrue(style.IsGlobal);
+		}
+
+		[TestMethod]
+		public void CustomName()
+		{
+			var style = new Cherry.Intermediate.Style(LineReader.ParseLineWithChildren("style test"));
+			Assert.IsFalse(style.IsGlobal);
+			Assert.AreEqual("test", style.Name);
+		}
 	}
 }
