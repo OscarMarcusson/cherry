@@ -143,8 +143,7 @@ namespace Cherry
 				{
 					Log.Trace("Writing header...");
 					writer.WriteLine("<!DOCTYPE html>");
-
-					writer.WriteLine();
+					writer.WriteLine("<html lang=\"en\">");
 					writer.WriteLine("<head>");
 					document.Meta.ToHtmlString(writer, 1);
 
@@ -269,6 +268,7 @@ namespace Cherry
 						writer.WriteLine("\t</script>");
 					}
 					document.MainWindow.ToEndHtmlStream(writer, 0);
+					writer.WriteLine("</html>");
 				}
 
 				Log.Trace("Done");
