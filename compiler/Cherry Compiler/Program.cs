@@ -19,14 +19,14 @@ namespace Cherry
 
 			if (args == null || args.Length == 0 || argumentReader.Exists("h", "help"))
 			{
-				Console.WriteLine("Simplified User Interface Framework Compiler");
+				Console.WriteLine("Cherry Compiler");
 				Console.WriteLine();
 
-				ArgumentPrinter.PrintArgumentUsage("  suifc [path-to-application]");
-				ArgumentPrinter.PrintArgumentUsage("  suifc [options] [path-to-application]");
+				ArgumentPrinter.PrintArgumentUsage("  cherry [path-to-application]");
+				ArgumentPrinter.PrintArgumentUsage("  cherry [options] [path-to-application]");
 				Console.WriteLine();
-				ArgumentPrinter.PrintArgumentExample("suifc \"C:/my_project/input.txt\"");
-				ArgumentPrinter.PrintArgumentExample("suifc -l 0 -o \"./input.html\" \"C:/my_project/input.txt\"");
+				ArgumentPrinter.PrintArgumentExample("cherry \"C:/my_project/input.txt\"");
+				ArgumentPrinter.PrintArgumentExample("cherry -l 0 -o \"./input.html\" \"C:/my_project/input.txt\"");
 
 				Console.WriteLine();
 
@@ -51,6 +51,18 @@ namespace Cherry
 								"r", "real-time", null,
 								$"Enables realtime compilation. The compiler instance will start running in a loop, watching the target file. " +
 								$"Whenever a change is detected the file is recompiled automatically.\n");
+
+				ArgumentPrinter.PrintArgumentDescription(
+								"n", "native", "OS",
+								$"Creates a native executable for the given operating system instead of HTML.\n" +
+								$"Options:\n" +
+								$"  * win-x86\n" +
+								$"  * win-x64\n" +
+								$"  * linux-x64\n" +
+								$"  * linux-arm64\n" +
+								$"Examples:\n" +
+								$"  -n win-x64\n" +
+								$"  -n linux-arm64\n");
 			}
 			else if (argumentReader.Exists("v", "version"))
 			{
