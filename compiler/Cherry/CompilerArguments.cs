@@ -12,6 +12,7 @@ namespace Cherry
 		public LogLevel LogLevel { get; set; } = LogLevel.Info;
 		public bool RealTime { get; set; }
 		public bool IsTest { get; set; }
+		public string Native { get; set; }
 
 
 		public CompilerArguments CreateCopy() => MemberwiseClone() as CompilerArguments;

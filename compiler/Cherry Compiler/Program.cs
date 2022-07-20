@@ -142,6 +142,8 @@ namespace Cherry
 			if (arguments.RealTime)
 				log.Trace("Real-time mode enabled");
 
+			arguments.Native = argumentReader.String("n", "native") ?? "";
+
 			var unknownArguments = argumentReader.GetUnhandledArguments();
 			if (unknownArguments.Length > 0)
 			{

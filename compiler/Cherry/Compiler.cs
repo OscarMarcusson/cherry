@@ -49,7 +49,15 @@ namespace Cherry
 
 			if (string.IsNullOrWhiteSpace(Arguments.Output))
 			{
-				Output = Path.ChangeExtension(Input, ".html");
+				var targetInput = ".html";
+				switch (Arguments.Native)
+				{
+					case "win-x64":
+					case "win-x86":
+						targetInput = ".cpp";
+						break;
+				}
+				Output = Path.ChangeExtension(Input, targetInput);
 				Log.Trace($"No output found, using: {Output}");
 			}
 
@@ -141,134 +149,23 @@ namespace Cherry
 				using (var file = File.Create(Output))
 				using (var writer = new StreamWriter(file))
 				{
-					Log.Trace("Writing header...");
-					writer.WriteLine("<!DOCTYPE html>");
-					writer.WriteLine("<html lang=\"en\">");
-					writer.WriteLine("<head>");
-					document.Meta.ToHtmlString(writer, 1);
-
-					var fonts = new List<Include>();
-					foreach(var link in document.Links)
+					switch (Arguments.Native)
 					{
-						switch (link.Type)
-						{
-							case IncludeType.CSS:        writer.WriteLine($"\t<link rel=\"stylesheet\" href=\"{link}\">"); break;
-							case IncludeType.Javascript: writer.WriteLine($"\t<script src=\"{link}\"></script>");          break;
-
-							case IncludeType.File: throw new NotImplementedException("No compiler implementation for " + Path.GetExtension(link.Value));
-
-							case IncludeType.Directory: throw new NotImplementedException("No compiler implementation for directoreis");
-							
-							// Since fonts are added in the CSS document we have to skip them here, but add them to the list to make it easier to check if a style should be written
-							case IncludeType.Font: 
-								fonts.Add(link); 
-								break;
-
-							default: throw new NotImplementedException("No compiler implementation for including " + link.Type);
-						}
-					}
-
-					foreach (var style in document.Styles)
-					{
-						Log.Trace($"Adding {style.Key} style...");
-						writer.WriteLine();
-						writer.WriteLine($"\t<!-- {style.Key} style  -->");
-						writer.WriteLine($"\t<style type=\"text/css\" rel=\"{style.Key.ToLower()}\" title=\"{style.Key}\">");
-						style.Value.ToCssStream(writer, 2);
-						writer.WriteLine("\t</style>");
-					}
-
-					if (document.Style.Elements.Count() > 0 || document.Style.MediaQueries.Count > 0 || document.Styles.Count > 0 || document.IncludeStyles.Length > 0 || fonts.Count > 0)
-					{
-						Log.Trace($"Adding global style...");
-						writer.WriteLine();
-						writer.WriteLine("\t<!-- Global style  -->");
-						writer.WriteLine("\t<style>");
-
-						if(fonts.Count > 0)
-						{
-							foreach(var font in fonts)
-							{
-								writer.WriteLine("\t\t@font-face {");
-								writer.WriteLine($"\t\t\tfont-family: {Path.GetFileNameWithoutExtension(font.Value)};");
-								writer.WriteLine($"\t\t\tsrc: url({font.Value});");
-								writer.WriteLine("\t\t}");
-							}
-						}
-
-						foreach (var include in document.IncludeStyles)
-							include.ToStream(writer, 2, InputDirectory);
-
-						document.Style.ToCssStream(writer, 2);
-						writer.WriteLine("\t</style>");
-					}
-					writer.WriteLine("</head>");
-
-
-					Log.Trace("Writing body...");
-					writer.WriteLine();
-					document.MainWindow.ToStartHtmlStream(writer, document, 0);
-					document.MainWindow.WriteContentToHtml(writer, document, 1);
-
-					if (document.Script.HasContent || document.ContainsFrameworkCode || document.Bindings.Count > 0 || document.IncludesScripts.Length > 0 || document.CustomElements.Count > 0)
-					{
-						writer.WriteLine("\t<script>");
-
-						// Bindings
-						document.BindingsToJavascriptStream(writer, 2);
-
-						// Variables
-						var variables = document.Script.GetVariables();
-						if (variables.Length > 0)
-						{
-							foreach (var variable in variables)
-								variable.ToJavascriptStream(writer, 2);
-
+						case "win-x64":
+						case "win-x86":
+							writer.WriteLine($"// Generated from {Path.GetFileName(Input)}");
+							writer.WriteLine("# include <iostream>");
 							writer.WriteLine();
-						}
+							writer.WriteLine("int main() {");
+							writer.WriteLine("\tstd::cout << \"Hello Cherry!\";");
+							writer.WriteLine("\treturn 0;");
+							writer.WriteLine("}");
+							break;
 
-						// Custom elements
-						if (document.CustomElements.Count > 0)
-						{
-							writer.WriteLine("\t\t// Custom elements");
-							foreach (var element in document.CustomElements)
-							{
-								element.Value.ToJavascriptClass(writer, 2);
-							}
-						}
-
-						// Framework code
-						if (document.ContainsFrameworkCode)
-						{
-							writer.WriteLine("\t\t// Framework code");
-							// Set defauls on load
-							// TODO:: Loop through each tab selector group and click the default (or first) button
-
-							// Select tab function
-							var selectTab = CompilerResources.GetJavascript("Tabs");
-							writer.WriteLine("\t\t" + selectTab.Replace("\n", "\n\t\t"));
-						}
-
-						// Functions
-						var functions = document.Script.GetFunctions();
-						if (functions.Length > 0)
-						{
-							foreach (var function in functions)
-								function.ToJavascriptStream(writer, 2);
-						}
-
-						// Embedded code from other files
-						if (document.IncludesScripts.Length > 0)
-						{
-							writer.WriteLine("\t\t// Include scripts");
-							foreach (var include in document.IncludesScripts)
-								include.ToStream(writer, 2, InputDirectory);
-						}
-
-						writer.WriteLine("\t</script>");
+						case "":
+							CompileHTML(Log, writer, document, InputDirectory);
+							break;
 					}
-					document.MainWindow.ToEndHtmlStream(writer, 0);
-					writer.WriteLine("</html>");
 				}
 
 				Log.Trace("Done");
@@ -280,5 +177,143 @@ namespace Cherry
 		}
 
 		public Document[] GetDocuments() => SharedCompilerInformation.GetValue(x => x.Documents.Select(d => d.Value).ToArray());
+
+
+
+
+
+
+
+		static void CompileHTML(Log log, StreamWriter writer, Document document, string inputDirectory)
+		{
+			log.Trace("Writing header...");
+			writer.WriteLine("<!DOCTYPE html>");
+			writer.WriteLine("<html lang=\"en\">");
+			writer.WriteLine("<head>");
+			document.Meta.ToHtmlString(writer, 1);
+
+			var fonts = new List<Include>();
+			foreach (var link in document.Links)
+			{
+				switch (link.Type)
+				{
+					case IncludeType.CSS: writer.WriteLine($"\t<link rel=\"stylesheet\" href=\"{link}\">"); break;
+					case IncludeType.Javascript: writer.WriteLine($"\t<script src=\"{link}\"></script>"); break;
+
+					case IncludeType.File: throw new NotImplementedException("No compiler implementation for " + Path.GetExtension(link.Value));
+
+					case IncludeType.Directory: throw new NotImplementedException("No compiler implementation for directoreis");
+
+					// Since fonts are added in the CSS document we have to skip them here, but add them to the list to make it easier to check if a style should be written
+					case IncludeType.Font:
+						fonts.Add(link);
+						break;
+
+					default: throw new NotImplementedException("No compiler implementation for including " + link.Type);
+				}
+			}
+
+			foreach (var style in document.Styles)
+			{
+				log.Trace($"Adding {style.Key} style...");
+				writer.WriteLine();
+				writer.WriteLine($"\t<!-- {style.Key} style  -->");
+				writer.WriteLine($"\t<style type=\"text/css\" rel=\"{style.Key.ToLower()}\" title=\"{style.Key}\">");
+				style.Value.ToCssStream(writer, 2);
+				writer.WriteLine("\t</style>");
+			}
+
+			if (document.Style.Elements.Count() > 0 || document.Style.MediaQueries.Count > 0 || document.Styles.Count > 0 || document.IncludeStyles.Length > 0 || fonts.Count > 0)
+			{
+				log.Trace($"Adding global style...");
+				writer.WriteLine();
+				writer.WriteLine("\t<!-- Global style  -->");
+				writer.WriteLine("\t<style>");
+
+				if (fonts.Count > 0)
+				{
+					foreach (var font in fonts)
+					{
+						writer.WriteLine("\t\t@font-face {");
+						writer.WriteLine($"\t\t\tfont-family: {Path.GetFileNameWithoutExtension(font.Value)};");
+						writer.WriteLine($"\t\t\tsrc: url({font.Value});");
+						writer.WriteLine("\t\t}");
+					}
+				}
+
+				foreach (var include in document.IncludeStyles)
+					include.ToStream(writer, 2, inputDirectory);
+
+				document.Style.ToCssStream(writer, 2);
+				writer.WriteLine("\t</style>");
+			}
+			writer.WriteLine("</head>");
+
+
+			log.Trace("Writing body...");
+			writer.WriteLine();
+			document.MainWindow.ToStartHtmlStream(writer, document, 0);
+			document.MainWindow.WriteContentToHtml(writer, document, 1);
+
+			if (document.Script.HasContent || document.ContainsFrameworkCode || document.Bindings.Count > 0 || document.IncludesScripts.Length > 0 || document.CustomElements.Count > 0)
+			{
+				writer.WriteLine("\t<script>");
+
+				// Bindings
+				document.BindingsToJavascriptStream(writer, 2);
+
+				// Variables
+				var variables = document.Script.GetVariables();
+				if (variables.Length > 0)
+				{
+					foreach (var variable in variables)
+						variable.ToJavascriptStream(writer, 2);
+
+					writer.WriteLine();
+				}
+
+				// Custom elements
+				if (document.CustomElements.Count > 0)
+				{
+					writer.WriteLine("\t\t// Custom elements");
+					foreach (var element in document.CustomElements)
+					{
+						element.Value.ToJavascriptClass(writer, 2);
+					}
+				}
+
+				// Framework code
+				if (document.ContainsFrameworkCode)
+				{
+					writer.WriteLine("\t\t// Framework code");
+					// Set defauls on load
+					// TODO:: Loop through each tab selector group and click the default (or first) button
+
+					// Select tab function
+					var selectTab = CompilerResources.GetJavascript("Tabs");
+					writer.WriteLine("\t\t" + selectTab.Replace("\n", "\n\t\t"));
+				}
+
+				// Functions
+				var functions = document.Script.GetFunctions();
+				if (functions.Length > 0)
+				{
+					foreach (var function in functions)
+						function.ToJavascriptStream(writer, 2);
+				}
+
+				// Embedded code from other files
+				if (document.IncludesScripts.Length > 0)
+				{
+					writer.WriteLine("\t\t// Include scripts");
+					foreach (var include in document.IncludesScripts)
+						include.ToStream(writer, 2, inputDirectory);
+				}
+
+				writer.WriteLine("\t</script>");
+			}
+			document.MainWindow.ToEndHtmlStream(writer, 0);
+			writer.WriteLine("</html>");
+		}
 	}
 }
