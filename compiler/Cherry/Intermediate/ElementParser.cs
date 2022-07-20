@@ -93,7 +93,7 @@ namespace Cherry.Intermediate
 		}
 
 		/// <summary> Converts a <see cref="LineReader"/> to a UI <see cref="Element"/>. Depending on the values of the reader this may return a specific element implementation. </summary>
-		public static Element ToElement(this LineReader reader, Element parent, CompilerArguments compilerArguments = null) => reader.ToElement(parent.Variables, parent, compilerArguments);
+		public static Element ToElement(this LineReader reader, Element parent, CompilerArguments compilerArguments = null) => reader.ToElement(parent?.Variables, parent, compilerArguments);
 
 		/// <summary> Converts a <see cref="LineReader"/> to a UI <see cref="Element"/> using a custom <see cref="VariablesCache"/>. Depending on the values of the reader this may return a specific element implementation. </summary>
 		public static Element ToElement(this LineReader reader, VariablesCache parentVariables, Element parent = null, CompilerArguments compilerArguments = null)
@@ -107,9 +107,12 @@ namespace Cherry.Intermediate
 				name = name.Substring(0, index);
 
 			compilerArguments = compilerArguments ?? parent?.CompilerArguments;
+			parentVariables = parentVariables ?? new VariablesCache();
 
 			switch (name)
 			{
+				case "window":  return new WindowElement(parentVariables, reader, parent, compilerArguments) { Name = name }.LoadContent();
+				case "text":    return new TextElement(parentVariables, reader, parent, compilerArguments) { Name = name }.LoadContent();
 				case "include": return new IncludeElement(parentVariables, reader, parent, compilerArguments).LoadContent();
 				case "tabs":    return new TabsElement(parentVariables, reader, parent, compilerArguments).LoadContent();
 				case "img":
@@ -120,7 +123,20 @@ namespace Cherry.Intermediate
 				case "button":  return new ButtonElement(parentVariables, reader, parent, compilerArguments).LoadContent();
 				case "textbox": return new TextboxElement(parentVariables, reader, parent, compilerArguments).LoadContent();
 				case "iframe":  return new IframeElement(parentVariables, reader, parent, compilerArguments).LoadContent();
-				default:        return new Element(parentVariables, reader, parent, false, compilerArguments) { Name = name }.LoadContent();
+
+				case "title":   return new TitleElement(parentVariables, reader, parent, compilerArguments).LoadContent();
+				case "title_1": return new TitleElement(parentVariables, reader, parent, compilerArguments).LoadContent();
+				case "title_2": return new TitleElement(parentVariables, reader, parent, compilerArguments).LoadContent();
+				case "title_3": return new TitleElement(parentVariables, reader, parent, compilerArguments).LoadContent();
+				case "title_4": return new TitleElement(parentVariables, reader, parent, compilerArguments).LoadContent();
+				case "title_5": return new TitleElement(parentVariables, reader, parent, compilerArguments).LoadContent();
+				case "title_6": return new TitleElement(parentVariables, reader, parent, compilerArguments).LoadContent();
+
+				case "area":    return new AreaElement(parentVariables, reader, parent, compilerArguments) { Name = name }.LoadContent();
+
+				default:
+					// TODO:: Implement lookup for the custom element declarations before throwing
+					throw new SectionException("", name, reader.Text.Substring(name.Length), $"Could not find an element named \"{name}\"", reader.LineNumber);
 			}
 		}
 	}

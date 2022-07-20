@@ -24,9 +24,11 @@ namespace Cherry.Intermediate.Elements
 		protected virtual ElementType GetType => ElementType.None;
 
 
+		protected override string HtmlTag => "input";
+
 		protected sealed override void WriteCoreHtmlDefinition(StreamWriter writer)
 		{
-			writer.Write($"input{HtmlFormattedClasses()} type=\"{GetTypeString}\"");
+			writer.Write($"{HtmlTag}{HtmlFormattedClasses()} type=\"{GetTypeString}\"");
 			if (HasValue)
 			{
 				writer.Write(" value=\"");

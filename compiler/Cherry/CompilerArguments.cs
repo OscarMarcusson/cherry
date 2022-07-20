@@ -11,8 +11,13 @@ namespace Cherry
 		public string RootDirectory { get; set; }
 		public LogLevel LogLevel { get; set; } = LogLevel.Info;
 		public bool RealTime { get; set; }
+		public bool IsTest { get; set; }
 
 
 		public CompilerArguments CreateCopy() => MemberwiseClone() as CompilerArguments;
+
+
+
+		public static CompilerArguments Test => new CompilerArguments { IsTest = true };
 	}
 }

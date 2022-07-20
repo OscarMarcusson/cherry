@@ -143,8 +143,7 @@ namespace Cherry
 				{
 					Log.Trace("Writing header...");
 					writer.WriteLine("<!DOCTYPE html>");
-
-					writer.WriteLine();
+					writer.WriteLine("<html lang=\"en\">");
 					writer.WriteLine("<head>");
 					document.Meta.ToHtmlString(writer, 1);
 
@@ -208,8 +207,8 @@ namespace Cherry
 
 					Log.Trace("Writing body...");
 					writer.WriteLine();
-					document.Body.ToStartHtmlStream(writer, document, 0);
-					document.Body.WriteContentToHtml(writer, document, 1);
+					document.MainWindow.ToStartHtmlStream(writer, document, 0);
+					document.MainWindow.WriteContentToHtml(writer, document, 1);
 
 					if (document.Script.HasContent || document.ContainsFrameworkCode || document.Bindings.Count > 0 || document.IncludesScripts.Length > 0 || document.CustomElements.Count > 0)
 					{
@@ -268,7 +267,8 @@ namespace Cherry
 
 						writer.WriteLine("\t</script>");
 					}
-					document.Body.ToEndHtmlStream(writer, 0);
+					document.MainWindow.ToEndHtmlStream(writer, 0);
+					writer.WriteLine("</html>");
 				}
 
 				Log.Trace("Done");
