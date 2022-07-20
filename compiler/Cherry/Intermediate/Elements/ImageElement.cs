@@ -29,10 +29,11 @@ namespace Cherry.Intermediate.Elements
 			}
 		}
 
+		protected override string HtmlTag => "img";
 
 		protected override void WriteCoreHtmlDefinition(StreamWriter writer)
 		{
-			writer.Write($"img src=\"{Value}\"{HtmlFormattedClasses()}");
+			writer.Write($"{HtmlTag} src=\"{Value}\"{HtmlFormattedClasses()}");
 
 			if (Width.HasValue)
 				writer.Write($" width=\"{Width.Value}\"");

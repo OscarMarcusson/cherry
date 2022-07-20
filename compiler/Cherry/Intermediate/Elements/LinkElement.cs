@@ -31,6 +31,7 @@ namespace Cherry.Intermediate.Elements
 		}
 
 
+		protected override string HtmlTag => "a";
 
 		protected override void WriteContentToHtml(StreamWriter writer, Document document, int indent, List<Element> children) => writer.Write(DisplayName);
 

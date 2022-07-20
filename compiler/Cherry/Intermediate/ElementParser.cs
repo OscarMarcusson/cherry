@@ -111,6 +111,7 @@ namespace Cherry.Intermediate
 
 			switch (name)
 			{
+				case "window":  return new WindowElement(parentVariables, reader, parent, compilerArguments) { Name = name }.LoadContent();
 				case "text":    return new TextElement(parentVariables, reader, parent, compilerArguments) { Name = name }.LoadContent();
 				case "include": return new IncludeElement(parentVariables, reader, parent, compilerArguments).LoadContent();
 				case "tabs":    return new TabsElement(parentVariables, reader, parent, compilerArguments).LoadContent();

@@ -33,9 +33,11 @@ namespace Cherry.Intermediate.Elements
 		}
 
 
+		protected override string HtmlTag => "iframe";
+
 		protected override void WriteCoreHtmlDefinition(StreamWriter writer)
 		{
-			writer.Write($"iframe src=\"{Value}\"{HtmlFormattedClasses()}");
+			writer.Write($"{HtmlTag} src=\"{Value}\"{HtmlFormattedClasses()}");
 
 			writer.Write($" width=\"{Width}\"");
 			writer.Write($" height=\"{Height}\"");

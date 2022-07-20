@@ -630,11 +630,11 @@ namespace Cherry.Intermediate
 
 		protected virtual void WriteCoreHtmlDefinition(StreamWriter writer)
 		{
-			writer.Write(Name + HtmlFormattedClasses());
+			writer.Write(HtmlTag + HtmlFormattedClasses());
 		}
 
 
-
+		protected virtual string HtmlTag => Name;
 
 		public virtual void ValueToHtml(StreamWriter writer)
 		{
@@ -688,7 +688,7 @@ namespace Cherry.Intermediate
 			if (customIndent > 0)
 				writer.Write(new string('\t', customIndent));
 
-			writer.WriteLine($"</{Name}>");
+			writer.WriteLine($"</{HtmlTag}>");
 		}
 
 

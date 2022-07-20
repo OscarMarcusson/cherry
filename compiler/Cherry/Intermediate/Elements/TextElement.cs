@@ -20,12 +20,6 @@ namespace Cherry.Intermediate.Elements
 		}
 
 
-
-		protected override void WriteCoreHtmlDefinition(StreamWriter writer)
-		{
-			writer.Write($"p{HtmlFormattedClasses()}");
-		}
-
-		internal override void ToEndHtmlStream(StreamWriter writer, int customIndent = 0) => writer.WriteLine($"</p>");
+		protected override string HtmlTag => "p";
 	}
 }
