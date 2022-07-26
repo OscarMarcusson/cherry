@@ -190,6 +190,9 @@ namespace Cherry.Intermediate
 				throw new SectionException(e.Left, e.Center, e.Right, e.Message, e.LineNumber, Path.GetFileName(reader.File));
 			}
 
+			// Parse the scripts now that everything at the top-level is initialized
+			Script.ParseFunctionBodies();
+
 			// Make sure that the global style is initialized
 			Style = Style ?? new Style();
 			IncludeStyles = includes.Where(x => x.Type == IncludeType.CSS).ToArray();

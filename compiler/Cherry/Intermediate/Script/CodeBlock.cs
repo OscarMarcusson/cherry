@@ -23,5 +23,12 @@ namespace Cherry.Intermediate
 
 		public void Add(Variable variable) => Variables[variable.Name] = variable;
 		public void Add(Function function) => Functions[function.Name] = function;
+
+
+		public void ParseFunctionBodies()
+		{
+			foreach (var functionPair in Functions)
+				functionPair.Value.GenerateBody();
+		}
 	}
 }
