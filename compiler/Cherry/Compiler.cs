@@ -153,9 +153,25 @@ namespace Cherry
 					{
 						case "win-x64":
 						case "win-x86":
+							var functions = document.Script.GetFunctions();
 							writer.WriteLine($"// Generated from {Path.GetFileName(Input)}");
 							writer.WriteLine("# include <iostream>");
 							writer.WriteLine();
+
+							if(functions.Length > 0)
+							{
+								writer.WriteLine("// Forward declarations");
+								foreach (var function in functions)
+									function.ToCppForwardDeclare(writer);
+								writer.WriteLine();
+
+								writer.WriteLine("// Implementations");
+								foreach (var function in functions)
+									function.ToCppStream(writer);
+								writer.WriteLine();
+							}
+
+							writer.WriteLine("// Application initialization & top-level statements");
 							writer.WriteLine("int main() {");
 							writer.WriteLine("\tstd::cout << \"Hello Cherry!\";");
 							writer.WriteLine("\treturn 0;");
