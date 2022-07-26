@@ -65,8 +65,7 @@ namespace Cherry.Intermediate
 
 		public override void ToJavascriptStream(StreamWriter writer, int indentation = 0)
 		{
-			if (indentation > 0)
-				writer.Write(new string('\t', indentation));
+			Indent(writer, indentation);
 
 			switch (Name)
 			{
@@ -78,6 +77,24 @@ namespace Cherry.Intermediate
 			writer.Write(string.Join(", ", Arguments.Select(x => x.ToString())));
 			writer.Write(')');
 			writer.WriteLine(';');
+		}
+
+		public override void ToCppStream(StreamWriter writer, int indentation = 0)
+		{
+			Indent(writer, indentation);
+
+			switch (Name)
+			{
+				case "print": writer.WriteLine($"std::cout << {string.Join(" << ", Arguments.Select(x => x.ToString()))};"); break;
+
+				default: 
+					writer.Write(Name);
+					writer.Write('(');
+					writer.Write(string.Join(", ", Arguments.Select(x => x.ToString())));
+					writer.Write(')');
+					writer.WriteLine(';');
+					break;
+			}
 		}
 	}
 }

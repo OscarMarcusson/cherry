@@ -144,5 +144,39 @@ namespace Cherry.Intermediate
 			writer.Write(indentationString);
 			writer.WriteLine("}");
 		}
+
+		public override void ToCppStream(StreamWriter writer, int indentation = 0)
+		{
+			Indent(writer, indentation);
+			writer.Write($"{Type} {Name}(");
+			ToCppArguments(writer);
+			writer.WriteLine(") {");
+			if (Body != null)
+			{
+				foreach (var line in Body)
+					line.ToCppStream(writer, indentation + 1);
+			}
+
+			Indent(writer, indentation);
+			writer.WriteLine("}");
+		}
+
+
+
+		// C++
+		void ToCppArguments(StreamWriter writer)
+		{
+			if(Arguments?.Length > 0)
+			{
+				writer.Write(string.Join(", ", Arguments.Select(x => $"{x.CppType} {x.Name}")));
+			}
+		}
+
+		public void ToCppForwardDeclare(StreamWriter writer)
+		{
+			writer.Write($"{Type} {Name}(");
+			ToCppArguments(writer);
+			writer.WriteLine(");");
+		}
 	}
 }

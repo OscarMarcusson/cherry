@@ -45,6 +45,22 @@ namespace Cherry.Intermediate
 			}
 		}
 
+		public override void ToCppStream(StreamWriter writer, int indentation = 0)
+		{
+			Indent(writer, indentation);
+
+			if (HasValue)
+			{
+				writer.Write("return ");
+				writer.Write(Value);
+				writer.WriteLine(';');
+			}
+			else
+			{
+				writer.WriteLine("return;");
+			}
+		}
+
 
 		public override string ToString() => $"return {Value}";
 	}

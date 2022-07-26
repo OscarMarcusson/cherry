@@ -46,8 +46,8 @@ namespace Cherry.Intermediate
 		{
 			switch (words.First)
 			{
-				case ReadOnlyAccessType:    AccessType = VariableType.ReadOnly; break;
-				case DynamicAccessType:     AccessType = VariableType.Dynamic; break;
+				case ReadOnlyAccessType: AccessType = VariableType.ReadOnly; break;
+				case DynamicAccessType: AccessType = VariableType.Dynamic; break;
 
 				default:
 					words.ThrowWordError(0, $"Unknown variable type\nExpected {ReadOnlyAccessType} or {DynamicAccessType}");
@@ -58,7 +58,7 @@ namespace Cherry.Intermediate
 			int nameIndex = 0;
 
 			// var a
-			if(words.Length == 2)
+			if (words.Length == 2)
 			{
 				Name = words.Second;
 				nameIndex = 1;
@@ -96,7 +96,7 @@ namespace Cherry.Intermediate
 				Value = new VariableValue(Variables, words.GetWords(4).ToString());
 				ValueType = Value.Type;
 				var resolvedType = ResolveTypeFromValueType(ValueType);
-				if(resolvedType != Type)
+				if (resolvedType != Type)
 				{
 					var valid = false;
 					if (ValueType == VariableValueType.Integer && (resolvedType == "i32" || resolvedType == "i64")) valid = true;
@@ -108,10 +108,10 @@ namespace Cherry.Intermediate
 			}
 			else
 			{
-				words.ThrowWordError(1, $"Could not parse name and type", words.Length-1);
+				words.ThrowWordError(1, $"Could not parse name and type", words.Length - 1);
 			}
 
-			
+
 			if (parentVariables.Exists(Name))
 				throw new ArgumentException($"A variable by the name {Name} already exists in this scope");
 			parentVariables[Name] = this;
@@ -134,11 +134,11 @@ namespace Cherry.Intermediate
 			switch (ValueType)
 			{
 				case VariableValueType.DynamicString:
-				case VariableValueType.String:         return "string";
-				case VariableValueType.Bool:           return "bool";
-				case VariableValueType.Integer:        return "i64";
-				case VariableValueType.Float:          return "f64";
-				case VariableValueType.Reference:      throw new NotImplementedException("Automatic reference type resolving is not yet implemented");
+				case VariableValueType.String: return "string";
+				case VariableValueType.Bool: return "bool";
+				case VariableValueType.Integer: return "i64";
+				case VariableValueType.Float: return "f64";
+				case VariableValueType.Reference: throw new NotImplementedException("Automatic reference type resolving is not yet implemented");
 			}
 			return null;
 		}
@@ -149,8 +149,7 @@ namespace Cherry.Intermediate
 
 		public override void ToJavascriptStream(StreamWriter writer, int indentation = 0)
 		{
-			if (indentation > 0)
-				writer.Write(new string('\t', indentation));
+			Indent(writer, indentation);
 
 			switch (AccessType)
 			{
@@ -160,7 +159,7 @@ namespace Cherry.Intermediate
 
 			writer.Write(Name);
 
-			if(Value != null)
+			if (Value != null)
 			{
 				writer.Write(" = ");
 				writer.Write(Value);
@@ -169,6 +168,96 @@ namespace Cherry.Intermediate
 			else
 			{
 				writer.WriteLine(";");
+			}
+		}
+
+		public override void ToCppStream(StreamWriter writer, int indentation = 0)
+		{
+			Indent(writer, indentation);
+
+			if (AccessType == VariableType.ReadOnly)
+				writer.Write("const ");
+
+			writer.Write(CppType);
+			writer.Write(' ');
+			writer.Write(Name);
+
+			if (Value != null)
+			{
+				writer.Write(" = ");
+				writer.Write(Value);
+				writer.WriteLine(";");
+			}
+			else
+			{
+				writer.WriteLine(";");
+			}
+		}
+
+
+
+
+
+		public string CppType
+		{
+			get
+			{
+				switch (Type)
+				{
+					// Integers
+					case "i8":
+					case "i16":
+						return "short int";
+
+					case "i32":
+						return "int";
+
+					case "int": // <<<< Default
+					case "i64":
+						return "long int";
+
+					case "i128":
+						return "long long int";
+
+
+					// Unsigned integers
+					case "u8":
+					case "u16":
+						return "unsigned short int";
+
+					case "u32":
+						return "unsigned int";
+
+					case "uint": // <<<< Default
+					case "u64":
+						return "unsigned long int";
+
+					case "u128":
+						return "unsigned long long int";
+
+
+					// Floats
+					case "f32":
+						return "float";
+
+					case "f64":
+					case "float":  // <<<< Default
+						return "double";
+
+					case "f128":
+						return "long double";
+
+
+					// Other builtin types
+					case "bool":
+						return "bool";
+
+					case "string":
+						return "string";    // TODO:: #include <string>
+
+
+					default: return Type;
+				}
 			}
 		}
 	}

@@ -15,8 +15,18 @@ namespace Cherry.Intermediate
 
 		public abstract void ToJavascriptStream(StreamWriter writer, int indentation = 0);
 
+		public abstract void ToCppStream(StreamWriter writer, int indentation = 0);
 
 
+		protected void Indent(StreamWriter writer, int indentation)
+		{
+			if (indentation <= 0)
+				return;
+			else if (indentation == 1)
+				writer.Write('\t');
+			else
+				writer.Write(new string('\t', indentation));
+		}
 
 
 
@@ -35,6 +45,10 @@ namespace Cherry.Intermediate
 				else if (line.First == "return")
 				{
 					builder.Add(new Return(variables, line));
+				}
+				else if(line.First == "if" || line.First == "else")
+				{
+					builder.Add(new IfStatment(variables, line));
 				}
 
 				// Function or operator call, figure out by word 2 (a = 1 + 2 would have = as our keyword for this check)

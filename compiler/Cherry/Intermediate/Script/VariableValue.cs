@@ -198,7 +198,7 @@ namespace Cherry.Intermediate
 			{
 				if(parentVariables.TryGetVariableRecursive(raw, out var variable))
 				{
-					if(variable.AccessType == VariableType.ReadOnly)
+					if(variable.AccessType == VariableType.ReadOnly && variable.Value != null)
 					{
 						CopyFrom(variable.Value);
 					}

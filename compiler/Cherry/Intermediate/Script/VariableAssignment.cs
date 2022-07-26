@@ -55,9 +55,24 @@ namespace Cherry.Intermediate
 
 		public override void ToJavascriptStream(StreamWriter writer, int indentation = 0)
 		{
-			if (indentation > 0)
-				writer.Write(new string('\t', indentation));
+			Indent(writer, indentation);
+			writer.Write(Name);
+			writer.Write(' ');
+			writer.Write(Operator);
 
+			if (HasValue)
+			{
+				writer.Write(' ');
+				// TODO:: This should be resolved properly
+				writer.Write(Value);
+			}
+
+			writer.WriteLine(';');
+		}
+
+		public override void ToCppStream(StreamWriter writer, int indentation = 0)
+		{
+			Indent(writer, indentation);
 			writer.Write(Name);
 			writer.Write(' ');
 			writer.Write(Operator);

@@ -94,6 +94,31 @@ namespace Cherry.Intermediate
 			throw new NotImplementedException();
 		}
 
+		public override void ToCppStream(StreamWriter writer, int indentation = 0)
+		{
+			Indent(writer, indentation);
+			switch (Type)
+			{
+				case IfElseType.If:
+					writer.WriteLine("if () {");
+					break;
+
+				case IfElseType.ElseIf:
+					writer.WriteLine("else if () {");
+					break;
+
+				case IfElseType.Else:
+					writer.WriteLine("else {");
+					break;
+			}
+
+			foreach (var child in Body)
+				child.ToCppStream(writer, indentation + 1);
+
+			Indent(writer, indentation);
+			writer.WriteLine("}");
+		}
+
 
 		public override string ToString() => $"return {Condition}";
 	}
