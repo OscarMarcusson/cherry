@@ -104,9 +104,11 @@ namespace Cherry.Intermediate
 		public override string ToString()
 			=> IsLiteral
 				? Value
-				: Left != null
-					? $"({Left} {OperatorExtensions.Tostring(Operator)} {Right})"
-					: Value
+				: Type == VariableValueType.Reference
+					? ReferencedVariable.Name
+					: Left != null
+						? $"({Left} {OperatorExtensions.Tostring(Operator)} {Right})"
+						: Value
 				;
 
 		public VariableValue(VariablesCache parentVariables, string raw)
