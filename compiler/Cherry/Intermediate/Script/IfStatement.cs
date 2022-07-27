@@ -100,11 +100,11 @@ namespace Cherry.Intermediate
 			switch (Type)
 			{
 				case IfElseType.If:
-					writer.WriteLine("if () {");
+					writer.WriteLine($"if ({Condition}) {{");
 					break;
 
 				case IfElseType.ElseIf:
-					writer.WriteLine("else if () {");
+					writer.WriteLine($"else if ({Condition}) {{");
 					break;
 
 				case IfElseType.Else:
