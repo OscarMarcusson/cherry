@@ -14,7 +14,7 @@ namespace Cherry
 		public SectionException(string line, int index, int count, string error, int lineNumber = -1, string fileName = null) 
 			: this(
 				  left: index > 0
-							? line.Substring(index, count)
+							? line.Substring(0, index)
 							: ""
 							,
 				  center: line.Substring(index, count),
