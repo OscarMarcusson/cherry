@@ -112,8 +112,8 @@ namespace Cherry.Intermediate
 
 
 		// Helper variable creation methods
-		public Variable Create(string raw, int lineNumber = -1) => new Variable(this, raw, lineNumber);
-		public Variable Create(VariableType type, string name, object value) => new Variable(this, type, name, value?.ToString() ?? "null");
+		public Variable Create(string raw, int lineNumber = -1) => new Variable(this, null, raw, lineNumber);
+		public Variable Create(CodeLine parent, VariableType type, string name, object value) => new Variable(this, parent, type, name, value?.ToString() ?? "null");
 		public void Remove(string variableName) => this[variableName] = null;
 	}
 }

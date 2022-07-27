@@ -17,35 +17,35 @@ namespace Functions
 		public void FailsIfMissingStartParentheses()
 		{
 			var variables = new VariablesCache();
-			Assert.ThrowsException<SectionException>(() => new FunctionCall(variables, "print"));
+			Assert.ThrowsException<SectionException>(() => new FunctionCall(variables, null, "print"));
 		}
 
 		[TestMethod]
 		public void FailsIfMissingEndParentheses()
 		{
 			var variables = new VariablesCache();
-			Assert.ThrowsException<SectionException>(() => new FunctionCall(variables, "print("));
+			Assert.ThrowsException<SectionException>(() => new FunctionCall(variables, null, "print("));
 		}
 
 		[TestMethod]
 		public void FailsIfIncorrectParenthesesOrder()
 		{
 			var variables = new VariablesCache();
-			Assert.ThrowsException<SectionException>(() => new FunctionCall(variables, "print)("));
+			Assert.ThrowsException<SectionException>(() => new FunctionCall(variables, null, "print)("));
 		}
 
 		[TestMethod]
 		public void FailsIfMissingName()
 		{
 			var variables = new VariablesCache();
-			Assert.ThrowsException<SectionException>(() => new FunctionCall(variables, "()"));
+			Assert.ThrowsException<SectionException>(() => new FunctionCall(variables, null, "()"));
 		}
 
 		[TestMethod]
 		public void CanParseWithNoArguments()
 		{
 			var variables = new VariablesCache();
-			var f = new FunctionCall(variables, "print()");
+			var f = new FunctionCall(variables, null, "print()");
 			Assert.IsNull(f.Arguments);
 		}
 
@@ -53,13 +53,13 @@ namespace Functions
 		public void CanParseWithArguments()
 		{
 			var variables = new VariablesCache();
-			var f = new FunctionCall(variables, "print(\"Hello\")");
+			var f = new FunctionCall(variables, null, "print(\"Hello\")");
 			Assert.IsNotNull(f.Arguments);
 			Assert.AreEqual(1, f.Arguments.Length);
 			Assert.AreEqual(VariableValueType.String, f.Arguments[0].Type);
 			Assert.AreEqual("Hello", f.Arguments[0].Value);
 
-			f = new FunctionCall(variables, "max(1, 5)");
+			f = new FunctionCall(variables, null, "max(1, 5)");
 			Assert.IsNotNull(f.Arguments);
 			Assert.AreEqual(2, f.Arguments.Length);
 			Assert.AreEqual(VariableValueType.Integer, f.Arguments[0].Type);

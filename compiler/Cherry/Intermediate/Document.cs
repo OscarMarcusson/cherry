@@ -47,44 +47,32 @@ namespace Cherry.Intermediate
 					// 	var macro = new Macro(section, compilerArguments);
 					// 	Macros.Add(macro.Name, macro);
 					// }
-					if(section.First == "script")
-					{
-						foreach(var subSection in section.Children)
-						{
-							switch (subSection.First)
-							{								
-								// Script function
-								case Function.Declaration:
-									{
-										var function = new Function(Variables, subSection);
-										if (Script.FunctionExists(function.Name))
-											function.ThrowNameException("A function with this name already exists");
+					
+					switch (section.First)
+					{								
+						// Script function
+						case Function.Declaration:
+							{
+								var function = new Function(Variables, null, section);
+								if (Script.FunctionExists(function.Name))
+									function.ThrowNameException("A function with this name already exists");
 
-										Script.Add(function);
-									}
-									break;
-
-								case Variable.DynamicAccessType:
-								case Variable.ReadOnlyAccessType:
-									{
-										var variable = new Variable(Variables, subSection.Text, subSection.LineNumber);
-										if (Script.VariableExists(variable.Name))
-											throw new Exception($"A variable named {variable.Name} already exists.");
-
-										Script.Add(variable);
-									}
-									break;
-
-								default:
-									{
-										var words = new WordReader(subSection);
-										words.ThrowWordError(0, "Unknown keyword\nExpected a variable, function or data definition");
-										break;
-									}
+								Script.Add(function);
 							}
+							break;
+
+						case Variable.DynamicAccessType:
+						case Variable.ReadOnlyAccessType:
+							{
+								var variable = new Variable(Variables, null, section.Text, section.LineNumber);
+								if (Script.VariableExists(variable.Name))
+									throw new Exception($"A variable named {variable.Name} already exists.");
+
+								Script.Add(variable);
+							}
+							break;
 						}
 					}
-				}
 
 				// Parse everything else
 				foreach (var section in reader.Sections)
@@ -94,7 +82,10 @@ namespace Cherry.Intermediate
 
 					switch (section.First)
 					{
-						case "script": continue;
+						case Function.Declaration:
+						case Variable.DynamicAccessType:
+						case Variable.ReadOnlyAccessType:
+							continue;
 
 						case "link":
 							{

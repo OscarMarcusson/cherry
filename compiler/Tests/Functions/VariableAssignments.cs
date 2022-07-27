@@ -16,24 +16,24 @@ namespace Functions
 		public void VariableNotFound()
 		{
 			var variables = new VariablesCache();
-			var variable = new Variable(variables, "var a = 5");
-			Assert.ThrowsException<SectionException>(() => new VariableAssignment(variables, "doesnt_exist += 5"));
+			var variable = new Variable(variables, null, "var a = 5");
+			Assert.ThrowsException<SectionException>(() => new VariableAssignment(variables, null, "doesnt_exist += 5"));
 		}
 
 		[TestMethod]
 		public void IncorrectTypesThrows()
 		{
 			var variables = new VariablesCache();
-			var variable = new Variable(variables, "var a = 5");
-			Assert.ThrowsException<SectionException>(() => new VariableAssignment(variables, "a += \"error\""));
+			var variable = new Variable(variables, null, "var a = 5");
+			Assert.ThrowsException<SectionException>(() => new VariableAssignment(variables, null, "a += \"error\""));
 		}
 
 		[TestMethod]
 		public void CompileTimeLiteralValueEvaluation()
 		{
 			var variables = new VariablesCache();
-			var variable = new Variable(variables, "var a = 5");
-			var assignment = new VariableAssignment(variables, "a += 5");
+			var variable = new Variable(variables, null, "var a = 5");
+			var assignment = new VariableAssignment(variables, null, "a += 5");
 
 			Assert.AreEqual("10", variable.Value.Value);
 		}
@@ -48,8 +48,8 @@ namespace Functions
 		public void NoSpaceParsing()
 		{
 			var variables = new VariablesCache();
-			var variable = new Variable(variables, "var a = 5");
-			var assignment = new VariableAssignment(variables, "a+=5 * 10");
+			var variable = new Variable(variables, null, "var a = 5");
+			var assignment = new VariableAssignment(variables, null, "a+=5 * 10");
 
 			Assert.AreEqual("a", assignment.Name);
 			Assert.AreEqual("55", variable.Value.Value);

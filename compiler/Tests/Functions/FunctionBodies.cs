@@ -25,7 +25,7 @@ namespace Functions
 							return 5
 						";
 			var reader = LineReader.ParseLineWithChildren(code);
-			var function = new Function(variables, reader);
+			var function = new Function(variables, null, reader);
 			function.GenerateBody();
 			Assert.IsNotNull(function.Body);
 			Assert.AreEqual(4, function.Body.Length);
@@ -45,7 +45,7 @@ namespace Functions
 							return a
 						";
 			var reader = LineReader.ParseLineWithChildren(code);
-			var function = new Function(variables, reader);
+			var function = new Function(variables,null,  reader);
 			function.GenerateBody();
 			Assert.IsNotNull(function.Body);
 			Assert.AreEqual(2, function.Body.Length);
@@ -55,7 +55,7 @@ namespace Functions
 							return this_var_does_not_exist
 						";
 			reader = LineReader.ParseLineWithChildren(code);
-			Assert.ThrowsException<SectionException>(() => new Function(variables, reader).GenerateBody());
+			Assert.ThrowsException<SectionException>(() => new Function(variables, null, reader).GenerateBody());
 		}
 
 		[TestMethod]
@@ -73,7 +73,7 @@ namespace Functions
 							return 5
 						";
 			var reader = LineReader.ParseLineWithChildren(code);
-			var function = new Function(variables, reader);
+			var function = new Function(variables, null, reader);
 			function.GenerateBody();
 			Assert.IsNotNull(function.Body);
 			Assert.AreEqual(1, function.Body.Length);
@@ -82,9 +82,29 @@ namespace Functions
 		}
 
 		[TestMethod]
-		public void VariableReturnValue()
+		public void ReturnWithValueThrowsForVoidFunction()
 		{
-			throw new NotImplementedException();
+			var variables = new VariablesCache();
+			var code = @"
+						def void test
+							return 5
+						";
+			var reader = LineReader.ParseLineWithChildren(code);
+			var function = new Function(variables, null, reader);
+			Assert.ThrowsException<SectionException>(() => function.GenerateBody());
+		}
+
+		[TestMethod]
+		public void VoidReturnThrowsForVoidFunction()
+		{
+			var variables = new VariablesCache();
+			var code = @"
+						def i64 test
+							return
+						";
+			var reader = LineReader.ParseLineWithChildren(code);
+			var function = new Function(variables, null, reader);
+			Assert.ThrowsException<SectionException>(() => function.GenerateBody());
 		}
 
 		[TestMethod]
@@ -96,7 +116,7 @@ namespace Functions
 							return 5 + (3 * 10)
 						";
 			var reader = LineReader.ParseLineWithChildren(code);
-			var function = new Function(variables, reader);
+			var function = new Function(variables, null, reader);
 			function.GenerateBody();
 			Assert.IsNotNull(function.Body);
 			Assert.AreEqual(1, function.Body.Length);

@@ -22,7 +22,7 @@ namespace Cherry.Intermediate
 		readonly LineReader Source;
 
 
-		public Function(VariablesCache parentVariables, LineReader reader) : base(parentVariables)
+		public Function(VariablesCache parentVariables, CodeLine parent, LineReader reader) : base(parentVariables, parent)
 		{
 			Source = reader;
 			IsPrivate = false;
@@ -82,7 +82,7 @@ namespace Cherry.Intermediate
 					var nextWord = reader.Text.GetNextWord(ref nextIndex);
 					if(nextWord == null || nextWord.StartsWith(","))
 					{
-						var argument = new Variable(Variables, $"{(accessType == VariableType.Dynamic ? Variable.DynamicAccessType : Variable.ReadOnlyAccessType)} {type} {name}", reader.LineNumber);
+						var argument = new Variable(Variables, this, $"{(accessType == VariableType.Dynamic ? Variable.DynamicAccessType : Variable.ReadOnlyAccessType)} {type} {name}", reader.LineNumber);
 						argumentBuilder.Add(argument);
 						index++;
 					}
@@ -111,7 +111,7 @@ namespace Cherry.Intermediate
 		/// <summary> Generates the body. This should be called after all variables have been resolved </summary>
 		public void GenerateBody()
 		{
-			Body = CodeLine.ConvertToCodeLines(Variables, Source.Children);
+			Body = CodeLine.ConvertToCodeLines(Variables, Source.Children, this);
 		}
 
 

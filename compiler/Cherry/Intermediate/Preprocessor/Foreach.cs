@@ -104,7 +104,7 @@ namespace Cherry.Intermediate.Preprocessor
 			// Create children from values
 			foreach (var value in Values)
 			{
-				Variables.Create(VariableType.ReadOnly, VariableName, ResourceType == ForeachResourceType.File ? $"file:\"{value}\"" : value);
+				Variables.Create(null, VariableType.ReadOnly, VariableName, ResourceType == ForeachResourceType.File ? $"file:\"{value}\"" : value);
 
 				foreach(var child in Source.Children)
 					AddChild(child);

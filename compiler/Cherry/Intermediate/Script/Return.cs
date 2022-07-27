@@ -12,7 +12,7 @@ namespace Cherry.Intermediate
 		public bool HasValue => Value != null;
 
 
-		public Return(VariablesCache parentVariables, LineReader reader) : base(parentVariables)
+		public Return(VariablesCache parentVariables, CodeLine parent, LineReader reader) : base(parentVariables, parent)
 		{
 			var index = 0;
 			var returnWord = reader.Text.GetNextWord(ref index);
@@ -24,6 +24,17 @@ namespace Cherry.Intermediate
 				var remainder = reader.Text.Substring(index);
 				Value = new VariableValue(parentVariables, remainder);
 			}
+
+			if(!GetFirstParentOfType<Function>(out var function))
+				throw new SectionException(reader.Text, 0, 6, "Return statements can only be placed within a functions body", reader.LineNumber);
+		
+			if(function.Type == "void" && HasValue)
+				throw new SectionException(reader.Text, index, reader.Text.Length-index, "A value can't be returned from a void function", reader.LineNumber);
+
+			else if(function.Type != "void" && !HasValue)
+				throw new SectionException("return ", "", "", "Expected a value since this is not a void function", reader.LineNumber);
+
+			// TODO:: Check if the type matches
 		}
 
 

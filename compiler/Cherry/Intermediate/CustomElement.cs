@@ -35,7 +35,7 @@ namespace Cherry.Intermediate
 			{
 				if(remainingChildren[i].First == Variable.DynamicAccessType || remainingChildren[i].First == Variable.ReadOnlyAccessType)
 				{
-					var variable = new Variable(Variables, remainingChildren[i].Text, remainingChildren[i].LineNumber);
+					var variable = new Variable(Variables, null, remainingChildren[i].Text, remainingChildren[i].LineNumber);
 					if (Variables.Exists(variable.Name))
 						throw new SectionException(remainingChildren[i].First + ' ', (variable.Type + ' ' + variable.Name).Trim(), variable.Value != null ? $" = {variable.Value}" : "", "Already exists", remainingChildren[i].LineNumber);
 

@@ -17,14 +17,14 @@ namespace Functions
 		public void FailsIfStartingWithWrongKeyword()
 		{
 			var variables = new VariablesCache();
-			Assert.ThrowsException<SectionException>(() => new Return(variables, new LineReader("error 123")));
+			Assert.ThrowsException<SectionException>(() => new Return(variables, null, new LineReader("error 123")));
 		}
 
 		[TestMethod]
 		public void VoidReturn()
 		{
 			var variables = new VariablesCache();
-			var r = new Return(variables, new LineReader("return"));
+			var r = new Return(variables, null, new LineReader("return"));
 			Assert.AreEqual(false, r.HasValue);
 			Assert.IsNull(r.Value);
 		}
@@ -33,7 +33,7 @@ namespace Functions
 		public void ReturnValue()
 		{
 			var variables = new VariablesCache();
-			var r = new Return(variables, new LineReader("return 1"));
+			var r = new Return(variables, null, new LineReader("return 1"));
 			Assert.AreEqual(true, r.HasValue);
 			Assert.AreEqual("1", r.Value.Value);
 		}
@@ -42,7 +42,7 @@ namespace Functions
 		public void ReturnFormula()
 		{
 			var variables = new VariablesCache();
-			var r = new Return(variables, new LineReader("return 1 + 5 * 10"));
+			var r = new Return(variables, null, new LineReader("return 1 + 5 * 10"));
 			Assert.AreEqual(true, r.HasValue);
 			Assert.AreEqual("51", r.Value.Value);
 		}

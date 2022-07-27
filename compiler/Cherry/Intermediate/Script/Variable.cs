@@ -27,7 +27,7 @@ namespace Cherry.Intermediate
 		public override string ToString() => $"{(AccessType == VariableType.Dynamic ? DynamicAccessType : ReadOnlyAccessType)} {(Type != null ? $"{Type} " : "")}{Name}" + (Value != null ? $" = {Value}" : "");
 
 
-		public Variable(VariablesCache parentVariables, VariableType type, string name, string value) : base(parentVariables)
+		public Variable(VariablesCache parentVariables, CodeLine parent, VariableType type, string name, string value) : base(parentVariables, parent)
 		{
 			if (parentVariables.Exists(name))
 				throw new ArgumentException($"A variable by the name {name} already exists in this scope");
@@ -40,9 +40,9 @@ namespace Cherry.Intermediate
 			Type = ResolveTypeFromValueType(ValueType);
 		}
 
-		public Variable(VariablesCache parentVariables, string raw, int lineNumber = -1) : this(parentVariables, new WordReader(raw, lineNumber)) { }
+		public Variable(VariablesCache parentVariables, CodeLine parent, string raw, int lineNumber = -1) : this(parentVariables, parent, new WordReader(raw, lineNumber)) { }
 
-		public Variable(VariablesCache parentVariables, WordReader words) : base(parentVariables)
+		public Variable(VariablesCache parentVariables, CodeLine parent, WordReader words) : base(parentVariables, parent)
 		{
 			switch (words.First)
 			{
@@ -253,7 +253,7 @@ namespace Cherry.Intermediate
 						return "bool";
 
 					case "string":
-						return "string";    // TODO:: #include <string>
+						return "std::string";    // TODO:: #include <string>
 
 
 					default: return Type;

@@ -15,9 +15,9 @@ namespace Cherry.Intermediate
 		public readonly VariableValue[] Arguments;
 
 
-		public FunctionCall(VariablesCache parentVariables, string raw) : this(parentVariables, new LineReader(raw)) { }
+		public FunctionCall(VariablesCache parentVariables, CodeLine parent, string raw) : this(parentVariables, parent, new LineReader(raw)) { }
 
-		public FunctionCall(VariablesCache parentVariables, LineReader reader) : base(parentVariables)
+		public FunctionCall(VariablesCache parentVariables, CodeLine parent, LineReader reader) : base(parentVariables, parent)
 		{
 			var opening = reader.Text.IndexOf('(');
 			var closing = reader.Text.LastIndexOf(')');

@@ -18,9 +18,9 @@ namespace Cherry.Intermediate
 		public bool HasValue => Value != null;
 
 
-		public VariableAssignment(VariablesCache parentVariables, string raw) : this(parentVariables, new LineReader(raw)) { }
+		public VariableAssignment(VariablesCache parentVariables, CodeLine parent, string raw) : this(parentVariables, parent, new LineReader(raw)) { }
 
-		public VariableAssignment(VariablesCache parentVariables, LineReader reader) : base(parentVariables)
+		public VariableAssignment(VariablesCache parentVariables, CodeLine parent, LineReader reader) : base(parentVariables, parent)
 		{
 			var index = 0;
 			Name = reader.Text.GetNextWord(ref index, StringUtils.OperatorWordSplit);

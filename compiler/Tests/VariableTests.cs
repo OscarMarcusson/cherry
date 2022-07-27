@@ -19,7 +19,7 @@ namespace Parser
 		public void TestAccessabilityType()
 		{
 			var variables = new VariablesCache();
-			Assert.ThrowsException<SectionException>(() => new Variable(variables, "this can't be parsed as a variable"));
+			Assert.ThrowsException<SectionException>(() => new Variable(variables, null, "this can't be parsed as a variable"));
 
 			Assert.AreEqual(variables.Create("var a").AccessType, VariableType.Dynamic);
 			Assert.AreEqual(variables.Create("let b").AccessType, VariableType.ReadOnly);

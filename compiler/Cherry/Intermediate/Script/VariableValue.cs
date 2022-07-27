@@ -103,7 +103,9 @@ namespace Cherry.Intermediate
 
 		public override string ToString()
 			=> IsLiteral
-				? Value
+				? Type == VariableValueType.String
+					? $"\"{Value}\""
+					: Value
 				: Type == VariableValueType.Reference
 					? ReferencedVariable.Name
 					: Left != null

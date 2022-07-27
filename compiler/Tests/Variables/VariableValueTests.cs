@@ -64,7 +64,7 @@ namespace Variables
 		public void CanResolveLetLiteral()
 		{
 			var cache = new VariablesCache();
-			cache.Create(VariableType.ReadOnly, "a", 5);
+			cache.Create(null, VariableType.ReadOnly, "a", 5);
 
 			var variableValue = new VariableValue(cache, "1 + a");
 			Assert.AreEqual(VariableValueType.Integer, variableValue.Type);
@@ -190,7 +190,7 @@ namespace Variables
 		public void CanCombineLiteralAndConst()
 		{
 			var cache = new VariablesCache();
-			var variable = new Variable(cache, "let a = 5");
+			var variable = new Variable(cache, null, "let a = 5");
 
 			var a = new VariableValue(cache, "1");
 			var b = new VariableValue(cache, "a");
@@ -203,7 +203,7 @@ namespace Variables
 		public void CanCombineLiteralAndVar()
 		{
 			var cache = new VariablesCache();
-			var variable = new Variable(cache, "var a = 5");
+			var variable = new Variable(cache, null, "var a = 5");
 
 			var a = new VariableValue(cache, "1");
 			var b = new VariableValue(cache, "a");

@@ -19,9 +19,9 @@ namespace Cherry.Intermediate
 		public readonly CodeLine[] Body;
 
 
-		public IfStatment(VariablesCache parentVariables, string raw) : this(parentVariables, new LineReader(raw)) { }
+		public IfStatment(VariablesCache parentVariables, CodeLine parent, string raw) : this(parentVariables, parent, new LineReader(raw)) { }
 
-		public IfStatment(VariablesCache parentVariables, LineReader reader) : base(parentVariables)
+		public IfStatment(VariablesCache parentVariables, CodeLine parent, LineReader reader) : base(parentVariables, parent)
 		{
 			if (string.IsNullOrWhiteSpace(reader.Text))
 				throw new SectionException("", "", "", "Expected \"if\", \"else if\", or \"else\"", reader.LineNumber);
@@ -70,11 +70,11 @@ namespace Cherry.Intermediate
 
 						index = reader.Text.GetIndexToNextNonWhitespace(oneLinerIndex + 1);
 						var remainingRow = reader.Text.Substring(index);
-						Body = ConvertToCodeLines(Variables, new[] { new LineReader(remainingRow, reader) });
+						Body = ConvertToCodeLines(Variables, new[] { new LineReader(remainingRow, reader) }, this);
 					}
 					else
 					{
-						Body = CodeLine.ConvertToCodeLines(Variables, reader.Children);
+						Body = CodeLine.ConvertToCodeLines(Variables, reader.Children, this);
 					}
 				}
 			}
