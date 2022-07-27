@@ -148,7 +148,7 @@ namespace Cherry.Intermediate
 		public override void ToCppStream(StreamWriter writer, int indentation = 0)
 		{
 			Indent(writer, indentation);
-			writer.Write($"{Type} {Name}(");
+			writer.Write($"{TypeTranslator.ToCpp(Type)} {Name}(");
 			ToCppArguments(writer);
 			writer.WriteLine(") {");
 			if (Body != null)
@@ -174,7 +174,7 @@ namespace Cherry.Intermediate
 
 		public void ToCppForwardDeclare(StreamWriter writer)
 		{
-			writer.Write($"{Type} {Name}(");
+			writer.Write($"{TypeTranslator.ToCpp(Type)} {Name}(");
 			ToCppArguments(writer);
 			writer.WriteLine(");");
 		}
